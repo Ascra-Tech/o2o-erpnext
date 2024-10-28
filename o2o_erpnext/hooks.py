@@ -244,5 +244,7 @@ app_license = "mit"
 
 fixtures = [
     "Client Script",
-    "Server Script"
+    "Server Script",
+    "Workspace",
+    "Print Format"
 ]
