@@ -246,5 +246,6 @@ fixtures = [
     "Client Script",
     "Server Script",
     "Workspace",
+    "Custom Field",
     "Print Format"
 ]
