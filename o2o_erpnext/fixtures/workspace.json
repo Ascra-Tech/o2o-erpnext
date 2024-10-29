@@ -4763,7 +4763,7 @@
     "parent": "Users",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "DocShare",
     "type": "Link"
    },
    {
@@ -7093,7 +7093,7 @@
     "parent": "Stock",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Serial No",
     "type": "Link"
    },
    {
@@ -7111,7 +7111,7 @@
     "parent": "Stock",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Serial No",
     "type": "Link"
    },
    {
@@ -7129,7 +7129,7 @@
     "parent": "Stock",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Serial No",
     "type": "Link"
    },
    {
@@ -7543,7 +7543,7 @@
     "parent": "Stock",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Stock Ledger Entry",
     "type": "Link"
    },
    {
@@ -8310,7 +8310,7 @@
     "parent": "Assets",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Asset Maintenance",
     "type": "Link"
    },
    {
@@ -8328,7 +8328,7 @@
     "parent": "Assets",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Asset Activity",
     "type": "Link"
    }
   ],
@@ -12337,7 +12337,7 @@
     "parent": "Payables",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Purchase Invoice",
     "type": "Link"
    },
    {
@@ -12355,7 +12355,7 @@
     "parent": "Payables",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Purchase Invoice",
     "type": "Link"
    },
    {
@@ -12373,7 +12373,7 @@
     "parent": "Payables",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Purchase Invoice",
     "type": "Link"
    },
    {
@@ -12391,7 +12391,7 @@
     "parent": "Payables",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Purchase Invoice",
     "type": "Link"
    },
    {
@@ -12409,7 +12409,7 @@
     "parent": "Payables",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Purchase Order",
     "type": "Link"
    },
    {
@@ -12427,7 +12427,7 @@
     "parent": "Payables",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Purchase Invoice",
     "type": "Link"
    },
    {
@@ -12445,7 +12445,7 @@
     "parent": "Payables",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Purchase Invoice",
     "type": "Link"
    }
   ],
