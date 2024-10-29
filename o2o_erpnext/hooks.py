@@ -1,26 +1,29 @@
 app_name = "o2o_erpnext"
 app_title = "o2o ErpNext"
-app_publisher = "Amit Kumar"
+app_publisher = "Ascratech LLP"
 app_description = "o2o App for ErpNext"
+app_icon = "octicon octicon-file-directory"
+app_color = "grey"
 app_email = "amit@ascratech.com"
-app_license = "mit"
+app_license = "GNU General Public License (v3)"
 
 # Apps
 # ------------------
 
-# required_apps = []
+# Required Apps
+required_apps = ["frappe/erpnext"]
+
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "o2o_erpnext",
-# 		"logo": "/assets/o2o_erpnext/logo.png",
-# 		"title": "o2o ErpNext",
-# 		"route": "/o2o_erpnext",
-# 		"has_permission": "o2o_erpnext.api.permission.has_app_permission"
-# 	}
-# ]
-
+add_to_apps_screen = [
+    {
+        "name": "o2o_erpnext",
+        "logo": "/assets/o2o_erpnext/images/o2o_big_logo.png",
+        "title": "o2o ErpNext",
+        "route": "/o2o_erpnext",
+       # "has_permission": "o2o_erpnext.api.permission.has_app_permission"
+    }
+]
 # Includes in <head>
 # ------------------
 
@@ -247,5 +250,6 @@ fixtures = [
     "Server Script",
     "Workspace",
     "Custom Field",
+    # "Web Form",
     "Print Format"
 ]
