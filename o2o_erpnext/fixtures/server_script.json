@@ -1,6 +1,25 @@
 [
  {
   "allow_guest": 0,
+  "api_method": "get_linked_purchase_receipts",
+  "cron_format": null,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Server Script",
+  "doctype_event": "Before Insert",
+  "enable_rate_limit": 0,
+  "event_frequency": "All",
+  "modified": "2024-11-06 14:34:25.915772",
+  "module": null,
+  "name": "Get Linked Purchase Receipts",
+  "rate_limit_count": 5,
+  "rate_limit_seconds": 86400,
+  "reference_doctype": null,
+  "script": "{\n    \"doctype\": \"Server Script\",\n    \"name\": \"get_linked_purchase_receipts\",\n    \"script_type\": \"API\",\n    \"api_method\": \"get_linked_purchase_receipts\",\n    \"allow_guest\": 0,\n    \"enabled\": 1,\n    \"script\": \"\"\"\nimport frappe\nimport json\n\n@frappe.whitelist()\ndef execute(purchase_order):\n    try:\n        # Debug: Log the incoming PO number\n        frappe.logger().debug(f\"Searching for PO: {purchase_order}\")\n        \n        # Check if PO exists\n        if not frappe.db.exists('Purchase Order', purchase_order):\n            return {\n                'status': 'error',\n                'message': f'Purchase Order {purchase_order} does not exist'\n            }\n            \n        # Direct SQL query for debugging\n        sql_query = '''\n            SELECT \n                pri.parent as pr_name,\n                pri.purchase_order,\n                pri.docstatus,\n                pri.name as item_name,\n                pri.item_code,\n                pr.posting_date,\n                pr.docstatus as pr_docstatus\n            FROM \n                `tabPurchase Receipt Item` pri\n            LEFT JOIN \n                `tabPurchase Receipt` pr ON pri.parent = pr.name\n            WHERE \n                pri.purchase_order = %s\n        '''\n        \n        results = frappe.db.sql(sql_query, purchase_order, as_dict=1)\n        \n        # Debug: Log what we found\n        frappe.logger().debug(f\"SQL Query Results: {json.dumps(results, default=str)}\")\n        \n        # Filter for submitted documents\n        valid_receipts = []\n        for r in results:\n            if r.get('pr_docstatus') == 1:  # Only submitted documents\n                valid_receipts.append({\n                    'name': r.pr_name,\n                    'posting_date': r.posting_date,\n                    'purchase_order': r.purchase_order,\n                    'item_code': r.item_code\n                })\n        \n        # Also check direct child table records\n        child_records = frappe.get_all('Purchase Receipt Item',\n            filters={'purchase_order': purchase_order},\n            fields=['parent', 'purchase_order', 'name', 'item_code']\n        )\n        \n        frappe.logger().debug(f\"Child Table Records: {json.dumps(child_records, default=str)}\")\n        \n        return {\n            'status': 'success',\n            'message': valid_receipts,\n            'debug': {\n                'raw_results': results,\n                'child_records': child_records\n            }\n        }\n        \n    except Exception as e:\n        frappe.log_error(f\"Error in get_linked_purchase_receipts: {str(e)}\")\n        return {\n            'status': 'error',\n            'message': str(e)\n        }\n\"\"\"\n}",
+  "script_type": "API"
+ },
+ {
+  "allow_guest": 0,
   "api_method": null,
   "cron_format": null,
   "disabled": 1,
