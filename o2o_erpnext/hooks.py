@@ -254,3 +254,33 @@ fixtures = [
     # "Web Form",
     "Print Format"
 ]
+
+doc_events = {
+    "Sales Order": {
+        "validate": "o2o_erpnext.custom_sales_order.CustomSalesOrder.validate_delivery_date"
+    }
+}
+
+
+# In /home/frappe/frappe-bench-1/apps/o2o_erpnext/o2o_erpnext/hooks.py
+
+doc_events = {
+    "Employee": {
+        "before_validate": "o2o_erpnext.api.employee.before_validate",
+        "validate": "o2o_erpnext.api.employee.validate_employee",
+        "after_insert": "o2o_erpnext.api.employee.create_user_for_employee"
+    }
+
+    
+}
+
+
+
+permission_query_conditions = {
+    "Purchase Order": "o2o_erpnext.o2o_erpnext.custom.purchase_order.get_permission_query_conditions"
+}
+
+has_permission = {
+    "Purchase Order": "o2o_erpnext.o2o_erpnext.custom.purchase_order.has_permission"
+}
+

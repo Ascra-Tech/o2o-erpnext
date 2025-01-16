@@ -13588,12 +13588,6 @@
     "parentfield": "roles",
     "parenttype": "Workspace",
     "role": "Entity Master"
-   },
-   {
-    "parent": "Entity",
-    "parentfield": "roles",
-    "parenttype": "Workspace",
-    "role": "Entity Admin User"
    }
   ],
   "sequence_id": 36.0,
@@ -14208,14 +14202,7 @@
   "public": 1,
   "quick_lists": [],
   "restrict_to_domain": null,
-  "roles": [
-   {
-    "parent": "State Master",
-    "parentfield": "roles",
-    "parenttype": "Workspace",
-    "role": "Entity Admin User"
-   }
-  ],
+  "roles": [],
   "sequence_id": 33.0,
   "shortcuts": [],
   "title": "State Master"
@@ -14249,14 +14236,7 @@
   "public": 1,
   "quick_lists": [],
   "restrict_to_domain": null,
-  "roles": [
-   {
-    "parent": "City Master",
-    "parentfield": "roles",
-    "parenttype": "Workspace",
-    "role": "Entity Admin User"
-   }
-  ],
+  "roles": [],
   "sequence_id": 34.0,
   "shortcuts": [],
   "title": "City Master"
@@ -14331,14 +14311,7 @@
   "public": 1,
   "quick_lists": [],
   "restrict_to_domain": null,
-  "roles": [
-   {
-    "parent": "User Permissions",
-    "parentfield": "roles",
-    "parenttype": "Workspace",
-    "role": "Entity Admin User"
-   }
-  ],
+  "roles": [],
   "sequence_id": 31.0,
   "shortcuts": [],
   "title": "User Permissions"
@@ -14365,12 +14338,6 @@
   "quick_lists": [],
   "restrict_to_domain": null,
   "roles": [
-   {
-    "parent": "Stock Module",
-    "parentfield": "roles",
-    "parenttype": "Workspace",
-    "role": "Entity Admin User"
-   },
    {
     "parent": "Stock Module",
     "parentfield": "roles",
@@ -14426,14 +14393,7 @@
   "public": 1,
   "quick_lists": [],
   "restrict_to_domain": null,
-  "roles": [
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Workspace",
-    "role": "Entity Admin User"
-   }
-  ],
+  "roles": [],
   "sequence_id": 40.0,
   "shortcuts": [
    {
