@@ -274,7 +274,13 @@ doc_events = {
     
 }
 
-
+# In hooks.py
+doc_events = {
+    "Purchase Order": {
+        "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order",
+        "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order"
+    }
+}
 
 permission_query_conditions = {
     "Purchase Order": "o2o_erpnext.o2o_erpnext.custom.purchase_order.get_permission_query_conditions"
