@@ -272,31 +272,9 @@ doc_events = {
 }
 
 permission_query_conditions = {
-    "Purchase Order": "o2o_erpnext.o2o_erpnext.custom.purchase_order.get_permission_query_conditions"
+    "Purchase Order": "o2o_erpnext.controllers.permissions.get_permission_query_conditions"
 }
 
-has_permission = {
-    "Purchase Order": "o2o_erpnext.o2o_erpnext.custom.purchase_order.has_permission"
-}
-
-
-permission_query_conditions = {
-    "Purchase Order": "o2o_erpnext.controllers.permissions.get_purchase_order_permissions",
-    "Purchase Invoice": "o2o_erpnext.controllers.permissions.get_purchase_invoice_permissions",
-    "Purchase Receipt": "o2o_erpnext.controllers.permissions.get_purchase_receipt_permissions",
-    "Sales Order": "o2o_erpnext.controllers.permissions.get_sales_order_permissions",
-    "Sales Invoice": "o2o_erpnext.controllers.permissions.get_sales_invoice_permissions",
-    "Delivery Note": "o2o_erpnext.controllers.permissions.get_delivery_note_permissions"
-}
-
-has_permission = {
-    "Purchase Order": "o2o_erpnext.controllers.permissions.has_purchase_order_permission",
-    "Purchase Invoice": "o2o_erpnext.controllers.permissions.has_purchase_invoice_permission",
-    "Purchase Receipt": "o2o_erpnext.controllers.permissions.has_purchase_receipt_permission",
-    "Sales Order": "o2o_erpnext.controllers.permissions.has_sales_order_permission",
-    "Sales Invoice": "o2o_erpnext.controllers.permissions.has_sales_invoice_permission",
-    "Delivery Note": "o2o_erpnext.controllers.permissions.has_delivery_note_permission"
-}
 
 doctype_js = {
     "Branch": "o2o_erpnext/doctype/branch/branch.js"
