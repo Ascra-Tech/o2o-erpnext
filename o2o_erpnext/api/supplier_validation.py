@@ -22,7 +22,7 @@ def check_supplier_permission():
     
     if existing_supplier:
         response['allowed'] = False
-        response['message'] = _('You can create only one supplier is Allowed')
+        response['message'] = _('You can create only one supplier. Contact Administrator')
         return response
         
     return response

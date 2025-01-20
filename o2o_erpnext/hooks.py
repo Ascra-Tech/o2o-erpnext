@@ -265,17 +265,6 @@ doc_events = {
 # In /home/frappe/frappe-bench-1/apps/o2o_erpnext/o2o_erpnext/hooks.py
 
 doc_events = {
-    "Employee": {
-        "before_validate": "o2o_erpnext.api.employee.before_validate",
-        "validate": "o2o_erpnext.api.employee.validate_employee",
-        "after_insert": "o2o_erpnext.api.employee.create_user_for_employee"
-    }
-
-    
-}
-
-# In hooks.py
-doc_events = {
     "Purchase Order": {
         "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order",
         "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order"
@@ -290,3 +279,25 @@ has_permission = {
     "Purchase Order": "o2o_erpnext.o2o_erpnext.custom.purchase_order.has_permission"
 }
 
+
+permission_query_conditions = {
+    "Purchase Order": "o2o_erpnext.controllers.permissions.get_purchase_order_permissions",
+    "Purchase Invoice": "o2o_erpnext.controllers.permissions.get_purchase_invoice_permissions",
+    "Purchase Receipt": "o2o_erpnext.controllers.permissions.get_purchase_receipt_permissions",
+    "Sales Order": "o2o_erpnext.controllers.permissions.get_sales_order_permissions",
+    "Sales Invoice": "o2o_erpnext.controllers.permissions.get_sales_invoice_permissions",
+    "Delivery Note": "o2o_erpnext.controllers.permissions.get_delivery_note_permissions"
+}
+
+has_permission = {
+    "Purchase Order": "o2o_erpnext.controllers.permissions.has_purchase_order_permission",
+    "Purchase Invoice": "o2o_erpnext.controllers.permissions.has_purchase_invoice_permission",
+    "Purchase Receipt": "o2o_erpnext.controllers.permissions.has_purchase_receipt_permission",
+    "Sales Order": "o2o_erpnext.controllers.permissions.has_sales_order_permission",
+    "Sales Invoice": "o2o_erpnext.controllers.permissions.has_sales_invoice_permission",
+    "Delivery Note": "o2o_erpnext.controllers.permissions.has_delivery_note_permission"
+}
+
+doctype_js = {
+    "Branch": "o2o_erpnext/doctype/branch/branch.js"
+}

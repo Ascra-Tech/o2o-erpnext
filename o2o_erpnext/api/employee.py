@@ -1,108 +1,102 @@
 import frappe
-from frappe.utils import validate_email_address
 from frappe import _
+from frappe.utils import random_string
 
-def get_user_linked_supplier(user):
-    """Helper function to get supplier linked to user"""
-    # Check if user has supplier role
-    user_roles = frappe.get_roles(user)
-    if 'Supplier' in user_roles:
-        # Get supplier linked to user
-        suppliers = frappe.get_all('Supplier',
-            filters={'custom_user': user},
-            fields=['name'],
-            limit=1
-        )
-        if suppliers:
-            return suppliers[0].name
-    return None
-
-def before_validate(doc, method=None):
-    """Set custom_supplier based on user role before validation"""
-    user = frappe.session.user
-    if user:
-        # Get user's roles
-        user_roles = frappe.get_roles(user)
+@frappe.whitelist()
+def create_user(employee, email=None):
+    """
+    Create user for employee with clean role assignment
+    """
+    if not employee:
+        frappe.throw(_("Please specify Employee"))
         
-        # If user has Supplier role
-        if 'Supplier' in user_roles:
-            # Get linked supplier
-            suppliers = frappe.get_all('Supplier',
-                filters={'custom_user': user},
-                fields=['name'],
-                limit=1
-            )
-            
-            if suppliers:
-                # Set custom_supplier field
-                doc.custom_supplier = suppliers[0].name
-                
-                # Debug log
-                frappe.logger().debug(f"Setting custom_supplier to {doc.custom_supplier} for user {user}")
-
-def validate_employee(doc, method=None):
-    """Validates employee document"""
-    if doc.custom_sub_branch:
-        # Check if the sub branch exists
-        if not frappe.db.exists("Sub Branch", doc.custom_sub_branch):
-            frappe.throw(_("Sub Branch {0} does not exist").format(doc.custom_sub_branch))
-            
-    # Validate supplier for supplier role users
-    user = frappe.session.user
-    user_roles = frappe.get_roles(user)
-    
-    if 'Supplier' in user_roles:
-        # Get linked supplier
-        linked_supplier = get_user_linked_supplier(user)
-        if linked_supplier and doc.custom_supplier != linked_supplier:
-            frappe.throw(_("As a supplier user, you can only use your linked supplier"))
-
-def create_user_for_employee(doc, method=None):
-    """Creates a new user when a new employee is created"""
-    if hasattr(doc, '_user_created'):
-        return
-
-    if not doc.custom_user_email:
-        return
-
     try:
-        validate_email_address(doc.custom_user_email, throw=True)
-    except frappe.InvalidEmailAddressError:
-        frappe.throw("Please enter a valid email address in Custom User Email")
+        employee_doc = frappe.get_doc("Employee", employee)
+        
+        # Use provided email or custom_user_email
+        email = email or employee_doc.custom_user_email
+        
+        if not email:
+            frappe.throw(_("Please enter Email"))
 
-    if frappe.db.exists("User", doc.custom_user_email):
-        frappe.msgprint(f"User already exists with email {doc.custom_user_email}")
-        return
+        # Prepare roles list
+        roles_to_assign = ["Employee"]  # Always include Employee role
+        
+        # Add custom roles if specified
+        if employee_doc.custom_roles:
+            custom_roles = employee_doc.custom_roles.split(',') if isinstance(employee_doc.custom_roles, str) else [employee_doc.custom_roles]
+            for role in custom_roles:
+                role = role.strip()
+                if role and frappe.db.exists("Role", role) and role not in roles_to_assign:
+                    roles_to_assign.append(role)
 
-    try:
+        # Check if user already exists
+        if frappe.db.exists("User", email):
+            existing_user = frappe.get_doc("User", email)
+            
+            # First update employee link
+            employee_doc.db_set('user_id', email, update_modified=False)
+            frappe.db.commit()
+            
+            # Then update roles
+            existing_roles = [r.role for r in existing_user.roles]
+            for role in roles_to_assign:
+                if role not in existing_roles:
+                    existing_user.append("roles", {"role": role})
+            
+            existing_user.save(ignore_permissions=True)
+            frappe.db.commit()
+            
+            frappe.msgprint(_("User {0} updated with roles: {1}").format(
+                email, ", ".join(roles_to_assign)
+            ))
+            return existing_user
+
+        # First set the user_id in employee to prevent role removal message
+        employee_doc.db_set('user_id', email, update_modified=False)
+        frappe.db.commit()
+
+        # Create new user with roles
         user = frappe.get_doc({
             "doctype": "User",
-            "email": doc.custom_user_email,
-            "first_name": doc.first_name,
-            "last_name": doc.last_name or "",
+            "email": email,
+            "first_name": employee_doc.first_name,
+            "middle_name": employee_doc.middle_name,
+            "last_name": employee_doc.last_name,
             "enabled": 1,
             "user_type": "System User",
-            "send_welcome_email": 0
+            "send_welcome_email": 0,
+            "new_password": random_string(10),
+            "roles": [{"role": role} for role in roles_to_assign]
         })
 
-        if doc.custom_roles:
-            roles = doc.custom_roles.split(',') if isinstance(doc.custom_roles, str) else [doc.custom_roles]
-            for role in roles:
-                role = role.strip()
-                if role and frappe.db.exists("Role", role):
-                    user.append("roles", {
-                        "role": role
-                    })
-
-        user.insert(ignore_permissions=True)
-        frappe.db.set_value('Employee', doc.name, 'user_id', user.name, update_modified=False)
-        doc._user_created = True
-        frappe.msgprint(f"User {doc.custom_user_email} created and linked to employee")
-
+        user.flags.ignore_permissions = True
+        user.flags.no_welcome_mail = True
+        user.insert()
+        
+        # Commit changes
+        frappe.db.commit()
+        
+        # Try to send welcome email
+        try:
+            user.send_welcome_mail()
+            frappe.msgprint(_("Welcome email sent to {0}").format(email))
+        except Exception as mail_error:
+            frappe.log_error(f"Failed to send welcome email: {str(mail_error)}", "Welcome Email Error")
+            frappe.msgprint(_("User created but welcome email could not be sent. Please check email settings."))
+        
+        # Verify and report final status
+        user.reload()
+        final_roles = [r.role for r in user.roles]
+        frappe.msgprint(_("User {0} created successfully with roles: {1}").format(
+            email, ", ".join(final_roles)
+        ))
+        
+        return user
+        
     except Exception as e:
-        error_msg = str(e)[:900]
         frappe.log_error(
-            message=f"Failed to create user for employee {doc.name}: {error_msg}",
-            title="User Creation Error"
+            f"Error in user creation for employee {employee}: {str(e)}\n{frappe.get_traceback()}",
+            "User Creation Error"
         )
-        frappe.throw(f"Failed to create user: {error_msg}", title="Error")
+        frappe.throw(_("Error creating user: {0}").format(str(e)))
