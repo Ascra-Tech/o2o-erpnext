@@ -253,6 +253,7 @@ fixtures = [
     "Workspace",
     "Custom Field",
     "Property Setter",
+    "Custom DocPerm",
     "Workflow",
     "Workflow State",
     "Workflow Action",
