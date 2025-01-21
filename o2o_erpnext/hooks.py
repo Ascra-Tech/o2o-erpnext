@@ -247,11 +247,15 @@ add_to_apps_screen = [
 # }
 
 fixtures = [
+    "Role",
     "Client Script",
     "Server Script",
     "Workspace",
     "Custom Field",
-    # "Web Form",
+    "Property Setter",
+    "Workflow",
+    "Workflow State",
+    "Workflow Action",
     "Print Format"
 ]
 

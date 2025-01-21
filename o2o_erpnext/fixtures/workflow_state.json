@@ -1,0 +1,110 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2024-07-20 11:37:36.820199",
+  "name": "Pending",
+  "style": "",
+  "workflow_state_name": "Pending"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2024-07-20 11:37:36.825262",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "ok-sign",
+  "modified": "2024-07-20 11:37:36.823046",
+  "name": "Approved",
+  "style": "Success",
+  "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-08-08 20:07:13.254970",
+  "name": "Super PO Rejected",
+  "style": "",
+  "workflow_state_name": "Super PO Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-08-08 17:28:12.204311",
+  "name": "Super PO Approved",
+  "style": "",
+  "workflow_state_name": "Super PO Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-08-08 20:00:44.268125",
+  "name": "Super Requisition Rejected",
+  "style": "",
+  "workflow_state_name": "Super Requisition Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-08-08 20:18:02.196264",
+  "name": "Super Requisition Approved",
+  "style": "",
+  "workflow_state_name": "Super Requisition Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-07-24 15:55:40.071936",
+  "name": "Requisition Rejected",
+  "style": "",
+  "workflow_state_name": "Requisition Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-07-25 16:35:56.994516",
+  "name": "PO Rejected",
+  "style": "",
+  "workflow_state_name": "PO Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-07-24 15:55:11.073321",
+  "name": "Requisition Approved",
+  "style": "",
+  "workflow_state_name": "Requisition Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-07-25 16:34:37.331544",
+  "name": "PO Approved",
+  "style": "",
+  "workflow_state_name": "PO Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-07-24 15:54:46.996095",
+  "name": "Awaiting Approval",
+  "style": "",
+  "workflow_state_name": "Awaiting Approval"
+ }
+]
