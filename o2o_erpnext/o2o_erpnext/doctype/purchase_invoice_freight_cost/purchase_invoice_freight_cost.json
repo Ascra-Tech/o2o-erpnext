@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-21 13:16:08.411047",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "purchase_receipt",
+  "hsnsac",
+  "quantity",
+  "gst_rate",
+  "rate",
+  "total_rate",
+  "cgst",
+  "sgst",
+  "igst",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "purchase_receipt",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Purchase Receipt",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hsnsac",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "HSN/SAC"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "gst_rate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "GST Rate"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate"
+  },
+  {
+   "fieldname": "total_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Rate"
+  },
+  {
+   "fieldname": "cgst",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "CGST"
+  },
+  {
+   "fieldname": "sgst",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "SGST"
+  },
+  {
+   "fieldname": "igst",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "IGST"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-01-21 13:24:35.274045",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "Purchase Invoice Freight Cost",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
