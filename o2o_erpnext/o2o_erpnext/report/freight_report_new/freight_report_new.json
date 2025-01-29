@@ -1,0 +1,46 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2025-01-29 13:40:29.509912",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-01-29 13:40:29.509912",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "Freight Report New",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT `tabPurchase Invoice`.supplier as \"Entity:Link/Supplier:200\",\n        `tabSupplier`.custom_gstin__uin as \"GST Number:Data:120\",\n        `tabPurchase Receipt`.custom_state_name \"State:Data:120\",\n        `tabPurchase Invoice`.name as \"Invoice Number:Link/Purchase Invoice:120\",\n         cn.name AS \"Credit Note Number:Link/Purchase Invoice:120\",\n        `tabPurchase Invoice`.posting_date as \"Invoice Date:Date:120\",\n        `tabPurchase Receipt`.name as \"Purchase Receipt:Link/Purchase Receipt:120\",\n        `tabPurchase Receipt`.custom_weight_in_kg as \"Box Quantity\t:Int:120\",\n        `tabPurchase Receipt`.custom_rate_per_kg as \"Freight Rate:Int:120\",\n        `tabPurchase Receipt`.custom_freight_tax_rate_ as \"Gst Rate:Int:120\",\n        `tabPurchase Receipt`.custom_freight_amount as \"Freight Amount:Int:120\",\n        `tabPurchase Receipt`.custom_cgst_amount as \"CGST:Currency:120\",\n        `tabPurchase Receipt`.custom_sgst_amount as \"SGST:Currency:120\",\n        `tabPurchase Receipt`.custom_igst_amount as \"IGST:Currency:120\",\n        (`tabPurchase Receipt`.custom_freight_amount + `tabPurchase Receipt`.custom_cgst_amount + `tabPurchase Receipt`.custom_sgst_amount + `tabPurchase Receipt`.custom_igst_amount) as \"Total Freight Amount:Currency:120\"\n        \nFROM `tabPurchase Invoice`\nINNER JOIN `tabPurchase Invoice Freight Cost` on `tabPurchase Invoice`.name = `tabPurchase Invoice Freight Cost`.parent\nINNER JOIN `tabSupplier` on `tabSupplier`.name = `tabPurchase Invoice`.supplier\nINNER JOIN `tabPurchase Receipt` on `tabPurchase Invoice Freight Cost`.purchase_receipt = `tabPurchase Receipt`.name\nLEFT JOIN \n    `tabPurchase Invoice` AS cn\nON \n    cn.return_against = `tabPurchase Invoice`.name",
+ "ref_doctype": "Purchase Invoice",
+ "report_name": "Freight Report New",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Auditor"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Entity Admin User"
+  },
+  {
+   "role": "Vendor User"
+  }
+ ],
+ "timeout": 0
+}
