@@ -1,0 +1,46 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-29 08:18:37.143785",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_ffui",
+  "vendor",
+  "vendor_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_ffui",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "vendor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vendor",
+   "options": "Vendor"
+  },
+  {
+   "fetch_from": "vendor.vendor_code",
+   "fetch_if_empty": 1,
+   "fieldname": "vendor_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vendor Code"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-01-29 08:38:37.942921",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "Vendor Access Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

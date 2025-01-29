@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "field:vendor_name",
  "creation": "2024-01-21 12:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -45,7 +45,8 @@
    "in_global_search": 1,
    "in_list_view": 1,
    "label": "Vendor Name",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "column_break0",
@@ -152,11 +153,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-29 08:04:22.732031",
+ "modified": "2025-01-29 08:35:14.955917",
  "modified_by": "Administrator",
  "module": "o2o ErpNext",
  "name": "Vendor",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -191,6 +192,7 @@
    "role": "Purchase User"
   }
  ],
+ "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
