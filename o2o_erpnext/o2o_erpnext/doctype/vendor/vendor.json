@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "vendor_details_section",
   "naming_series",
   "vendor_name",
   "vendor_code",
@@ -14,18 +15,16 @@
   "account_name",
   "image",
   "signature",
-  "contact_and_address_tab",
-  "address_contacts",
-  "is_frozen",
-  "disabled",
-  "website",
+  "language",
+  "more_details_section",
   "email_id",
   "mobile_no",
-  "address_html",
+  "disabled",
+  "is_frozen",
+  "website",
+  "user_id",
   "column_break2",
-  "contact_html",
-  "primary_address",
-  "language"
+  "address"
  ],
  "fields": [
   {
@@ -68,36 +67,8 @@
    "label": "Image"
   },
   {
-   "fieldname": "contact_and_address_tab",
-   "fieldtype": "Tab Break",
-   "label": "Address & Contact"
-  },
-  {
-   "fieldname": "address_contacts",
-   "fieldtype": "Section Break",
-   "label": "Address and Contacts"
-  },
-  {
-   "fieldname": "address_html",
-   "fieldtype": "HTML",
-   "label": "Address HTML",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break2",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "contact_html",
-   "fieldtype": "HTML",
-   "label": "Contact HTML",
-   "read_only": 1
-  },
-  {
-   "fieldname": "primary_address",
-   "fieldtype": "Text",
-   "label": "Primary Address",
-   "read_only": 1
   },
   {
    "fieldname": "mobile_no",
@@ -107,7 +78,8 @@
   {
    "fieldname": "email_id",
    "fieldtype": "Data",
-   "label": "Email Id"
+   "label": "Email Id",
+   "reqd": 1
   },
   {
    "fieldname": "website",
@@ -149,11 +121,33 @@
    "fieldname": "signature",
    "fieldtype": "Attach Image",
    "label": "Signature"
+  },
+  {
+   "fieldname": "vendor_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vendor Details"
+  },
+  {
+   "fieldname": "more_details_section",
+   "fieldtype": "Section Break",
+   "label": "More Details"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Long Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "label": "User Id",
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-29 08:35:14.955917",
+ "modified": "2025-01-29 10:32:56.930340",
  "modified_by": "Administrator",
  "module": "o2o ErpNext",
  "name": "Vendor",

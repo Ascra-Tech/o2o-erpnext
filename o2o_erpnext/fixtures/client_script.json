@@ -2,6 +2,17 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
+  "dt": "Vendor",
+  "enabled": 1,
+  "modified": "2025-01-29 11:18:42.162173",
+  "module": "o2o ErpNext",
+  "name": "Vendor v1",
+  "script": "frappe.ui.form.on('Vendor', {\n    refresh: function(frm) {\n        console.log('Refresh triggered');\n        console.log('user_id:', frm.doc.user_id);\n        console.log('email_id:', frm.doc.email_id);\n        \n        // Add custom button if user is not created/linked\n        if (!frm.doc.user_id && frm.doc.email_id) {\n            console.log('Adding Create User button');\n            frm.add_custom_button(__('Create User'), () => {\n                console.log('Create User button clicked');\n                create_vendor_user(frm);\n            }).addClass('btn-primary');\n        }\n    }\n});\n\n// Separate function for creating vendor user\nfunction create_vendor_user(frm) {\n    console.log('Creating vendor user for:', frm.doc.name);\n    \n    if (!frm.doc.email_id) {\n        frappe.throw(__(\"Please enter Email ID\"));\n        return;\n    }\n    \n    frappe.call({\n        method: \"o2o_erpnext.api.vendor.create_vendor_user\",\n        args: {\n            vendor: frm.doc.name\n        },\n        freeze: true,\n        freeze_message: __(\"Creating User...\"),\n        callback: function(r) {\n            console.log('API response:', r);\n            if (!r.exc) {\n                frm.reload_doc();\n                setTimeout(function() {\n                    cur_frm.refresh();\n                }, 1000);\n            }\n        },\n        error: function(r) {\n            console.error('API error:', r);\n        }\n    });\n}",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
   "dt": "Supplier",
   "enabled": 1,
   "modified": "2025-01-16 10:53:58.115896",
