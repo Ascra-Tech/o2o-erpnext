@@ -1,0 +1,46 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2025-01-29 13:43:22.878928",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-01-29 13:43:22.878928",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "HSN Report New",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT  `tabPurchase Invoice`.posting_date as \"Date:Date:120\",\n        `tabPurchase Invoice`.name as \"Invoice:Link/Purchase Invoice:120\",\n         cn.name AS \"Credit Note Number:Link/Purchase Invoice:120\",\n        `tabPurchase Invoice Item`.item_name as \"Product Name:Data:120\",\n        `tabPurchase Invoice Item`.gst_hsn_code as \"HSN Code:Int:100\", \n        `tabPurchase Invoice Item`.rate as \"Rate:Currency:170\", \n        `tabPurchase Invoice Item`.qty as \"Quantity:Int:100\", \n        `tabPurchase Invoice Item`.item_tax_template as \"GST:Link/Item Tax Template:120\",\n        `tabPurchase Invoice Item`.uom as \"Unit (Kg/ No/etc):Link/UOM:120\",\n        `tabPurchase Invoice Item`.taxable_value as \"Taxable Value:Currency:170\",\n        `tabPurchase Invoice Item`.cgst_amount as \"CGST:Currency:170\",\n        `tabPurchase Invoice Item`.sgst_amount as \"SGST:Currency:170\",\n        `tabPurchase Invoice Item`.igst_amount as \"IGST:Currency:170\",\n        (`tabPurchase Invoice Item`.taxable_value + `tabPurchase Invoice Item`.cgst_amount + `tabPurchase Invoice Item`.sgst_amount + `tabPurchase Invoice Item`.igst_amount) as \"Total:Currency:170\"\nFROM `tabPurchase Invoice`\nINNER JOIN `tabPurchase Invoice Item`\nON `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.parent\nLEFT JOIN \n    `tabPurchase Invoice` AS cn\nON \n    cn.return_against = `tabPurchase Invoice`.name",
+ "ref_doctype": "Purchase Invoice",
+ "report_name": "HSN Report New",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Auditor"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Entity Admin User"
+  },
+  {
+   "role": "Vendor User"
+  }
+ ],
+ "timeout": 0
+}
