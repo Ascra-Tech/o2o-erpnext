@@ -8,38 +8,31 @@
  "field_order": [
   "naming_series",
   "vendor_name",
-  "country",
-  "column_break0",
-  "vendor_group",
+  "vendor_code",
   "vendor_type",
+  "column_break0",
+  "account_name",
   "image",
-  "defaults_section",
-  "default_currency",
-  "default_price_list",
-  "column_break1",
-  "payment_terms",
-  "tax_tab",
-  "tax_id",
-  "tax_category",
-  "tax_withholding_category",
+  "signature",
   "contact_and_address_tab",
   "address_contacts",
+  "is_frozen",
+  "disabled",
+  "website",
+  "email_id",
+  "mobile_no",
   "address_html",
   "column_break2",
   "contact_html",
   "primary_address",
-  "mobile_no",
-  "email_id",
-  "website",
-  "language",
-  "is_frozen",
-  "disabled"
+  "language"
  ],
  "fields": [
   {
    "default": "VEN-.YYYY.-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Series",
    "options": "VEN-.YYYY.-",
    "reqd": 1,
@@ -50,31 +43,19 @@
    "fieldname": "vendor_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_list_view": 1,
    "label": "Vendor Name",
    "reqd": 1
-  },
-  {
-   "fieldname": "country",
-   "fieldtype": "Link",
-   "label": "Country",
-   "options": "Country"
   },
   {
    "fieldname": "column_break0",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "vendor_group",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Vendor Group",
-   "options": "Supplier Group"
-  },
-  {
    "default": "Company",
    "fieldname": "vendor_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Vendor Type",
    "options": "Company\nIndividual\nPartnership",
    "reqd": 1
@@ -84,55 +65,6 @@
    "fieldtype": "Attach Image",
    "hidden": 1,
    "label": "Image"
-  },
-  {
-   "fieldname": "defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Defaults"
-  },
-  {
-   "fieldname": "default_currency",
-   "fieldtype": "Link",
-   "label": "Billing Currency",
-   "options": "Currency"
-  },
-  {
-   "fieldname": "default_price_list",
-   "fieldtype": "Link",
-   "label": "Price List",
-   "options": "Price List"
-  },
-  {
-   "fieldname": "column_break1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "payment_terms",
-   "fieldtype": "Link",
-   "label": "Default Payment Terms Template",
-   "options": "Payment Terms Template"
-  },
-  {
-   "fieldname": "tax_tab",
-   "fieldtype": "Tab Break",
-   "label": "Tax"
-  },
-  {
-   "fieldname": "tax_id",
-   "fieldtype": "Data",
-   "label": "Tax ID"
-  },
-  {
-   "fieldname": "tax_category",
-   "fieldtype": "Link",
-   "label": "Tax Category",
-   "options": "Tax Category"
-  },
-  {
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category"
   },
   {
    "fieldname": "contact_and_address_tab",
@@ -198,14 +130,33 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "vendor_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vendor Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account_name",
+   "fieldtype": "Link",
+   "label": "Account Name",
+   "options": "Bank"
+  },
+  {
+   "fieldname": "signature",
+   "fieldtype": "Attach Image",
+   "label": "Signature"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-21 17:32:16.922972",
+ "modified": "2025-01-29 08:04:22.732031",
  "modified_by": "Administrator",
  "module": "o2o ErpNext",
  "name": "Vendor",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
