@@ -6145,22 +6145,6 @@
  },
  {
   "default_value": null,
-  "doc_type": "Supplier",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocField",
-  "field_name": "custom_is_vendor",
-  "is_system_generated": 1,
-  "modified": "2025-01-18 18:13:33.253926",
-  "module": null,
-  "name": "Supplier-custom_is_vendor-in_list_view",
-  "property": "in_list_view",
-  "property_type": "Check",
-  "row_name": null,
-  "value": "0"
- },
- {
-  "default_value": null,
   "doc_type": "Item",
   "docstatus": 0,
   "doctype": "Property Setter",
