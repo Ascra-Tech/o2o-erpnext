@@ -251,7 +251,7 @@ fixtures = [
     "Client Script",
     "Server Script",
     "Workspace",
-    "Custom Field",
+    # "Custom Field",
     # "Property Setter",
     "Custom DocPerm",
     "Workflow",
