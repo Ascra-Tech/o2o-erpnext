@@ -7129,7 +7129,7 @@
     "parent": "Stock",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": "Serial No",
+    "report_ref_doctype": null,
     "type": "Link"
    },
    {
