@@ -257,7 +257,11 @@ fixtures = [
     "Workflow",
     "Workflow State",
     "Workflow Action",
-    "Print Format"
+    "Print Format",
+    "Purchase Taxes and Charges Template",
+    "Sales Taxes and Charges Template",
+    "Item Tax Template",
+    "Tax Category"
 ]
 
 doc_events = {

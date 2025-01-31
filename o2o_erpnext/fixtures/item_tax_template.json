@@ -1,0 +1,695 @@
+[
+ {
+  "company": "O2O TM",
+  "custom_created_at": "2024-12-12",
+  "custom_updated_at": "2024-12-12 20:11:54.609127",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Tax Template",
+  "gst_rate": 0.0,
+  "gst_treatment": "Nil-Rated",
+  "modified": "2024-12-12 20:11:54.591649",
+  "name": "Nil-Rated - OT",
+  "taxes": [
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax SGST - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax CGST - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax IGST - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax SGST RCM - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax CGST RCM - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax IGST RCM - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax SGST - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax CGST - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax IGST - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax SGST RCM - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax CGST RCM - OT"
+   },
+   {
+    "parent": "Nil-Rated - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax IGST RCM - OT"
+   }
+  ],
+  "title": "Nil-Rated"
+ },
+ {
+  "company": "O2O TM",
+  "custom_created_at": "2024-12-12",
+  "custom_updated_at": "2024-12-12 20:12:09.488448",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Tax Template",
+  "gst_rate": 0.0,
+  "gst_treatment": "Exempted",
+  "modified": "2024-12-12 20:12:09.471046",
+  "name": "Exempted - OT",
+  "taxes": [
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax SGST - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax CGST - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax IGST - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax SGST RCM - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax CGST RCM - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax IGST RCM - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax SGST - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax CGST - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax IGST - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax SGST RCM - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax CGST RCM - OT"
+   },
+   {
+    "parent": "Exempted - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax IGST RCM - OT"
+   }
+  ],
+  "title": "Exempted"
+ },
+ {
+  "company": "O2O TM",
+  "custom_created_at": "2024-12-12",
+  "custom_updated_at": "2024-12-12 20:11:17.651672",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Tax Template",
+  "gst_rate": 0.0,
+  "gst_treatment": "Non-GST",
+  "modified": "2024-12-12 20:11:17.632168",
+  "name": "Non-GST - OT",
+  "taxes": [
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax SGST - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax CGST - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax IGST - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax SGST RCM - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax CGST RCM - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Output Tax IGST RCM - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax SGST - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax CGST - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax IGST - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax SGST RCM - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax CGST RCM - OT"
+   },
+   {
+    "parent": "Non-GST - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 0.0,
+    "tax_type": "Input Tax IGST RCM - OT"
+   }
+  ],
+  "title": "Non-GST"
+ },
+ {
+  "company": "O2O TM",
+  "custom_created_at": "2024-12-12",
+  "custom_updated_at": "2024-12-12 20:11:29.008963",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Tax Template",
+  "gst_rate": 28.0,
+  "gst_treatment": "Taxable",
+  "modified": "2024-12-12 20:11:28.989823",
+  "name": "GST 28% - OT",
+  "taxes": [
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 14.0,
+    "tax_type": "Output Tax SGST - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 14.0,
+    "tax_type": "Output Tax CGST - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 28.0,
+    "tax_type": "Output Tax IGST - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -14.0,
+    "tax_type": "Output Tax SGST RCM - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -14.0,
+    "tax_type": "Output Tax CGST RCM - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -28.0,
+    "tax_type": "Output Tax IGST RCM - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 14.0,
+    "tax_type": "Input Tax SGST - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 14.0,
+    "tax_type": "Input Tax CGST - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 28.0,
+    "tax_type": "Input Tax IGST - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 14.0,
+    "tax_type": "Input Tax SGST RCM - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 14.0,
+    "tax_type": "Input Tax CGST RCM - OT"
+   },
+   {
+    "parent": "GST 28% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 28.0,
+    "tax_type": "Input Tax IGST RCM - OT"
+   }
+  ],
+  "title": "GST 28%"
+ },
+ {
+  "company": "O2O TM",
+  "custom_created_at": "2024-12-12",
+  "custom_updated_at": "2024-12-12 20:11:43.043695",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Tax Template",
+  "gst_rate": 12.0,
+  "gst_treatment": "Taxable",
+  "modified": "2024-12-12 20:11:43.026064",
+  "name": "GST 12% - OT",
+  "taxes": [
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 6.0,
+    "tax_type": "Output Tax SGST - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 6.0,
+    "tax_type": "Output Tax CGST - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 12.0,
+    "tax_type": "Output Tax IGST - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -6.0,
+    "tax_type": "Output Tax SGST RCM - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -6.0,
+    "tax_type": "Output Tax CGST RCM - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -12.0,
+    "tax_type": "Output Tax IGST RCM - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 6.0,
+    "tax_type": "Input Tax SGST - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 6.0,
+    "tax_type": "Input Tax CGST - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 12.0,
+    "tax_type": "Input Tax IGST - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 6.0,
+    "tax_type": "Input Tax SGST RCM - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 6.0,
+    "tax_type": "Input Tax CGST RCM - OT"
+   },
+   {
+    "parent": "GST 12% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 12.0,
+    "tax_type": "Input Tax IGST RCM - OT"
+   }
+  ],
+  "title": "GST 12%"
+ },
+ {
+  "company": "O2O TM",
+  "custom_created_at": "2024-12-12",
+  "custom_updated_at": "2024-12-12 20:11:04.645381",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Tax Template",
+  "gst_rate": 5.0,
+  "gst_treatment": "Taxable",
+  "modified": "2024-12-12 20:11:04.626251",
+  "name": "GST 5% - OT",
+  "taxes": [
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 2.5,
+    "tax_type": "Output Tax SGST - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 2.5,
+    "tax_type": "Output Tax CGST - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 5.0,
+    "tax_type": "Output Tax IGST - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -2.5,
+    "tax_type": "Output Tax SGST RCM - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -2.5,
+    "tax_type": "Output Tax CGST RCM - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -5.0,
+    "tax_type": "Output Tax IGST RCM - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 2.5,
+    "tax_type": "Input Tax SGST - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 2.5,
+    "tax_type": "Input Tax CGST - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 5.0,
+    "tax_type": "Input Tax IGST - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 2.5,
+    "tax_type": "Input Tax SGST RCM - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 2.5,
+    "tax_type": "Input Tax CGST RCM - OT"
+   },
+   {
+    "parent": "GST 5% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 5.0,
+    "tax_type": "Input Tax IGST RCM - OT"
+   }
+  ],
+  "title": "GST 5%"
+ },
+ {
+  "company": "O2O TM",
+  "custom_created_at": "2024-12-12",
+  "custom_updated_at": "2024-12-12 20:06:22",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Tax Template",
+  "gst_rate": 18.0,
+  "gst_treatment": "Taxable",
+  "modified": "2024-12-12 20:07:12.189685",
+  "name": "GST 18% - OT",
+  "taxes": [
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 9.0,
+    "tax_type": "Output Tax SGST - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 9.0,
+    "tax_type": "Output Tax CGST - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 18.0,
+    "tax_type": "Output Tax IGST - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -9.0,
+    "tax_type": "Output Tax SGST RCM - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -9.0,
+    "tax_type": "Output Tax CGST RCM - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": -18.0,
+    "tax_type": "Output Tax IGST RCM - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 9.0,
+    "tax_type": "Input Tax SGST - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 9.0,
+    "tax_type": "Input Tax CGST - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 18.0,
+    "tax_type": "Input Tax IGST - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 9.0,
+    "tax_type": "Input Tax SGST RCM - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 9.0,
+    "tax_type": "Input Tax CGST RCM - OT"
+   },
+   {
+    "parent": "GST 18% - OT",
+    "parentfield": "taxes",
+    "parenttype": "Item Tax Template",
+    "tax_rate": 18.0,
+    "tax_type": "Input Tax IGST RCM - OT"
+   }
+  ],
+  "title": "GST 18%"
+ }
+]
