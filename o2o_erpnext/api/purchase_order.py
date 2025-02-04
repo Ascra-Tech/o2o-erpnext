@@ -2,7 +2,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_datetime
 
-# Your existing functions
 @frappe.whitelist()
 def validate_and_set_purchase_order_defaults(doc_name=None):
     """
@@ -32,7 +31,7 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
         if not employee:
             frappe.throw(_("No Employee record found linked to your User ID"), title=_("Employee Not Found"))
             
-        # Get the Purchase Order document if doc_name is provided
+        # Get the Purchase Order document
         if doc_name:
             po_doc = frappe.get_doc("Purchase Order", doc_name)
         else:
@@ -74,7 +73,23 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
                         "Purchase Order API Error")
         raise e
 
-# New validation class
+@frappe.whitelist()
+def get_supplier_vendors(supplier):
+    """Get list of vendors from supplier's vendor access list"""
+    try:
+        supplier_doc = frappe.get_doc("Supplier", supplier)
+        vendors = []
+        
+        if supplier_doc.custom_vendor_access_list:
+            vendors = [v.vendor for v in supplier_doc.custom_vendor_access_list]
+            
+        return vendors
+        
+    except Exception as e:
+        frappe.log_error(f"Error fetching supplier vendors: {str(e)}", 
+                        "Get Supplier Vendors Error")
+        return []
+
 class PurchaseOrderValidation:
     def __init__(self, doc, method):
         self.doc = doc
@@ -135,6 +150,29 @@ class PurchaseOrderValidation:
                     transaction_day, budget_start_day, budget_end_day
                 ),
                 title=_("Invalid Transaction Date")
+            )
+        return True
+
+    def validate_vendor_access(self):
+        if not self.doc.custom_vendor:
+            return True
+
+        if not self.doc.supplier:
+            frappe.throw(_("Supplier must be selected before selecting a vendor"), title=_("Missing Supplier"))
+
+        supplier_doc = frappe.get_doc("Supplier", self.doc.supplier)
+        allowed_vendors = [v.vendor for v in supplier_doc.custom_vendor_access_list]
+
+        if not allowed_vendors:
+            frappe.throw(_("No vendors configured for supplier {0}").format(self.doc.supplier), 
+                        title=_("No Vendors Available"))
+
+        if self.doc.custom_vendor not in allowed_vendors:
+            frappe.throw(
+                _("Selected vendor {0} is not in the allowed vendor list for supplier {1}").format(
+                    self.doc.custom_vendor, self.doc.supplier
+                ),
+                title=_("Invalid Vendor")
             )
         return True
 
@@ -249,6 +287,8 @@ class PurchaseOrderValidation:
         if self.doc.items:
             self.validate_order_value(branch, supplier)
             self.validate_budgets(branch)
+            
+        self.validate_vendor_access()
         
         return True
 
