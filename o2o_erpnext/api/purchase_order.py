@@ -290,12 +290,14 @@ def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
     
+    roles = frappe.get_roles(user)
+    
     # First check if user is Administrator - show all POs
-    if "Administrator" in frappe.get_roles(user):
+    if "Administrator" in roles:
         return ""  # Empty string means no conditions - show all records
     
     # Then check if user has Person Raising Request role
-    elif "Person Raising Request" in frappe.get_roles(user):
+    elif "Person Raising Request" in roles:
         # Get employee linked to the user
         employee = frappe.db.get_value("Employee", 
             {"user_id": user}, 
@@ -322,7 +324,18 @@ def get_permission_query_conditions(user):
         else:
             return "1=0"  # Return false condition if no matching criteria
     
-    # If user has neither role
+    # Check if user has Supplier role
+    elif "Supplier" in roles:
+        # Get supplier linked to the user using custom_user field
+        supplier = frappe.db.get_value("Supplier", {"custom_user": user}, "name")
+        
+        if not supplier:
+            return "1=0"  # Return false condition if no supplier found
+            
+        # Return condition to match PO supplier with user's supplier
+        return f"`tabPurchase Order`.supplier = '{supplier}'"
+    
+    # If user has none of the allowed roles
     else:
         frappe.throw(_("Not Allowed to see PO"))
         return "1=0"
@@ -334,12 +347,14 @@ def has_permission(doc, user=None, permission_type=None):
     if not user:
         user = frappe.session.user
     
+    roles = frappe.get_roles(user)
+    
     # Administrator can see all documents
-    if "Administrator" in frappe.get_roles(user):
+    if "Administrator" in roles:
         return True
         
     # Check Person Raising Request role
-    elif "Person Raising Request" in frappe.get_roles(user):
+    elif "Person Raising Request" in roles:
         # Get employee details
         employee = frappe.db.get_value("Employee", 
             {"user_id": user}, 
@@ -356,5 +371,16 @@ def has_permission(doc, user=None, permission_type=None):
         matches_sub_branch = (doc.custom_sub_branch == employee.custom_sub_branch)
         
         return matches_supplier and matches_branch and matches_sub_branch
+    
+    # Check Supplier role
+    elif "Supplier" in roles:
+        # Get supplier linked to the user using custom_user field
+        supplier = frappe.db.get_value("Supplier", {"custom_user": user}, "name")
+        
+        if not supplier:
+            return False
+            
+        # Check if document matches supplier
+        return doc.supplier == supplier
     
     return False    
