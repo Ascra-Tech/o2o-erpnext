@@ -283,6 +283,13 @@ doc_events = {
     }
 }
 
+doc_events = {
+    "Purchase Receipt": {
+        "get_permission_query_conditions": "o2o_erpnext.api.purchase_receipt.get_permission_query_conditions",
+        "has_permission": "o2o_erpnext.api.purchase_receipt.has_permission"
+    }
+}
+
 permission_query_conditions = {
     "Purchase Order": "o2o_erpnext.api.purchase_order.get_permission_query_conditions"
 }
