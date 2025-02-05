@@ -294,6 +294,14 @@ doc_events = {
     }
 }
 
+doc_events = {
+    "Sub Branch": {
+        "get_permission_query_conditions": "o2o_erpnext.o2o_erpnext.doctype.sub_branch.sub_branch.get_permission_query_conditions",
+        "has_permission": "o2o_erpnext.o2o_erpnext.doctype.sub_branch.sub_branch.has_permission",
+        "get_list": "o2o_erpnext.o2o_erpnext.doctype.sub_branch.sub_branch.get_list"
+    }
+}
+
 permission_query_conditions = {
     "Purchase Order": "o2o_erpnext.api.purchase_order.get_permission_query_conditions"
 }
