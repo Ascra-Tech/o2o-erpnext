@@ -4,8 +4,25 @@ from frappe.utils import flt, get_datetime
 
 @frappe.whitelist()
 def validate_and_set_purchase_order_defaults(doc_name=None):
+    """
+    API endpoint to validate user role and set default values in Purchase Order
+    based on the linked Employee record.
+    
+    Args:
+        doc_name (str, optional): Name of the Purchase Order document
+    """
     try:
+        # Get current user's roles
+        user_roles = frappe.get_roles(frappe.session.user)
+        
+        # Check if user has the required role
+        if "Person Raising Request" not in user_roles:
+            frappe.throw(_("You are not Authorized to create Purchase Orders"), title=_("Not Authorized"))
+        
+        # Get current user's email
         user_email = frappe.session.user
+        
+        # Find Employee linked to current user
         employee = frappe.get_value("Employee", 
                                   {"user_id": user_email}, 
                                   ["name", "custom_supplier", "branch", "custom_sub_branch"],
@@ -14,11 +31,13 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
         if not employee:
             frappe.throw(_("No Employee record found linked to your User ID"), title=_("Employee Not Found"))
             
+        # Get the Purchase Order document
         if doc_name:
             po_doc = frappe.get_doc("Purchase Order", doc_name)
         else:
             po_doc = frappe.new_doc("Purchase Order")
             
+        # Set values in Purchase Order
         if employee.custom_supplier:
             po_doc.supplier = employee.custom_supplier
             
@@ -28,6 +47,7 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
         if employee.custom_sub_branch:
             po_doc.custom_sub_branch = employee.custom_sub_branch
             
+        # If it's a new document, don't save yet
         if not doc_name:
             return {
                 "status": "success",
@@ -39,6 +59,7 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
                 }
             }
         
+        # For existing documents, save the changes
         po_doc.save()
         frappe.db.commit()
         
@@ -54,6 +75,7 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
 
 @frappe.whitelist()
 def get_supplier_vendors(supplier):
+    """Get list of vendors from supplier's vendor access list"""
     try:
         supplier_doc = frappe.get_doc("Supplier", supplier)
         vendors = []
@@ -275,6 +297,7 @@ class PurchaseOrderValidation:
             branch = frappe.get_doc("Branch", self.doc.custom_branch)
             self.update_budgets(branch)
 
+# Document event handlers
 def validate_purchase_order(doc, method):
     validator = PurchaseOrderValidation(doc, method)
     validator.validate()
@@ -282,79 +305,3 @@ def validate_purchase_order(doc, method):
 def on_submit_purchase_order(doc, method):
     validator = PurchaseOrderValidation(doc, method)
     validator.on_submit()
-
-def get_permission_query_conditions(user):
-    """
-    Returns query conditions for Purchase Order list view based on user role
-    """
-    if not user:
-        user = frappe.session.user
-    
-    # First check if user is Administrator - show all POs
-    if "Administrator" in frappe.get_roles(user):
-        return ""  # Empty string means no conditions - show all records
-    
-    # Then check if user has Person Raising Request role
-    elif "Person Raising Request" in frappe.get_roles(user):
-        # Get employee linked to the user
-        employee = frappe.db.get_value("Employee", 
-            {"user_id": user}, 
-            ["custom_supplier", "branch", "custom_sub_branch"], 
-            as_dict=1
-        )
-        
-        if not employee:
-            return "1=0"  # Return false condition if no employee found
-            
-        conditions = []
-        
-        # Build conditions based on employee details
-        if employee.custom_supplier:
-            conditions.append(f"`tabPurchase Order`.supplier = '{employee.custom_supplier}'")
-        if employee.branch:
-            conditions.append(f"`tabPurchase Order`.custom_branch = '{employee.branch}'")
-        if employee.custom_sub_branch:
-            conditions.append(f"`tabPurchase Order`.custom_sub_branch = '{employee.custom_sub_branch}'")
-            
-        # If any conditions exist, join them with AND
-        if conditions:
-            return " AND ".join(conditions)
-        else:
-            return "1=0"  # Return false condition if no matching criteria
-    
-    # If user has neither role
-    else:
-        frappe.throw(_("Not Allowed to see PO"))
-        return "1=0"
-
-def has_permission(doc, user=None, permission_type=None):
-    """
-    Additional permission check at document level
-    """
-    if not user:
-        user = frappe.session.user
-    
-    # Administrator can see all documents
-    if "Administrator" in frappe.get_roles(user):
-        return True
-        
-    # Check Person Raising Request role
-    elif "Person Raising Request" in frappe.get_roles(user):
-        # Get employee details
-        employee = frappe.db.get_value("Employee", 
-            {"user_id": user}, 
-            ["custom_supplier", "branch", "custom_sub_branch"], 
-            as_dict=1
-        )
-        
-        if not employee:
-            return False
-            
-        # Check if document matches employee criteria
-        matches_supplier = (doc.supplier == employee.custom_supplier)
-        matches_branch = (doc.custom_branch == employee.branch)
-        matches_sub_branch = (doc.custom_sub_branch == employee.custom_sub_branch)
-        
-        return matches_supplier and matches_branch and matches_sub_branch
-    
-    return False    
