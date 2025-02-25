@@ -269,6 +269,20 @@ doc_events = {
 # In /home/frappe/frappe-bench-1/apps/o2o_erpnext/o2o_erpnext/hooks.py
 
 doc_events = {
+    "Purchase Order": {
+        "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order",
+        "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order"
+    }
+}
+
+
+doc_events = {
+    "Purchase Order": {
+        "has_permission": "o2o_erpnext.api.purchase_order.has_permission"
+    }
+}
+
+doc_events = {
     "Purchase Receipt": {
         "get_permission_query_conditions": "o2o_erpnext.api.purchase_receipt.get_permission_query_conditions",
         "has_permission": "o2o_erpnext.api.purchase_receipt.has_permission"
@@ -287,7 +301,9 @@ doc_events = {
     }
 }
 
-
+permission_query_conditions = {
+    "Purchase Order": "o2o_erpnext.api.purchase_order.get_permission_query_conditions"
+}
 
 # permission_query_conditions = {
 #    "Purchase Order": "o2o_erpnext.controllers.permissions.get_permission_query_conditions"
