@@ -305,9 +305,6 @@ permission_query_conditions = {
     "Purchase Order": "o2o_erpnext.api.purchase_order.get_permission_query_conditions"
 }
 
-# permission_query_conditions = {
-#    "Purchase Order": "o2o_erpnext.controllers.permissions.get_permission_query_conditions"
-# }
 
 
 doctype_js = {
