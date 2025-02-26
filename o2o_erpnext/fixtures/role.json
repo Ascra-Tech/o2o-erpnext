@@ -930,9 +930,9 @@
   "home_page": null,
   "is_custom": 0,
   "modified": "2025-02-25 13:05:35.436411",
-  "name": "Person Raising Request Branch Level",
+  "name": "Person Raising Request Branch",
   "restrict_to_domain": null,
-  "role_name": "Person Raising Request Branch Level",
+  "role_name": "Person Raising Request Branch",
   "two_factor_auth": 0
  }
 ]
