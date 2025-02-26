@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, get_datetime
+from frappe.exceptions import DoesNotExistError
 
 @frappe.whitelist()
 def validate_and_set_purchase_order_defaults(doc_name=None):
@@ -92,64 +93,64 @@ class PurchaseOrderValidation:
             )
         return True
 
-
-def get_permission_query_conditions(user):
+def get_permission_query_conditions(user, doctype):
     """
-    Returns query conditions for Purchase Order list view based on user role
+    Returns SQL conditions to filter Purchase Orders based on user roles and related employee/supplier data.
     """
-    if not user:
-        user = frappe.session.user
-    
     roles = frappe.get_roles(user)
-    
-    # First check if user is Administrator - show all POs
-    if "Administrator" in roles:
-        return ""  # Empty string means no conditions - show all records
-    
+
     # Check for Approver roles (Requisition Approver and PO Approver)
-    elif "Requisition Approver" in roles or "PO Approver" in roles:
-        # Get employee linked to the user and their sub-branches
-        employee = frappe.db.get_value("Employee", 
-            {"user_id": user}, 
-            ["name", "custom_supplier", "branch", "custom_sub_branch"], 
+    if "Requisition Approver" in roles or "PO Approver" in roles:
+        # Get employee linked to the user
+        employee = frappe.db.get_value("Employee",
+            {"user_id": user},
+            ["name", "custom_supplier", "branch", "custom_sub_branch"],  # Fetch necessary fields
             as_dict=1
         )
-        
+
         if not employee:
-            return "1=0"  # Return false condition if no employee found
-            
-        # Get additional sub-branches from custom_sub_branch_list
-        additional_sub_branches = frappe.get_all("Employee Sub Branch List",
-            filters={"parent": employee.name},
-            pluck="custom_sub_branch"
-        )
-        
+            return "1=0"  # No employee found, return false condition
+
         conditions = []
-        
-        # Build conditions based on employee details
+
+        # Build conditions based on employee details (supplier and primary branch)
         if employee.custom_supplier:
             conditions.append(f"`tabPurchase Order`.supplier = '{employee.custom_supplier}'")
         if employee.branch:
             conditions.append(f"`tabPurchase Order`.custom_branch = '{employee.branch}'")
-        
-        # Build sub-branch condition to include both primary and additional sub-branches
+
+        # --- Sub-Branch Filtering (using Employee fields directly) ---
         sub_branch_conditions = []
+
+        # 1. Primary Sub-Branch (custom_sub_branch)
         if employee.custom_sub_branch:
             sub_branch_conditions.append(f"`tabPurchase Order`.custom_sub_branch = '{employee.custom_sub_branch}'")
-        
-        # Add conditions for additional sub-branches
-        for sub_branch in additional_sub_branches:
-            sub_branch_conditions.append(f"`tabPurchase Order`.custom_sub_branch = '{sub_branch}'")
-        
+
+        # 2. Secondary Sub-Branches from Employee Sub Branch List child table
+        if employee.name:
+            try:
+                # Use correct table name format: `tabEmployee Sub Branch List`
+                additional_sub_branches = frappe.get_all(
+                    "Employee Sub Branch List",  # Using the correct DocType name without 'custom_' prefix
+                    filters={"parent": employee.name},
+                    fields=["sub_branch"],
+                    pluck="sub_branch"
+                )
+                for sub_branch in additional_sub_branches:
+                    sub_branch_conditions.append(f"`tabPurchase Order`.custom_sub_branch = '{sub_branch}'")
+            except Exception as e:
+                # Log error but continue execution
+                frappe.log_error(f"Error fetching sub branches: {str(e)}", "Permission Query Error")
+
         # Combine sub-branch conditions with OR
         if sub_branch_conditions:
             conditions.append(f"({' OR '.join(sub_branch_conditions)})")
-            
-        # If any conditions exist, join them with AND
+
+        # Combine all conditions with AND
         if conditions:
             return " AND ".join(conditions)
         else:
-            return "1=0"  # Return false condition if no matching criteria
+            return "1=0"
     
     # Then check if user has Person Raising Request role
     elif "Person Raising Request" in roles:
@@ -230,12 +231,16 @@ def has_permission(doc, user=None, permission_type=None):
         
         if not employee:
             return False
-            
-        # Get additional sub-branches
-        additional_sub_branches = frappe.get_all("Employee Sub Branch List",
-            filters={"parent": employee.name},
-            pluck="custom_sub_branch"
-        )
+        
+        try:    
+            # Get additional sub-branches - FIXED: Using the correct table name
+            additional_sub_branches = frappe.get_all("Employee Sub Branch List",
+                filters={"parent": employee.name},
+                pluck="sub_branch"
+            )
+        except Exception:
+            # Handle case where table/field might not exist
+            additional_sub_branches = []
         
         # Check if document matches employee criteria
         matches_supplier = (doc.supplier == employee.custom_supplier)
@@ -288,4 +293,4 @@ def has_permission(doc, user=None, permission_type=None):
         # Check if document matches vendor
         return doc.custom_vendor == vendor
     
-    return False    
+    return False
