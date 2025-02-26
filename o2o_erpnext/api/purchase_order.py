@@ -100,14 +100,14 @@ def get_permission_query_conditions(user, doctype):
     roles = frappe.get_roles(user)
 
     if "Administrator" in roles:
-        return None  # or return "1=1"
+        return None  # Administrator can see all
     
     # Check for Approver roles (Requisition Approver and PO Approver)
     if "Requisition Approver" in roles or "PO Approver" in roles:
         # Get employee linked to the user
         employee = frappe.db.get_value("Employee",
             {"user_id": user},
-            ["name", "custom_supplier", "branch", "custom_sub_branch"],  # Fetch necessary fields
+            ["name", "custom_supplier", "branch", "custom_sub_branch"],
             as_dict=1
         )
 
@@ -116,31 +116,33 @@ def get_permission_query_conditions(user, doctype):
 
         conditions = []
 
-        # Build conditions based on employee details (supplier and primary branch)
+        # Build conditions based on employee details (supplier and branch)
         if employee.custom_supplier:
             conditions.append(f"`tabPurchase Order`.supplier = '{employee.custom_supplier}'")
         if employee.branch:
             conditions.append(f"`tabPurchase Order`.custom_branch = '{employee.branch}'")
 
-        # --- Sub-Branch Filtering (using Employee fields directly) ---
+        # --- Sub-Branch Filtering (Primary OR any secondary sub-branch) ---
         sub_branch_conditions = []
 
         # 1. Primary Sub-Branch (custom_sub_branch)
         if employee.custom_sub_branch:
             sub_branch_conditions.append(f"`tabPurchase Order`.custom_sub_branch = '{employee.custom_sub_branch}'")
 
-        # 2. Secondary Sub-Branches from Employee Sub Branch List child table
+        # 2. Secondary Sub-Branches from custom_sub_branch_list table field in Employee
         if employee.name:
             try:
-                # Use correct table name format: `tabEmployee Sub Branch List`
+                # Use the correct table name: tabSub Branch Table
                 additional_sub_branches = frappe.get_all(
-                    "Employee Sub Branch List",  # Using the correct DocType name without 'custom_' prefix
+                    "Sub Branch Table",  # The correct table DocType name
                     filters={"parent": employee.name},
-                    fields=["sub_branch"],
+                    fields=["sub_branch"],  # The correct field name for sub-branch
                     pluck="sub_branch"
                 )
+                
                 for sub_branch in additional_sub_branches:
-                    sub_branch_conditions.append(f"`tabPurchase Order`.custom_sub_branch = '{sub_branch}'")
+                    if sub_branch:  # Check for null values
+                        sub_branch_conditions.append(f"`tabPurchase Order`.custom_sub_branch = '{sub_branch}'")
             except Exception as e:
                 # Log error but continue execution
                 frappe.log_error(f"Error fetching sub branches: {str(e)}", "Permission Query Error")
@@ -148,7 +150,7 @@ def get_permission_query_conditions(user, doctype):
         # Combine sub-branch conditions with OR
         if sub_branch_conditions:
             conditions.append(f"({' OR '.join(sub_branch_conditions)})")
-
+        
         # Combine all conditions with AND
         if conditions:
             return " AND ".join(conditions)
@@ -210,6 +212,7 @@ def get_permission_query_conditions(user, doctype):
         frappe.throw(_("Not Allowed to see PO"))
         return "1=0"
 
+
 def has_permission(doc, user=None, permission_type=None):
     """
     Additional permission check at document level
@@ -236,25 +239,28 @@ def has_permission(doc, user=None, permission_type=None):
             return False
         
         try:    
-            # Get additional sub-branches - FIXED: Using the correct table name
-            additional_sub_branches = frappe.get_all("Employee Sub Branch List",
+            # Get additional sub-branches from the custom_sub_branch_list table field
+            additional_sub_branches = frappe.get_all(
+                "Sub Branch Table",  # The correct DocType name
                 filters={"parent": employee.name},
+                fields=["sub_branch"],  # The correct field name
                 pluck="sub_branch"
             )
-        except Exception:
-            # Handle case where table/field might not exist
+        except Exception as e:
+            frappe.log_error(f"Error in has_permission: {str(e)}", "Permission Error")
             additional_sub_branches = []
         
-        # Check if document matches employee criteria
+        # Check if document matches required employee criteria
         matches_supplier = (doc.supplier == employee.custom_supplier)
         matches_branch = (doc.custom_branch == employee.branch)
         
         # Check if document's sub-branch matches either primary or any additional sub-branch
         matches_sub_branch = (doc.custom_sub_branch == employee.custom_sub_branch or 
-                            doc.custom_sub_branch in additional_sub_branches)
+                             doc.custom_sub_branch in additional_sub_branches)
         
+        # For approver roles, must match supplier and branch, AND match at least one sub-branch
         return matches_supplier and matches_branch and matches_sub_branch
-        
+    
     # Check Person Raising Request role
     elif "Person Raising Request" in roles:
         # Get employee details
