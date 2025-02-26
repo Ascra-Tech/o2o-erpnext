@@ -99,6 +99,9 @@ def get_permission_query_conditions(user, doctype):
     """
     roles = frappe.get_roles(user)
 
+    if "Administrator" in roles:
+        return None  # or return "1=1"
+    
     # Check for Approver roles (Requisition Approver and PO Approver)
     if "Requisition Approver" in roles or "PO Approver" in roles:
         # Get employee linked to the user
