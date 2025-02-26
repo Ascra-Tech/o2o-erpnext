@@ -230,7 +230,7 @@
    "label": "Sub Branch",
    "length": 0,
    "link_filters": null,
-   "mandatory_depends_on": "eval:doc.custom_roles && !doc.custom_roles.includes('Vendor User')",
+   "mandatory_depends_on": "",
    "modified": "2025-01-04 14:05:40.506284",
    "modified_by": "Administrator",
    "module": null,
