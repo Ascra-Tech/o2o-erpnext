@@ -1,0 +1,290 @@
+[
+ {
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-15 15:12:48.726607",
+  "name": "Inventory",
+  "role_profile": "Inventory",
+  "roles": [
+   {
+    "parent": "Inventory",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Inventory",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Inventory",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Item Manager"
+   }
+  ]
+ },
+ {
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-15 15:12:48.735300",
+  "name": "Manufacturing",
+  "role_profile": "Manufacturing",
+  "roles": [
+   {
+    "parent": "Manufacturing",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Manufacturing",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Manufacturing",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Manufacturing Manager"
+   }
+  ]
+ },
+ {
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-15 15:12:48.751968",
+  "name": "Accounts",
+  "role_profile": "Accounts",
+  "roles": [
+   {
+    "parent": "Accounts",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Accounts",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Accounts Manager"
+   }
+  ]
+ },
+ {
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-15 15:12:48.761133",
+  "name": "Sales",
+  "role_profile": "Sales",
+  "roles": [
+   {
+    "parent": "Sales",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Sales",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Sales",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Sales Manager"
+   }
+  ]
+ },
+ {
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-15 15:12:48.770486",
+  "name": "Purchase",
+  "role_profile": "Purchase",
+  "roles": [
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Item Manager"
+   },
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Purchase Manager"
+   }
+  ]
+ },
+ {
+  "custom_created_at": "2025-02-28",
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-02-28 01:40:37.638304",
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-28 01:40:37.623512",
+  "name": "Supplier Profile",
+  "role_profile": "Supplier Profile",
+  "roles": [
+   {
+    "parent": "Supplier Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Supplier"
+   }
+  ]
+ },
+ {
+  "custom_created_at": "2025-02-28",
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-02-28 01:42:52.252310",
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-28 01:42:52.239889",
+  "name": "Branch PRR Profile",
+  "role_profile": "Branch PRR Profile",
+  "roles": [
+   {
+    "parent": "Branch PRR Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Person Raising Request Branch"
+   },
+   {
+    "parent": "Branch PRR Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Employee"
+   }
+  ]
+ },
+ {
+  "custom_created_at": "2025-02-28",
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-02-28 01:42:46.402538",
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-28 01:42:46.396964",
+  "name": "Sub Branch PRR Profile",
+  "role_profile": "Sub Branch PRR Profile",
+  "roles": [
+   {
+    "parent": "Sub Branch PRR Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Person Raising Request"
+   },
+   {
+    "parent": "Sub Branch PRR Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Employee"
+   }
+  ]
+ },
+ {
+  "custom_created_at": "2025-02-28",
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-02-28 01:43:19.356394",
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-28 01:43:19.351627",
+  "name": "PO Approver Profile",
+  "role_profile": "PO Approver Profile",
+  "roles": [
+   {
+    "parent": "PO Approver Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "PO Approver"
+   },
+   {
+    "parent": "PO Approver Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Employee"
+   }
+  ]
+ },
+ {
+  "custom_created_at": "2025-02-28",
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-02-28 01:44:28.182940",
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-28 01:44:28.178143",
+  "name": "Requisition Approver",
+  "role_profile": " Requisition Approver",
+  "roles": [
+   {
+    "parent": "Requisition Approver",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "Requisition Approver",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Employee"
+   }
+  ]
+ },
+ {
+  "custom_created_at": "2025-02-28",
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-02-28 01:44:57.084782",
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-28 01:44:57.079607",
+  "name": "Vendor Profile",
+  "role_profile": "Vendor Profile",
+  "roles": [
+   {
+    "parent": "Vendor Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Employee"
+   },
+   {
+    "parent": "Vendor Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Vendor User"
+   }
+  ]
+ }
+]

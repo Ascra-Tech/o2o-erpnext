@@ -121,6 +121,7 @@ def get_permission_query_conditions(user, doctype):
             conditions.append(f"`tabPurchase Order`.supplier = '{employee.custom_supplier}'")
         if employee.branch:
             conditions.append(f"`tabPurchase Order`.custom_branch = '{employee.branch}'")
+            conditions.append("(`tabPurchase Order`.custom_sub_branch IS NULL OR TRIM(`tabPurchase Order`.custom_sub_branch) = '')")
             
         # If any conditions exist, join them with AND
         if conditions:

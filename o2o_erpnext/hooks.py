@@ -87,7 +87,7 @@ add_to_apps_screen = [
 # ------------
 
 # before_install = "o2o_erpnext.install.before_install"
-# after_install = "o2o_erpnext.install.after_install"
+after_install = "o2o_erpnext.branch_update.setup_monthly_budget_update"
 
 # Uninstallation
 # ------------
@@ -248,6 +248,7 @@ add_to_apps_screen = [
 
 fixtures = [
     "Role",
+    "Role Profile",
     "Client Script",
     "Server Script",
     "Workspace",
