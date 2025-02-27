@@ -102,6 +102,32 @@ def get_permission_query_conditions(user, doctype):
     if "Administrator" in roles:
         return None  # Administrator can see all
     
+        # Then check if user has Person Raising Request Branch role
+    if "Person Raising Request Branch" in roles:
+        # Get employee linked to the user
+        employee = frappe.db.get_value("Employee", 
+            {"user_id": user}, 
+            ["custom_supplier", "branch"], 
+            as_dict=1
+        )
+        
+        if not employee:
+            return "1=0"  # Return false condition if no employee found
+            
+        conditions = []
+        
+        # Build conditions based on employee details
+        if employee.custom_supplier:
+            conditions.append(f"`tabPurchase Order`.supplier = '{employee.custom_supplier}'")
+        if employee.branch:
+            conditions.append(f"`tabPurchase Order`.custom_branch = '{employee.branch}'")
+            
+        # If any conditions exist, join them with AND
+        if conditions:
+            return " AND ".join(conditions)
+        else:
+            return "1=0"  # Return false condition if no matching criteria
+    
     # Check for Approver roles (Requisition Approver and PO Approver)
     if "Requisition Approver" in roles or "PO Approver" in roles:
         # Get employee linked to the user
@@ -225,6 +251,24 @@ def has_permission(doc, user=None, permission_type=None):
     # Administrator can see all documents
     if "Administrator" in roles:
         return True
+    
+    # Check for Person Raising Request Branch roles
+    elif "Person Raising Request Branch" in roles:
+        # Get employee details
+        employee = frappe.db.get_value("Employee", 
+            {"user_id": user}, 
+            ["custom_supplier", "branch"], 
+            as_dict=1
+        )
+        
+        if not employee:
+            return False
+            
+        # Check if document matches employee criteria
+        matches_supplier = (doc.supplier == employee.custom_supplier)
+        matches_branch = (doc.custom_branch == employee.branch)
+        
+        return matches_supplier and matches_branch
     
     # Check for Approver roles
     elif "Requisition Approver" in roles or "PO Approver" in roles:
