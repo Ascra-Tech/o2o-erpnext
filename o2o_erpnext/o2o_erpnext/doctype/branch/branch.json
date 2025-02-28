@@ -9,7 +9,8 @@
  "engine": "InnoDB",
  "field_order": [
   "branch",
-  "address_html"
+  "address_html",
+  "address"
  ],
  "fields": [
   {
@@ -26,12 +27,18 @@
    "fieldname": "address_html",
    "fieldtype": "HTML",
    "label": "Address"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Link",
+   "label": "Primary Address",
+   "options": "Address"
   }
  ],
  "icon": "fa fa-code-fork",
  "idx": 1,
  "links": [],
- "modified": "2025-02-28 12:57:34.715942",
+ "modified": "2025-02-28 13:20:51.096794",
  "modified_by": "Administrator",
  "module": "o2o ErpNext",
  "name": "Branch",
@@ -61,7 +68,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

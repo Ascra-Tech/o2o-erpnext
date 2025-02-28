@@ -16,6 +16,7 @@
   "opex_budget",
   "created_at",
   "address_html",
+  "address",
   "column_break_fqjc",
   "maximum_order_value",
   "capex_budget",
@@ -98,11 +99,17 @@
    "fieldname": "address_html",
    "fieldtype": "HTML",
    "label": "Address"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Link",
+   "label": "Primary Address",
+   "options": "Address"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-28 12:58:33.647781",
+ "modified": "2025-02-28 13:21:06.025531",
  "modified_by": "Administrator",
  "module": "o2o ErpNext",
  "name": "Sub Branch",
