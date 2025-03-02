@@ -2,6 +2,54 @@ import frappe
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import now_datetime, get_first_day, get_last_day, add_months
 
+def setup_monthly_budget_update():
+    """
+    Set up a scheduled job to update budgets for Branch doctype on the 1st of every month.
+    This function should be called during app installation or setup.
+    """
+    if not frappe.db.exists("Scheduled Job Type", "Auto Update Branch Budget"):
+        frappe.get_doc({
+            "doctype": "Scheduled Job Type",
+            "method": "o2o_erpnext.branch_update.update_all_branch_budgets",
+            "frequency": "Monthly",
+            "cron_format": "0 0 1 * *",  # At 00:00 on the 1st of every month
+            "docstatus": 0,
+            "name": "Auto Update Branch Budget"
+        }).insert()
+        frappe.db.commit()
+
+def update_all_branch_budgets():
+    """
+    Update budgets for all branches.
+    This function is called by the scheduler on the 1st of every month.
+    """
+    try:
+        branches = frappe.get_all("Branch", fields=["name", "custom_auto_update_capex_budget", "custom_auto_update_opex_budget"])
+        
+        for branch in branches:
+            try:
+                branch_doc = frappe.get_doc("Branch", branch.name)
+                
+                # Update CAPEX budget if available
+                if branch.custom_auto_update_capex_budget:
+                    branch_doc.capex_budget = branch.custom_auto_update_capex_budget
+                
+                # Update OPEX budget if available
+                if branch.custom_auto_update_opex_budget:
+                    branch_doc.opex_budget = branch.custom_auto_update_opex_budget
+                
+                # Save the document
+                branch_doc.save()
+                
+                frappe.logger().info(f"Successfully updated budgets for Branch: {branch.name}")
+            except Exception as e:
+                frappe.logger().error(f"Error updating Branch {branch.name}: {str(e)}")
+        
+        frappe.db.commit()
+        frappe.logger().info("Branch budget auto-update completed successfully")
+    except Exception as e:
+        frappe.logger().error(f"Error in branch budget auto-update: {str(e)}")
+
 def setup_monthly_sub_branch_budget_update():
     """
     Set up a scheduled job to update budgets for Sub Branch doctype on the 1st of every month.
@@ -89,7 +137,6 @@ def setup_all_budget_updates():
     """
     Set up scheduled jobs for both Branch and Sub Branch budget updates.
     """
-    from o2o_erpnext.branch_update import setup_monthly_budget_update
     setup_monthly_budget_update()
     setup_monthly_sub_branch_budget_update()
     return "All budget update scheduled jobs have been set up."
