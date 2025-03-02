@@ -1,5 +1,18 @@
 [
  {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2025-02-25 13:05:35.436411",
+  "name": "Person Raising Request Branch Level",
+  "restrict_to_domain": null,
+  "role_name": "Person Raising Request Branch Level",
+  "two_factor_auth": 0
+ },
+ {
   "desk_access": 0,
   "disabled": 0,
   "docstatus": 0,

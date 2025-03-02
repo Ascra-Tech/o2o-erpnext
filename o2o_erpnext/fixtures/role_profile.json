@@ -1,5 +1,23 @@
 [
  {
+  "custom_created_at": "2025-02-27",
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": "2025-02-27 18:36:49.957595",
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-27 18:36:49.947798",
+  "name": "Default",
+  "role_profile": "Default",
+  "roles": [
+   {
+    "parent": "Default",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Employee"
+   }
+  ]
+ },
+ {
   "custom_created_at": null,
   "custom_o2o_role_profile": 0,
   "custom_updated_at": null,
