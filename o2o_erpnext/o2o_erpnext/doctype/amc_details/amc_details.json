@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-03-03 10:48:48.653094",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "description",
+  "start_date",
+  "end_date",
+  "column_break_cuxw",
+  "amc_",
+  "amc_cost",
+  "document_copy"
+ ],
+ "fields": [
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "column_break_cuxw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amc_",
+   "fieldtype": "Data",
+   "label": "AMC (%)"
+  },
+  {
+   "fieldname": "amc_cost",
+   "fieldtype": "Currency",
+   "label": "AMC Cost"
+  },
+  {
+   "fieldname": "document_copy",
+   "fieldtype": "Attach",
+   "label": "Document Copy"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-03-03 10:51:35.606232",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "AMC Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

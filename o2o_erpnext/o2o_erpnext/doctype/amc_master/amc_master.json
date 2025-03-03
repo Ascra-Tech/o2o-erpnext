@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:vendor_name",
+ "creation": "2025-03-03 10:45:51.357366",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "entity_name",
+  "vendor_email",
+  "vendor_gstn",
+  "column_break_cv43",
+  "vendor_name",
+  "vendor_addres",
+  "vendor_pan",
+  "section_break_dufv",
+  "amc_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "entity_name",
+   "fieldtype": "Link",
+   "label": "Entity Name",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "vendor_email",
+   "fieldtype": "Data",
+   "label": "Vendor Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "vendor_gstn",
+   "fieldtype": "Data",
+   "label": "Vendor GSTN"
+  },
+  {
+   "fieldname": "column_break_cv43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vendor_name",
+   "fieldtype": "Link",
+   "label": "Vendor Name",
+   "options": "Vendor",
+   "unique": 1
+  },
+  {
+   "fieldname": "vendor_addres",
+   "fieldtype": "Link",
+   "label": "Vendor Addres",
+   "options": "Address"
+  },
+  {
+   "fieldname": "vendor_pan",
+   "fieldtype": "Data",
+   "label": "Vendor PAN"
+  },
+  {
+   "fieldname": "section_break_dufv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amc_details",
+   "fieldtype": "Table",
+   "label": "AMC Details",
+   "options": "AMC Details"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-03-03 10:52:14.124512",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "AMC Master",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
