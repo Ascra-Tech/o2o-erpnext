@@ -1,6 +1,74 @@
 [
  {
   "charts": [],
+  "content": "[{\"id\":\"g_ZBUxzcbW\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">User Details</span>\",\"col\":12}},{\"id\":\"xHYE8ipU-i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Role Profile\",\"col\":3}},{\"id\":\"Ye2YSD2rUz\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"User Master\",\"col\":3}},{\"id\":\"2OIyYf9tFa\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"City Master\",\"col\":3}},{\"id\":\"bskgdZLoSg\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"State Master\",\"col\":3}}]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "for_user": "",
+  "hide_custom": 0,
+  "icon": null,
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "User Details",
+  "links": [],
+  "modified": "2025-03-03 17:46:21.968761",
+  "module": null,
+  "name": "User Details",
+  "number_cards": [
+   {
+    "label": "City Master",
+    "number_card_name": "City Master",
+    "parent": "User Details",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "User Master",
+    "number_card_name": "User Master",
+    "parent": "User Details",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "Role Profile",
+    "number_card_name": "User Role Profile",
+    "parent": "User Details",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "State Master",
+    "number_card_name": "State Master",
+    "parent": "User Details",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   }
+  ],
+  "parent_page": "",
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [
+   {
+    "parent": "User Details",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "User Details",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "PO Approver"
+   }
+  ],
+  "sequence_id": 43.0,
+  "shortcuts": [],
+  "title": "User Details"
+ },
+ {
+  "charts": [],
   "content": "[{\"id\":\"kb3XPLg8lb\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"nWd2KJPW8l\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"id\":\"snrzfbFr5Y\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"id\":\"SHJKakmLLf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier\",\"col\":3}},{\"id\":\"CPxEyhaf3G\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"WU4F-HUcIQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Leaderboard\",\"col\":3}},{\"id\":\"d_KVM1gsf9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"JVu8-FJZCu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"JiuSi0ubOg\",\"type\":\"card\",\"data\":{\"card_name\":\"Accounting\",\"col\":4}},{\"id\":\"ji2Jlm3Q8i\",\"type\":\"card\",\"data\":{\"card_name\":\"Stock\",\"col\":4}},{\"id\":\"N61oiXpuwK\",\"type\":\"card\",\"data\":{\"card_name\":\"CRM\",\"col\":4}},{\"id\":\"6J0CVl1mPo\",\"type\":\"card\",\"data\":{\"card_name\":\"Data Import and Settings\",\"col\":4}}]",
   "custom_blocks": [],
   "docstatus": 0,
@@ -13596,11 +13664,18 @@
  },
  {
   "charts": [],
-  "content": "[{\"id\":\"Y9mkdLbyde\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Purchase</span>\",\"col\":12}},{\"id\":\"TGDBoTtpm_\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Available Credit Value Show\",\"col\":12}},{\"id\":\"PMnvhfMeRW\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Purchase Order\",\"col\":3}},{\"id\":\"L8RiW3CIdZ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO(Awaiting Approval)\",\"col\":3}},{\"id\":\"l4PaM9ozbl\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO(Requisitions Approved)\",\"col\":3}},{\"id\":\"ScXY9-6UUR\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO(Requisition Rejected)\",\"col\":3}},{\"id\":\"HiJvFyIRGl\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO (Approved)\",\"col\":3}},{\"id\":\"kNEwuaf2GV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO(Rejected)\",\"col\":3}},{\"id\":\"JmeAPx37gG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Product Catalogs\",\"col\":3}}]",
+  "content": "[{\"id\":\"Y9mkdLbyde\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Purchase</span>\",\"col\":12}},{\"id\":\"xLmN9CZPiZ\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Branch Budget Display for PRR Branch\",\"col\":12}},{\"id\":\"bDXzqSOywl\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Sub Branch Budget Display\",\"col\":12}},{\"id\":\"PMnvhfMeRW\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Purchase Order\",\"col\":3}},{\"id\":\"L8RiW3CIdZ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO(Awaiting Approval)\",\"col\":3}},{\"id\":\"l4PaM9ozbl\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO(Requisitions Approved)\",\"col\":3}},{\"id\":\"ScXY9-6UUR\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO(Requisition Rejected)\",\"col\":3}},{\"id\":\"HiJvFyIRGl\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO (Approved)\",\"col\":3}},{\"id\":\"kNEwuaf2GV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PO(Rejected)\",\"col\":3}},{\"id\":\"JmeAPx37gG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Product Catalogs\",\"col\":3}}]",
   "custom_blocks": [
    {
-    "custom_block_name": "Available Credit Value Show",
-    "label": "Available Credit Value Show",
+    "custom_block_name": "Branch Budget Display for PRR Branch",
+    "label": "Branch Budget Display for PRR Branch",
+    "parent": "Purchase",
+    "parentfield": "custom_blocks",
+    "parenttype": "Workspace"
+   },
+   {
+    "custom_block_name": "Sub Branch Budget Display",
+    "label": "Sub Branch Budget Display",
     "parent": "Purchase",
     "parentfield": "custom_blocks",
     "parenttype": "Workspace"
@@ -13615,7 +13690,7 @@
   "is_hidden": 0,
   "label": "Purchase",
   "links": [],
-  "modified": "2024-10-04 16:49:06.119413",
+  "modified": "2025-03-04 11:52:19.587566",
   "module": null,
   "name": "Purchase",
   "number_cards": [
@@ -13678,7 +13753,13 @@
     "parent": "Purchase",
     "parentfield": "roles",
     "parenttype": "Workspace",
-    "role": "Purchase Master"
+    "role": "Person Raising Request Branch"
+   },
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Person Raising Request"
    }
   ],
   "sequence_id": 23.0,
