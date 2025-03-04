@@ -348,3 +348,4 @@ def has_permission(doc, user=None, permission_type=None):
         return doc.custom_vendor == vendor
     
     return False
+    

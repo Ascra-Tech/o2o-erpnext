@@ -2515,5 +2515,26 @@
   "status": "Open",
   "user": null,
   "workflow_state": "Awaiting Approval"
+ },
+ {
+  "completed_by": null,
+  "completed_by_role": null,
+  "docstatus": 0,
+  "doctype": "Workflow Action",
+  "modified": "2025-03-04 12:59:27.448379",
+  "name": "7hd2b93r77",
+  "permitted_roles": [
+   {
+    "parent": "7hd2b93r77",
+    "parentfield": "permitted_roles",
+    "parenttype": "Workflow Action",
+    "role": "PO Approver"
+   }
+  ],
+  "reference_doctype": "Purchase Order",
+  "reference_name": "WOR00104032025",
+  "status": "Open",
+  "user": null,
+  "workflow_state": "Awaiting Approval"
  }
 ]
