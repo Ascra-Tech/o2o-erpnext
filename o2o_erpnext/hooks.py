@@ -152,7 +152,7 @@ add_to_apps_screen = [
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 # 	"all": [
 # 		"o2o_erpnext.tasks.all"
 # 	],
@@ -165,10 +165,11 @@ add_to_apps_screen = [
 # 	"weekly": [
 # 		"o2o_erpnext.tasks.weekly"
 # 	],
-# 	"monthly": [
-# 		"o2o_erpnext.tasks.monthly"
-# 	],
-# }
+ 	"monthly": [
+ 		"o2o_erpnext.branch_update.update_all_branch_budgets",
+        "o2o_erpnext.branch_update.update_all_sub_branch_budgets"
+ 	],
+ }
 
 # Testing
 # -------
@@ -253,7 +254,6 @@ fixtures = [
     "Server Script",
     "Workspace",
     "Custom HTML Block",
-    # "Custom Field",
     "Custom DocPerm",
     "Workflow",
     "Workflow State",

@@ -24,7 +24,7 @@ def update_all_branch_budgets():
     This function is called by the scheduler on the 1st of every month.
     """
     try:
-        branches = frappe.get_all("Branch", fields=["name", "custom_auto_update_capex_budget", "custom_auto_update_opex_budget"])
+        branches = frappe.get_all("Branch", fields=["name", "custom_auto_update_capex_budget", "custom_auto_update_opex_budget_"])
         
         for branch in branches:
             try:
@@ -32,11 +32,11 @@ def update_all_branch_budgets():
                 
                 # Update CAPEX budget if available
                 if branch.custom_auto_update_capex_budget:
-                    branch_doc.capex_budget = branch.custom_auto_update_capex_budget
+                    branch_doc.custom_capex_budget = branch.custom_auto_update_capex_budget
                 
                 # Update OPEX budget if available
-                if branch.custom_auto_update_opex_budget:
-                    branch_doc.opex_budget = branch.custom_auto_update_opex_budget
+                if branch.custom_auto_update_opex_budget_:
+                    branch_doc.custom_opex_budget = branch.custom_auto_update_opex_budget_
                 
                 # Save the document
                 branch_doc.save()
@@ -49,6 +49,40 @@ def update_all_branch_budgets():
         frappe.logger().info("Branch budget auto-update completed successfully")
     except Exception as e:
         frappe.logger().error(f"Error in branch budget auto-update: {str(e)}")
+
+@frappe.whitelist()
+def manual_update_branch_budgets():
+    """
+    Manually trigger the budget update process.
+    Can be called from client-side or used for testing.
+    """
+    enqueue(update_all_branch_budgets, queue="long", timeout=1500)
+    return {"message": "Branch budget update has been queued"}
+
+def test_branch_budget_update(branch_name=None):
+    """
+    Test function to verify the budget update for a specific branch or all branches.
+    For debugging purposes only.
+    """
+    if branch_name:
+        branch = frappe.get_doc("Branch", branch_name)
+        print(f"Before update - CAPEX: {branch.custom_capex_budget}, OPEX: {branch.custom_opex_budget}")
+        
+        if branch.custom_auto_update_capex_budget:
+            branch.custom_capex_budget = branch.custom_auto_update_capex_budget
+            
+        if branch.custom_auto_update_opex_budget_:
+            branch.custom_opex_budget = branch.custom_auto_update_opex_budget_
+            
+        branch.save()
+        
+        # Reload and verify
+        branch.reload()
+        print(f"After update - CAPEX: {branch.custom_capex_budget}, OPEX: {branch.custom_opex_budget}")
+    else:
+        # Test for all branches
+        update_all_branch_budgets()
+        print("Test completed for all branches")
 
 def setup_monthly_sub_branch_budget_update():
     """
@@ -132,11 +166,45 @@ def test_sub_branch_budget_update(sub_branch_name=None):
         update_all_sub_branch_budgets()
         print("Test completed for all sub branches")
 
-# Function to setup both branch and sub branch scheduled jobs
+def update_all_budgets():
+    """
+    Update budgets for all branches and sub branches.
+    """
+    update_all_branch_budgets()
+    update_all_sub_branch_budgets()
+    return "All budgets updated successfully"
+
+@frappe.whitelist()
+def manual_update_all_budgets():
+    """
+    Manually trigger both branch and sub branch budget updates.
+    Can be called from client-side or used for testing.
+    """
+    enqueue(update_all_budgets, queue="long", timeout=1500)
+    return {"message": "All budget updates have been queued"}
+
+@frappe.whitelist()
 def setup_all_budget_updates():
     """
     Set up scheduled jobs for both Branch and Sub Branch budget updates.
+    This function is whitelisted to allow calling from the frontend.
     """
     setup_monthly_budget_update()
     setup_monthly_sub_branch_budget_update()
     return "All budget update scheduled jobs have been set up."
+
+def setup_combined_budget_update():
+    """
+    Set up a single combined scheduled job for both Branch and Sub Branch updates.
+    """
+    if not frappe.db.exists("Scheduled Job Type", "Auto Update All Budgets"):
+        frappe.get_doc({
+            "doctype": "Scheduled Job Type",
+            "method": "o2o_erpnext.branch_update.update_all_budgets",
+            "frequency": "Monthly",
+            "cron_format": "0 0 1 * *",  # At 00:00 on the 1st of every month
+            "docstatus": 0,
+            "name": "Auto Update All Budgets"
+        }).insert()
+        frappe.db.commit()
+    return "Combined budget update scheduled job has been set up."
