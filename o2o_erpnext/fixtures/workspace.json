@@ -15013,5 +15013,46 @@
   "sequence_id": 22.0,
   "shortcuts": [],
   "title": "Welcome Workspace"
+ },
+ {
+  "charts": [],
+  "content": "[{\"id\":\"H1Go121wt-\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Supplier Dashboard</span>\",\"col\":12}},{\"id\":\"YfosCGZbYH\",\"type\":\"custom_block\",\"data\":{\"custom_block_name\":\"Supplier Workspace Block\",\"col\":12}}]",
+  "custom_blocks": [
+   {
+    "custom_block_name": "Supplier Workspace Block",
+    "label": "Supplier Workspace Block",
+    "parent": "Supplier Dashboard",
+    "parentfield": "custom_blocks",
+    "parenttype": "Workspace"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "for_user": "",
+  "hide_custom": 0,
+  "icon": "dashboard-list",
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "Supplier Dashboard",
+  "links": [],
+  "modified": "2025-03-06 09:12:22.602169",
+  "module": null,
+  "name": "Supplier Dashboard",
+  "number_cards": [],
+  "parent_page": "",
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [
+   {
+    "parent": "Supplier Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Supplier"
+   }
+  ],
+  "sequence_id": 44.0,
+  "shortcuts": [],
+  "title": "Supplier Dashboard"
  }
 ]
