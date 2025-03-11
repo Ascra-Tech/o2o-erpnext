@@ -23,21 +23,32 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
         if employee.custom_supplier:
             po_doc.supplier = employee.custom_supplier
             
+        approver_info = None
         if employee.branch:
             po_doc.custom_branch = employee.branch
+            
+            # Find branch approver once we set the branch
+            approver_info = get_branch_approver_info(employee.branch)
+            if approver_info:
+                po_doc.custom__approver_name_and_email = approver_info
             
         if employee.custom_sub_branch:
             po_doc.custom_sub_branch = employee.custom_sub_branch
             
         if not doc_name:
+            response_data = {
+                "supplier": employee.custom_supplier,
+                "custom_branch": employee.branch,
+                "custom_sub_branch": employee.custom_sub_branch
+            }
+            
+            if approver_info:
+                response_data["custom__approver_name_and_email"] = approver_info
+                
             return {
                 "status": "success",
                 "message": _("Default values set successfully"),
-                "data": {
-                    "supplier": employee.custom_supplier,
-                    "custom_branch": employee.branch,
-                    "custom_sub_branch": employee.custom_sub_branch
-                }
+                "data": response_data
             }
         
         po_doc.save()
@@ -52,6 +63,38 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
         frappe.log_error(f"Error in Purchase Order auto-fill: {str(e)}", 
                         "Purchase Order API Error")
         raise e
+
+
+def get_branch_approver_info(branch):
+    """Helper function to find branch approver information"""
+    try:
+        if not branch:
+            return None
+            
+        # Search for Employee with Person Raising Request Branch role in custom_roles
+        # and matching branch
+        employees = frappe.get_all(
+            "Employee",
+            filters={
+                "branch": branch,
+                "custom_roles": ["like", "%Person Raising Request Branch%"]
+            },
+            fields=["name", "employee_name", "custom_user_email"]
+        )
+        
+        if not employees:
+            return None
+            
+        # Take the first matching employee
+        approver = employees[0]
+        
+        # Format approver information
+        return f"{approver.employee_name}:{approver.custom_user_email}"
+            
+    except Exception as e:
+        frappe.log_error(f"Error finding branch approver: {str(e)}", 
+                        "Get Branch Approver Error")
+        return None
 
 @frappe.whitelist()
 def get_supplier_vendors(supplier):
@@ -68,6 +111,65 @@ def get_supplier_vendors(supplier):
         frappe.log_error(f"Error fetching supplier vendors: {str(e)}", 
                         "Get Supplier Vendors Error")
         return []
+
+@frappe.whitelist()
+def set_branch_approver_for_purchase_order(purchase_order_name):
+    try:
+        # Get the Purchase Order document
+        po_doc = frappe.get_doc("Purchase Order", purchase_order_name)
+        
+        # Get the branch from Purchase Order
+        branch = po_doc.custom_branch
+        
+        if not branch:
+            frappe.throw(_("Purchase Order does not have a branch assigned"), 
+                        title=_("Missing Branch"))
+        
+        # Search for Employee with Person Raising Request Branch role in custom_roles
+        # and matching branch
+        employees = frappe.get_all(
+            "Employee",
+            filters={
+                "branch": branch,  # Using the branch from PO
+                "custom_roles": ["like", "%Person Raising Request Branch%"]
+            },
+            fields=["name", "employee_name", "custom_user_email"]
+        )
+        
+        if not employees:
+            frappe.msgprint(
+                _("No Branch Approver found for branch {0}").format(branch),
+                title=_("Approver Not Found")
+            )
+            return {
+                "status": "warning",
+                "message": _("No Branch Approver found")
+            }
+        
+        # Take the first matching employee
+        approver = employees[0]
+        
+        # Format and set the approver information
+        approver_info = f"{approver.employee_name}:{approver.custom_user_email}"
+        
+        # Update the Purchase Order
+        po_doc.custom__approver_name_and_email = approver_info
+        po_doc.save()
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": _("Branch Approver set successfully"),
+            "approver": approver_info
+        }
+            
+    except Exception as e:
+        frappe.log_error(f"Error setting branch approver: {str(e)}", 
+                        "Set Branch Approver Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 class PurchaseOrderValidation:
     def validate_vendor_access(self):
@@ -348,4 +450,3 @@ def has_permission(doc, user=None, permission_type=None):
         return doc.custom_vendor == vendor
     
     return False
-    
