@@ -253,7 +253,7 @@ fixtures = [
     "Client Script",
     "Server Script",
    # "Purchase Taxes and Charges Template",
-   "Tax Category",
+    "Tax Category",
     "Workspace",
     "Custom HTML Block",
     "Custom DocPerm",
