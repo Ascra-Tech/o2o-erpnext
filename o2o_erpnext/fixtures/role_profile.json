@@ -1,8 +1,8 @@
 [
  {
-  "custom_created_at": "2025-02-27",
+  "custom_created_at": null,
   "custom_o2o_role_profile": 0,
-  "custom_updated_at": "2025-02-27 18:36:49.957595",
+  "custom_updated_at": null,
   "docstatus": 0,
   "doctype": "Role Profile",
   "modified": "2025-02-27 18:36:49.947798",
@@ -168,27 +168,9 @@
   ]
  },
  {
-  "custom_created_at": "2025-02-28",
-  "custom_o2o_role_profile": 1,
-  "custom_updated_at": "2025-02-28 01:40:37.638304",
-  "docstatus": 0,
-  "doctype": "Role Profile",
-  "modified": "2025-02-28 01:40:37.623512",
-  "name": "Supplier Profile",
-  "role_profile": "Supplier Profile",
-  "roles": [
-   {
-    "parent": "Supplier Profile",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
-    "role": "Supplier"
-   }
-  ]
- },
- {
-  "custom_created_at": "2025-02-28",
-  "custom_o2o_role_profile": 1,
-  "custom_updated_at": "2025-02-28 01:42:52.252310",
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
   "docstatus": 0,
   "doctype": "Role Profile",
   "modified": "2025-02-28 01:42:52.239889",
@@ -210,9 +192,9 @@
   ]
  },
  {
-  "custom_created_at": "2025-02-28",
-  "custom_o2o_role_profile": 1,
-  "custom_updated_at": "2025-02-28 01:42:46.402538",
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
   "docstatus": 0,
   "doctype": "Role Profile",
   "modified": "2025-02-28 01:42:46.396964",
@@ -234,9 +216,9 @@
   ]
  },
  {
-  "custom_created_at": "2025-02-28",
-  "custom_o2o_role_profile": 1,
-  "custom_updated_at": "2025-02-28 01:43:19.356394",
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
   "docstatus": 0,
   "doctype": "Role Profile",
   "modified": "2025-02-28 01:43:19.351627",
@@ -258,9 +240,9 @@
   ]
  },
  {
-  "custom_created_at": "2025-02-28",
-  "custom_o2o_role_profile": 1,
-  "custom_updated_at": "2025-02-28 01:44:28.182940",
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
   "docstatus": 0,
   "doctype": "Role Profile",
   "modified": "2025-02-28 01:44:28.178143",
@@ -282,9 +264,9 @@
   ]
  },
  {
-  "custom_created_at": "2025-02-28",
-  "custom_o2o_role_profile": 1,
-  "custom_updated_at": "2025-02-28 01:44:57.084782",
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
   "docstatus": 0,
   "doctype": "Role Profile",
   "modified": "2025-02-28 01:44:57.079607",
@@ -302,6 +284,24 @@
     "parentfield": "roles",
     "parenttype": "Role Profile",
     "role": "Vendor User"
+   }
+  ]
+ },
+ {
+  "custom_created_at": null,
+  "custom_o2o_role_profile": 0,
+  "custom_updated_at": null,
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-02-28 01:40:37.623512",
+  "name": "Supplier Profile",
+  "role_profile": "Supplier Profile",
+  "roles": [
+   {
+    "parent": "Supplier Profile",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Supplier"
    }
   ]
  }

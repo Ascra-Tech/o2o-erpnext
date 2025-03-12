@@ -13556,7 +13556,7 @@
   "hide_custom": 0,
   "icon": "share",
   "indicator_color": "",
-  "is_hidden": 0,
+  "is_hidden": 1,
   "label": "User Master",
   "links": [],
   "modified": "2024-10-04 16:49:06.284105",
