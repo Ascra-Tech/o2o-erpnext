@@ -252,6 +252,7 @@ fixtures = [
     "Role Profile",
     "Client Script",
     "Server Script",
+    "Purchase Taxes and Charges Template",
     "Workspace",
     "Custom HTML Block",
     "Custom DocPerm",
