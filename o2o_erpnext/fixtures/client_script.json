@@ -647,5 +647,38 @@
   "name": "Budget Auto Update",
   "script": "// Custom Script for Supplier List\nfrappe.listview_settings['Supplier'] = frappe.listview_settings['Supplier'] || {};\n\n// Extend the existing list view settings\nObject.assign(frappe.listview_settings['Supplier'], {\n    onload: function(listview) {\n        // Only show to administrators and system managers\n        if (frappe.user.has_role('System Manager') || frappe.user.has_role('Administrator')) {\n            // Add button to the list view\n            listview.page.add_inner_button(__('Setup Monthly Budget Updates'), function() {\n                frappe.confirm(\n                    'This will set up automatic budget updates for both Branch and Sub Branch doctypes to run on the 1st of every month at midnight (00:00 hrs). Continue?',\n                    function() {\n                        frappe.call({\n                            method: \"o2o_erpnext.branch_update.setup_all_budget_updates\",\n                            freeze: true,\n                            freeze_message: \"Setting up scheduled jobs...\",\n                            callback: function(r) {\n                                frappe.msgprint({\n                                    title: \"Success\",\n                                    indicator: \"green\",\n                                    message: \"Scheduled jobs have been set up. Branch and Sub Branch budgets will be automatically updated on the 1st of every month at 00:00 hours.\"\n                                });\n                            }\n                        });\n                    }\n                );\n            });\n        }\n    }\n});",
   "view": "List"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Purchase Invoice",
+  "enabled": 1,
+  "modified": "2025-03-12 11:30:39.894864",
+  "module": "o2o ErpNext",
+  "name": "filter for PI",
+  "script": "frappe.ui.form.on('Purchase Invoice', {\n    onload: function(frm) {\n        // This runs when the form first loads\n        clearShippingAddressFilter(frm);\n    },\n    refresh: function(frm) {\n        // This runs on every refresh\n        clearShippingAddressFilter(frm);\n    },\n    company: function(frm) {\n        // This runs when company field changes\n        clearShippingAddressFilter(frm);\n    }\n});\n\nfunction clearShippingAddressFilter(frm) {\n    // Method to override only the shipping_address filtering\n    \n    // For shipping_address only\n    frm.set_query(\"shipping_address\", function() {\n        return {\n            query: \"frappe.contacts.doctype.address.address.address_query\",\n            filters: {} // Empty filters to show all addresses\n        };\n    });\n    \n    // Clear any cached queries for shipping_address\n    if(frm.fields_dict.shipping_address) {\n        frm.fields_dict.shipping_address.get_query = function() {\n            return {\n                query: \"frappe.contacts.doctype.address.address.address_query\",\n                filters: {}\n            };\n        };\n    }\n    \n    // Force UI refresh of the shipping_address field\n    frm.refresh_field(\"shipping_address\");\n}",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Purchase Receipt",
+  "enabled": 1,
+  "modified": "2025-03-12 11:30:27.399468",
+  "module": "o2o ErpNext",
+  "name": "filter for PR",
+  "script": "frappe.ui.form.on('Purchase Receipt', {\n    onload: function(frm) {\n        // This runs when the form first loads\n        clearShippingAddressFilter(frm);\n    },\n    refresh: function(frm) {\n        // This runs on every refresh\n        clearShippingAddressFilter(frm);\n    },\n    company: function(frm) {\n        // This runs when company field changes\n        clearShippingAddressFilter(frm);\n    }\n});\n\nfunction clearShippingAddressFilter(frm) {\n    // Method to override only the shipping_address filtering\n    \n    // For shipping_address only\n    frm.set_query(\"shipping_address\", function() {\n        return {\n            query: \"frappe.contacts.doctype.address.address.address_query\",\n            filters: {} // Empty filters to show all addresses\n        };\n    });\n    \n    // Clear any cached queries for shipping_address\n    if(frm.fields_dict.shipping_address) {\n        frm.fields_dict.shipping_address.get_query = function() {\n            return {\n                query: \"frappe.contacts.doctype.address.address.address_query\",\n                filters: {}\n            };\n        };\n    }\n    \n    // Force UI refresh of the shipping_address field\n    frm.refresh_field(\"shipping_address\");\n}",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Purchase Order",
+  "enabled": 1,
+  "modified": "2025-03-12 11:30:34.181415",
+  "module": "o2o ErpNext",
+  "name": "filter for PO",
+  "script": "frappe.ui.form.on('Purchase Order', {\n    onload: function(frm) {\n        // This runs when the form first loads\n        clearShippingAddressFilter(frm);\n    },\n    refresh: function(frm) {\n        // This runs on every refresh\n        clearShippingAddressFilter(frm);\n    },\n    company: function(frm) {\n        // This runs when company field changes\n        clearShippingAddressFilter(frm);\n    }\n});\nfunction clearShippingAddressFilter(frm) {\n    // Method to override only the shipping_address filtering\n\n    // For shipping_address only\n    frm.set_query(\"shipping_address\", function() {\n        return {\n            query: \"frappe.contacts.doctype.address.address.address_query\",\n            filters: {} // Empty filters to show all addresses\n        };\n    });\n\n    // Clear any cached queries for shipping_address\n    if(frm.fields_dict.shipping_address) {\n        frm.fields_dict.shipping_address.get_query = function() {\n            return {\n                query: \"frappe.contacts.doctype.address.address.address_query\",\n                filters: {}\n            };\n        };\n    }\n\n    // Force UI refresh of the shipping_address field\n    frm.refresh_field(\"shipping_address\");\n}",
+  "view": "Form"
  }
 ]
