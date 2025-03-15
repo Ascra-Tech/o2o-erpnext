@@ -12,7 +12,7 @@
   "is_hidden": 0,
   "label": "User Details",
   "links": [],
-  "modified": "2025-03-03 17:46:21.968761",
+  "modified": "2025-03-13 19:26:22.453224",
   "module": null,
   "name": "User Details",
   "number_cards": [
@@ -61,9 +61,15 @@
     "parentfield": "roles",
     "parenttype": "Workspace",
     "role": "PO Approver"
+   },
+   {
+    "parent": "User Details",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Supplier"
    }
   ],
-  "sequence_id": 43.0,
+  "sequence_id": 31.0,
   "shortcuts": [],
   "title": "User Details"
  },
@@ -459,7 +465,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.155057",
+  "modified": "2025-03-13 19:26:21.390211",
   "module": "Setup",
   "name": "Home",
   "number_cards": [],
@@ -1277,7 +1283,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.856690",
+  "modified": "2025-03-13 19:26:22.027974",
   "module": "CRM",
   "name": "CRM",
   "number_cards": [],
@@ -2419,7 +2425,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.464007",
+  "modified": "2025-03-13 19:26:21.676328",
   "module": "Selling",
   "name": "Selling",
   "number_cards": [],
@@ -3397,7 +3403,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.408985",
+  "modified": "2025-03-13 19:26:21.628570",
   "module": "Buying",
   "name": "Buying",
   "number_cards": [],
@@ -3915,7 +3921,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.816483",
+  "modified": "2025-03-13 19:26:21.992246",
   "module": "Website",
   "name": "Website",
   "number_cards": [],
@@ -4581,7 +4587,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.912048",
+  "modified": "2025-03-13 19:26:22.070973",
   "module": "Automation",
   "name": "Tools",
   "number_cards": [],
@@ -4925,7 +4931,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.780268",
+  "modified": "2025-03-13 19:26:21.961021",
   "module": "Core",
   "name": "Users",
   "number_cards": [],
@@ -5393,7 +5399,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:06.002696",
+  "modified": "2025-03-13 19:26:22.153574",
   "module": "Integrations",
   "name": "Integrations",
   "number_cards": [],
@@ -6400,7 +6406,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.202535",
+  "modified": "2025-03-13 19:26:21.432130",
   "module": "Accounts",
   "name": "Accounting",
   "number_cards": [
@@ -7885,7 +7891,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.524076",
+  "modified": "2025-03-13 19:26:21.773253",
   "module": "Stock",
   "name": "Stock",
   "number_cards": [
@@ -7923,7 +7929,7 @@
     "role": "Stock Manager"
    }
   ],
-  "sequence_id": 9.0,
+  "sequence_id": 10.0,
   "shortcuts": [
    {
     "color": "Green",
@@ -8400,7 +8406,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.588571",
+  "modified": "2025-03-13 19:26:21.833855",
   "module": "Assets",
   "name": "Assets",
   "number_cards": [],
@@ -8409,7 +8415,7 @@
   "quick_lists": [],
   "restrict_to_domain": "",
   "roles": [],
-  "sequence_id": 10.0,
+  "sequence_id": 11.0,
   "shortcuts": [
    {
     "color": null,
@@ -8806,7 +8812,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.706626",
+  "modified": "2025-03-13 19:26:21.898430",
   "module": "Projects",
   "name": "Projects",
   "number_cards": [],
@@ -9218,7 +9224,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.744680",
+  "modified": "2025-03-13 19:26:21.930911",
   "module": "Support",
   "name": "Support",
   "number_cards": [],
@@ -9528,7 +9534,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.669774",
+  "modified": "2025-03-13 19:26:21.866635",
   "module": "Quality Management",
   "name": "Quality",
   "number_cards": [],
@@ -10174,7 +10180,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-21 14:13:38.777556",
+  "modified": "2025-03-13 19:26:21.730273",
   "module": "Manufacturing",
   "name": "Manufacturing",
   "number_cards": [],
@@ -10183,7 +10189,7 @@
   "quick_lists": [],
   "restrict_to_domain": "",
   "roles": [],
-  "sequence_id": 8.0,
+  "sequence_id": 9.0,
   "shortcuts": [
    {
     "color": "Grey",
@@ -10758,7 +10764,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:06.036738",
+  "modified": "2025-03-13 19:26:22.184406",
   "module": "ERPNext Integrations",
   "name": "ERPNext Integrations",
   "number_cards": [],
@@ -11540,7 +11546,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.955609",
+  "modified": "2025-03-13 19:26:22.110245",
   "module": "Setup",
   "name": "ERPNext Settings",
   "number_cards": [],
@@ -12094,7 +12100,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-05 10:28:10.623892",
+  "modified": "2025-03-13 19:26:21.517207",
   "module": "GST India",
   "name": "GST India",
   "number_cards": [
@@ -12132,7 +12138,7 @@
     "role": "Accounts Manager"
    }
   ],
-  "sequence_id": 3.0,
+  "sequence_id": 4.0,
   "shortcuts": [
    {
     "color": "Grey",
@@ -12517,7 +12523,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.259756",
+  "modified": "2025-03-13 19:26:21.483725",
   "module": "Accounts",
   "name": "Payables",
   "number_cards": [],
@@ -12933,7 +12939,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.334420",
+  "modified": "2025-03-13 19:26:21.557070",
   "module": "Accounts",
   "name": "Receivables",
   "number_cards": [],
@@ -13471,7 +13477,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:05.370770",
+  "modified": "2025-03-13 19:26:21.594447",
   "module": "Accounts",
   "name": "Financial Reports",
   "number_cards": [],
@@ -13497,7 +13503,7 @@
   "is_hidden": 0,
   "label": "Product",
   "links": [],
-  "modified": "2024-10-04 16:49:06.430295",
+  "modified": "2025-03-13 19:26:22.478176",
   "module": null,
   "name": "Product",
   "number_cards": [
@@ -13539,10 +13545,22 @@
     "parent": "Product",
     "parentfield": "roles",
     "parenttype": "Workspace",
-    "role": "Product Master"
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "Product",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "PO Approver"
+   },
+   {
+    "parent": "Product",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Supplier"
    }
   ],
-  "sequence_id": 35.0,
+  "sequence_id": 32.0,
   "shortcuts": [],
   "title": "Product"
  },
@@ -13559,7 +13577,7 @@
   "is_hidden": 1,
   "label": "User Master",
   "links": [],
-  "modified": "2024-10-04 16:49:06.284105",
+  "modified": "2025-03-13 19:26:22.313642",
   "module": null,
   "name": "User Master",
   "number_cards": [],
@@ -13575,7 +13593,7 @@
     "role": "User Master"
    }
   ],
-  "sequence_id": 29.0,
+  "sequence_id": 25.0,
   "shortcuts": [],
   "title": "User Master"
  },
@@ -13592,7 +13610,7 @@
   "is_hidden": 0,
   "label": "Entity",
   "links": [],
-  "modified": "2024-10-04 16:49:06.456003",
+  "modified": "2025-03-13 19:26:22.505100",
   "module": null,
   "name": "Entity",
   "number_cards": [
@@ -13655,10 +13673,22 @@
     "parent": "Entity",
     "parentfield": "roles",
     "parenttype": "Workspace",
-    "role": "Entity Master"
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "Entity",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "PO Approver"
+   },
+   {
+    "parent": "Entity",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Supplier"
    }
   ],
-  "sequence_id": 36.0,
+  "sequence_id": 33.0,
   "shortcuts": [],
   "title": "Entity"
  },
@@ -13690,7 +13720,7 @@
   "is_hidden": 0,
   "label": "Purchase",
   "links": [],
-  "modified": "2025-03-04 11:52:19.587566",
+  "modified": "2025-03-13 19:26:22.285445",
   "module": null,
   "name": "Purchase",
   "number_cards": [
@@ -13760,9 +13790,33 @@
     "parentfield": "roles",
     "parenttype": "Workspace",
     "role": "Person Raising Request"
+   },
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "PO Approver"
+   },
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Vendor User"
+   },
+   {
+    "parent": "Purchase",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Supplier"
    }
   ],
-  "sequence_id": 23.0,
+  "sequence_id": 24.0,
   "shortcuts": [],
   "title": "Purchase"
  },
@@ -13779,7 +13833,7 @@
   "is_hidden": 0,
   "label": "Reports",
   "links": [],
-  "modified": "2024-10-04 16:49:06.483353",
+  "modified": "2025-03-13 19:26:22.536278",
   "module": null,
   "name": "Reports",
   "number_cards": [],
@@ -13792,10 +13846,22 @@
     "parent": "Reports",
     "parentfield": "roles",
     "parenttype": "Workspace",
-    "role": "Report Master"
+    "role": "PO Approver"
+   },
+   {
+    "parent": "Reports",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "Reports",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Supplier"
    }
   ],
-  "sequence_id": 37.0,
+  "sequence_id": 34.0,
   "shortcuts": [
    {
     "color": "Grey",
@@ -13804,7 +13870,7 @@
     "icon": null,
     "kanban_board": null,
     "label": "Purchase Order Report",
-    "link_to": "Purchase Order Report",
+    "link_to": "Purchase Order New",
     "parent": "Reports",
     "parentfield": "shortcuts",
     "parenttype": "Workspace",
@@ -13829,7 +13895,7 @@
   "is_hidden": 0,
   "label": "Invoice",
   "links": [],
-  "modified": "2024-10-04 16:49:06.508349",
+  "modified": "2025-03-13 19:26:22.560970",
   "module": null,
   "name": "Invoice",
   "number_cards": [
@@ -13872,9 +13938,15 @@
     "parentfield": "roles",
     "parenttype": "Workspace",
     "role": "Purchase Manager"
+   },
+   {
+    "parent": "Invoice",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Vendor User"
    }
   ],
-  "sequence_id": 38.0,
+  "sequence_id": 35.0,
   "shortcuts": [
    {
     "color": "Grey",
@@ -13883,7 +13955,7 @@
     "icon": null,
     "kanban_board": null,
     "label": "Invoice Reports",
-    "link_to": "Invoice Reports",
+    "link_to": "Invoice Report New",
     "parent": "Invoice",
     "parentfield": "shortcuts",
     "parenttype": "Workspace",
@@ -13899,7 +13971,7 @@
     "icon": null,
     "kanban_board": null,
     "label": "Freight Report",
-    "link_to": "Freight Report",
+    "link_to": "Freight Report New",
     "parent": "Invoice",
     "parentfield": "shortcuts",
     "parenttype": "Workspace",
@@ -13915,7 +13987,7 @@
     "icon": null,
     "kanban_board": null,
     "label": "Mis Report",
-    "link_to": "Mis Report",
+    "link_to": "MIS Report New",
     "parent": "Invoice",
     "parentfield": "shortcuts",
     "parenttype": "Workspace",
@@ -13931,7 +14003,7 @@
     "icon": null,
     "kanban_board": null,
     "label": "HSN Report",
-    "link_to": "HSN Report",
+    "link_to": "HSN Report New",
     "parent": "Invoice",
     "parentfield": "shortcuts",
     "parenttype": "Workspace",
@@ -13956,7 +14028,7 @@
   "is_hidden": 1,
   "label": "Ascratech Users",
   "links": [],
-  "modified": "2024-10-04 16:49:06.535279",
+  "modified": "2025-03-13 19:26:22.587393",
   "module": null,
   "name": "Ascratech Users",
   "number_cards": [
@@ -13973,7 +14045,7 @@
   "quick_lists": [],
   "restrict_to_domain": null,
   "roles": [],
-  "sequence_id": 39.0,
+  "sequence_id": 36.0,
   "shortcuts": [],
   "title": "Ascratech Users"
  },
@@ -13990,7 +14062,7 @@
   "is_hidden": 0,
   "label": "ERP Data Import",
   "links": [],
-  "modified": "2024-10-04 16:49:06.612281",
+  "modified": "2025-03-13 19:26:22.654626",
   "module": null,
   "name": "ERP Data Import",
   "number_cards": [
@@ -14021,7 +14093,7 @@
     "role": "Purchase Manager"
    }
   ],
-  "sequence_id": 42.0,
+  "sequence_id": 39.0,
   "shortcuts": [],
   "title": "ERP Data Import"
  },
@@ -14038,7 +14110,7 @@
   "is_hidden": 0,
   "label": "User List",
   "links": [],
-  "modified": "2024-10-04 16:49:06.309959",
+  "modified": "2025-03-13 19:26:22.336639",
   "module": null,
   "name": "User List",
   "number_cards": [
@@ -14062,7 +14134,7 @@
     "role": "User Master"
    }
   ],
-  "sequence_id": 30.0,
+  "sequence_id": 26.0,
   "shortcuts": [],
   "title": "User List"
  },
@@ -14079,7 +14151,7 @@
   "is_hidden": 0,
   "label": "State Master",
   "links": [],
-  "modified": "2024-10-04 16:49:06.382035",
+  "modified": "2025-03-13 19:26:22.407276",
   "module": null,
   "name": "State Master",
   "number_cards": [
@@ -14096,7 +14168,7 @@
   "quick_lists": [],
   "restrict_to_domain": null,
   "roles": [],
-  "sequence_id": 33.0,
+  "sequence_id": 29.0,
   "shortcuts": [],
   "title": "State Master"
  },
@@ -14113,7 +14185,7 @@
   "is_hidden": 0,
   "label": "City Master",
   "links": [],
-  "modified": "2024-10-04 16:49:06.406131",
+  "modified": "2025-03-13 19:26:22.430272",
   "module": null,
   "name": "City Master",
   "number_cards": [
@@ -14130,7 +14202,7 @@
   "quick_lists": [],
   "restrict_to_domain": null,
   "roles": [],
-  "sequence_id": 34.0,
+  "sequence_id": 30.0,
   "shortcuts": [],
   "title": "City Master"
  },
@@ -14147,7 +14219,7 @@
   "is_hidden": 0,
   "label": "Roles Profile",
   "links": [],
-  "modified": "2024-10-04 16:49:06.358350",
+  "modified": "2025-03-13 19:26:22.384166",
   "module": null,
   "name": "Roles Profile",
   "number_cards": [
@@ -14171,7 +14243,7 @@
     "role": "User Master"
    }
   ],
-  "sequence_id": 32.0,
+  "sequence_id": 28.0,
   "shortcuts": [],
   "title": "Roles Profile"
  },
@@ -14188,7 +14260,7 @@
   "is_hidden": 0,
   "label": "User Permissions",
   "links": [],
-  "modified": "2024-10-04 16:49:06.334747",
+  "modified": "2025-03-13 19:26:22.361546",
   "module": null,
   "name": "User Permissions",
   "number_cards": [
@@ -14205,7 +14277,7 @@
   "quick_lists": [],
   "restrict_to_domain": null,
   "roles": [],
-  "sequence_id": 31.0,
+  "sequence_id": 27.0,
   "shortcuts": [],
   "title": "User Permissions"
  },
@@ -14222,7 +14294,7 @@
   "is_hidden": 0,
   "label": "Stock Module",
   "links": [],
-  "modified": "2024-10-04 16:49:06.585946",
+  "modified": "2025-03-13 19:26:22.632370",
   "module": null,
   "name": "Stock Module",
   "number_cards": [],
@@ -14244,7 +14316,7 @@
     "role": "Requisition Approver"
    }
   ],
-  "sequence_id": 41.0,
+  "sequence_id": 38.0,
   "shortcuts": [
    {
     "color": "Grey",
@@ -14278,7 +14350,7 @@
   "is_hidden": 0,
   "label": "P&L Dashboard",
   "links": [],
-  "modified": "2024-10-04 16:49:06.559243",
+  "modified": "2025-03-13 19:26:22.610966",
   "module": null,
   "name": "P&L Dashboard",
   "number_cards": [],
@@ -14286,8 +14358,15 @@
   "public": 1,
   "quick_lists": [],
   "restrict_to_domain": null,
-  "roles": [],
-  "sequence_id": 40.0,
+  "roles": [
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Supplier"
+   }
+  ],
+  "sequence_id": 37.0,
   "shortcuts": [
    {
     "color": "Grey",
@@ -14296,7 +14375,7 @@
     "icon": null,
     "kanban_board": null,
     "label": "P&L Dashboard",
-    "link_to": "P&L Dashboard",
+    "link_to": "",
     "parent": "P&L Dashboard",
     "parentfield": "shortcuts",
     "parenttype": "Workspace",
@@ -14862,7 +14941,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2024-10-04 16:49:06.074075",
+  "modified": "2025-03-13 19:26:22.219198",
   "module": "Core",
   "name": "Build",
   "number_cards": [],
@@ -15035,7 +15114,7 @@
   "is_hidden": 0,
   "label": "Supplier Dashboard",
   "links": [],
-  "modified": "2025-03-06 09:12:22.602169",
+  "modified": "2025-03-13 19:26:22.260284",
   "module": null,
   "name": "Supplier Dashboard",
   "number_cards": [],
@@ -15051,7 +15130,7 @@
     "role": "Supplier"
    }
   ],
-  "sequence_id": 44.0,
+  "sequence_id": 23.0,
   "shortcuts": [],
   "title": "Supplier Dashboard"
  }

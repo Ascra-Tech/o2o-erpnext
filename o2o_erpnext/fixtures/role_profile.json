@@ -169,11 +169,11 @@
  },
  {
   "custom_created_at": null,
-  "custom_o2o_role_profile": 0,
-  "custom_updated_at": null,
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-03-13 19:07:55.452536",
   "docstatus": 0,
   "doctype": "Role Profile",
-  "modified": "2025-02-28 01:42:52.239889",
+  "modified": "2025-03-13 19:07:55.448985",
   "name": "Branch PRR Profile",
   "role_profile": "Branch PRR Profile",
   "roles": [
@@ -193,11 +193,11 @@
  },
  {
   "custom_created_at": null,
-  "custom_o2o_role_profile": 0,
-  "custom_updated_at": null,
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-03-13 19:07:55.466886",
   "docstatus": 0,
   "doctype": "Role Profile",
-  "modified": "2025-02-28 01:42:46.396964",
+  "modified": "2025-03-13 19:07:55.463456",
   "name": "Sub Branch PRR Profile",
   "role_profile": "Sub Branch PRR Profile",
   "roles": [
@@ -217,11 +217,11 @@
  },
  {
   "custom_created_at": null,
-  "custom_o2o_role_profile": 0,
-  "custom_updated_at": null,
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-03-13 19:07:55.437695",
   "docstatus": 0,
   "doctype": "Role Profile",
-  "modified": "2025-02-28 01:43:19.351627",
+  "modified": "2025-03-13 19:07:55.434056",
   "name": "PO Approver Profile",
   "role_profile": "PO Approver Profile",
   "roles": [
@@ -241,11 +241,11 @@
  },
  {
   "custom_created_at": null,
-  "custom_o2o_role_profile": 0,
-  "custom_updated_at": null,
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-03-13 19:07:55.421944",
   "docstatus": 0,
   "doctype": "Role Profile",
-  "modified": "2025-02-28 01:44:28.178143",
+  "modified": "2025-03-13 19:07:55.418483",
   "name": "Requisition Approver",
   "role_profile": " Requisition Approver",
   "roles": [
@@ -265,11 +265,11 @@
  },
  {
   "custom_created_at": null,
-  "custom_o2o_role_profile": 0,
-  "custom_updated_at": null,
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-03-13 19:07:55.402879",
   "docstatus": 0,
   "doctype": "Role Profile",
-  "modified": "2025-02-28 01:44:57.079607",
+  "modified": "2025-03-13 19:07:55.398179",
   "name": "Vendor Profile",
   "role_profile": "Vendor Profile",
   "roles": [
@@ -289,11 +289,11 @@
  },
  {
   "custom_created_at": null,
-  "custom_o2o_role_profile": 0,
-  "custom_updated_at": null,
+  "custom_o2o_role_profile": 1,
+  "custom_updated_at": "2025-03-13 19:07:55.480916",
   "docstatus": 0,
   "doctype": "Role Profile",
-  "modified": "2025-02-28 01:40:37.623512",
+  "modified": "2025-03-13 19:07:55.477471",
   "name": "Supplier Profile",
   "role_profile": "Supplier Profile",
   "roles": [
