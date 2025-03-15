@@ -252,7 +252,7 @@ fixtures = [
     "Role Profile",
     "Client Script",
     "Server Script",
-   # "Purchase Taxes and Charges Template",
+    #"Purchase Taxes and Charges Template",
     "Tax Category",
     "Workspace",
     "Custom HTML Block",
@@ -260,7 +260,9 @@ fixtures = [
     "Workflow",
     "Workflow State",
     "Workflow Action",
-    "Print Format"
+    "Print Format",
+    "Number Card",
+    "Report"
 ]
 
 doc_events = {
