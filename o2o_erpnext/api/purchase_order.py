@@ -71,13 +71,13 @@ def get_branch_approver_info(branch):
         if not branch:
             return None
             
-        # Search for Employee with Person Raising Request Branch role in custom_roles
+        # Search for Employee with PO Approver role in custom_roles
         # and matching branch
         employees = frappe.get_all(
             "Employee",
             filters={
                 "branch": branch,
-                "custom_roles": ["like", "%Person Raising Request Branch%"]
+                "custom_roles": ["like", "%PO Approver%"]
             },
             fields=["name", "employee_name", "custom_user_email"]
         )
@@ -125,13 +125,13 @@ def set_branch_approver_for_purchase_order(purchase_order_name):
             frappe.throw(_("Purchase Order does not have a branch assigned"), 
                         title=_("Missing Branch"))
         
-        # Search for Employee with Person Raising Request Branch role in custom_roles
+        # Search for Employee with PO Approver role in custom_roles
         # and matching branch
         employees = frappe.get_all(
             "Employee",
             filters={
                 "branch": branch,  # Using the branch from PO
-                "custom_roles": ["like", "%Person Raising Request Branch%"]
+                "custom_roles": ["like", "%PO Approver%"]
             },
             fields=["name", "employee_name", "custom_user_email"]
         )
