@@ -252,7 +252,6 @@ fixtures = [
     "Role Profile",
     "Client Script",
     "Server Script",
-    #"Purchase Taxes and Charges Template",
     "Tax Category",
     "Workspace",
     "Custom HTML Block",
