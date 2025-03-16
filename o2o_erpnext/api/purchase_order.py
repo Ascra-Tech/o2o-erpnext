@@ -450,3 +450,83 @@ def has_permission(doc, user=None, permission_type=None):
         return doc.custom_vendor == vendor
     
     return False
+
+@frappe.whitelist()
+def calculate_gst_values(doc_name):
+    """
+    Calculate GST values for Purchase Order and save the document.
+    Can be called from client-side.
+    """
+    try:
+        # Get the Purchase Order document
+        po_doc = frappe.get_doc("Purchase Order", doc_name)
+        
+        # Document level totals
+        doc_total_sgst = 0
+        doc_total_cgst = 0
+        doc_total_igst = 0
+        doc_total_tax = 0
+        doc_grand_total = 0
+        doc_net_total = 0
+        
+        # Process each item in the items table
+        for item in po_doc.get('items', []):
+            # Convert tax values to float, defaulting to 0 if None
+            sgst_amount = float(item.get('sgst_amount') or 0)
+            cgst_amount = float(item.get('cgst_amount') or 0)
+            igst_amount = float(item.get('igst_amount') or 0)
+            net_amount = float(item.get('net_amount') or 0)
+            
+            # Calculate item totals
+            item_total_tax = sgst_amount + cgst_amount + igst_amount
+            item_grand_total = net_amount + item_total_tax
+            
+            # Set custom fields for the item
+            item.custom_gstn_value = item_total_tax
+            item.custom_grand_total = item_grand_total
+            
+            # Add to document totals
+            doc_total_sgst += sgst_amount
+            doc_total_cgst += cgst_amount
+            doc_total_igst += igst_amount
+            doc_total_tax += item_total_tax
+            doc_grand_total += item_grand_total
+            doc_net_total += net_amount
+        
+        # Update document-level custom fields if they exist
+        if hasattr(po_doc, 'custom_total_sgst'):
+            po_doc.custom_total_sgst = doc_total_sgst
+        
+        if hasattr(po_doc, 'custom_total_cgst'):
+            po_doc.custom_total_cgst = doc_total_cgst
+        
+        if hasattr(po_doc, 'custom_total_igst'):
+            po_doc.custom_total_igst = doc_total_igst
+        
+        if hasattr(po_doc, 'custom_total_tax'):
+            po_doc.custom_total_tax = doc_total_tax
+        
+        if hasattr(po_doc, 'custom_net_total'):
+            po_doc.custom_net_total = doc_net_total
+        
+        if hasattr(po_doc, 'custom_grand_total'):
+            po_doc.custom_grand_total = doc_grand_total
+        
+        # Save the document with ignore_permissions to ensure it saves
+        po_doc.save(ignore_permissions=True)
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": _("GST values calculated successfully")
+        }
+    
+    except Exception as e:
+        frappe.log_error(f"Error calculating GST values: {str(e)}", 
+                        "GST Calculation Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
