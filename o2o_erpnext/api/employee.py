@@ -44,10 +44,13 @@ def create_user(employee, email=None, password=None):
                 if role not in existing_roles:
                     existing_user.append("roles", {"role": role})
             
+            # Set module_profile to "Default Module"
+            existing_user.module_profile = "Default Module"
+            
             existing_user.save(ignore_permissions=True)
             frappe.db.commit()
             
-            frappe.msgprint(_("User {0} updated with roles: {1}").format(
+            frappe.msgprint(_("User {0} updated with roles: {1} and Default Module profile").format(
                 email, ", ".join(roles_to_assign)
             ))
             
@@ -71,6 +74,7 @@ def create_user(employee, email=None, password=None):
             "user_type": "System User",
             "send_welcome_email": 0,
             "new_password": user_password,
+            "module_profile": "Default Module",  # Set module_profile to "Default Module"
             "roles": [{"role": role} for role in roles_to_assign]
         })
         
@@ -95,7 +99,7 @@ def create_user(employee, email=None, password=None):
         # Verify and report final status
         user.reload()
         final_roles = [r.role for r in user.roles]
-        frappe.msgprint(_("User {0} created successfully with roles: {1}").format(
+        frappe.msgprint(_("User {0} created successfully with roles: {1} and Default Module profile").format(
             email, ", ".join(final_roles)
         ))
         
