@@ -303,3 +303,91 @@ def has_permission(doc, user=None, permission_type=None):
         return doc.custom_vendor == vendor
     
     return False
+@frappe.whitelist()
+def calculate_gst_values_for_purchase_invoice(doc_name):
+    """
+    Calculate GST values for Purchase Invoice and save the document.
+    Based on existing client-side GST calculation logic.
+    """
+    try:
+        # Get the Purchase Invoice document
+        pi_doc = frappe.get_doc("Purchase Invoice", doc_name)
+        
+        # Initialize summary values
+        gst_5_total = 0
+        gst_12_total = 0
+        gst_18_total = 0
+        gst_28_total = 0
+        goods_5_total = 0
+        goods_12_total = 0
+        goods_18_total = 0
+        goods_28_total = 0
+        
+        # Process each item in the invoice
+        for item in pi_doc.get('items', []):
+            template = item.get('item_tax_template') or ""
+            amount = float(item.get('amount') or 0)
+            gst_rate = 0
+            
+            # Extract GST rate from template name
+            if "GST 5%" in template:
+                gst_rate = 5
+            elif "GST 12%" in template:
+                gst_rate = 12
+            elif "GST 18%" in template:
+                gst_rate = 18
+            elif "GST 28%" in template:
+                gst_rate = 28
+            
+            # Calculate and set GST value if applicable
+            if gst_rate > 0:
+                gstn_value = round(amount * gst_rate / 100, 2)
+                item.custom_gstn_value = gstn_value
+                
+                # Add to appropriate totals
+                if gst_rate == 5:
+                    gst_5_total += gstn_value
+                    goods_5_total += amount
+                elif gst_rate == 12:
+                    gst_12_total += gstn_value
+                    goods_12_total += amount
+                elif gst_rate == 18:
+                    gst_18_total += gstn_value
+                    goods_18_total += amount
+                elif gst_rate == 28:
+                    gst_28_total += gstn_value
+                    goods_28_total += amount
+        
+        # Set document-level summary fields
+        pi_doc.custom_gst_5__ot = round(gst_5_total, 2)
+        pi_doc.custom_gst_12__ot = round(gst_12_total, 2)
+        pi_doc.custom_gst_18__ot = round(gst_18_total, 2)
+        pi_doc.custom_gst_28__ot = round(gst_28_total, 2)
+        pi_doc.custom_5_goods_value = round(goods_5_total, 2)
+        pi_doc.custom_12_goods_value = round(goods_12_total, 2)
+        pi_doc.custom_18_goods_value = round(goods_18_total, 2)
+        pi_doc.custom_28_goods_value = round(goods_28_total, 2)
+        
+        # Calculate total GSTN value
+        total_gstn = round(gst_5_total + gst_12_total + gst_18_total + gst_28_total, 2)
+        
+        # Set total GSTN if the field exists
+        if hasattr(pi_doc, 'gstn_value'):
+            pi_doc.gstn_value = total_gstn
+        
+        # Save the document
+        pi_doc.save(ignore_permissions=True)
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": "GST values calculated successfully"
+        }
+    
+    except Exception as e:
+        frappe.log_error(f"Error calculating GST values for Purchase Invoice: {str(e)}", 
+                        "GST Calculation Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
