@@ -528,5 +528,120 @@ def calculate_gst_values(doc_name):
             "status": "error",
             "message": str(e)
         }
+    
+@frappe.whitelist()
+def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=None, branch=None):
+    """
+    Fetch billing and shipping addresses from sub-branch or branch and update Purchase Order.
+    
+    Args:
+        purchase_order_name (str, optional): Purchase Order document name
+        sub_branch (str, optional): Sub-branch name to fetch addresses from
+        branch (str, optional): Branch name to fetch addresses from (used if sub_branch not provided)
+        
+    Returns:
+        dict: Result with status, message and addresses
+    """
+    try:
+        # Handle different input scenarios
+        po_doc = None
+        if purchase_order_name and not purchase_order_name.startswith('new-'):
+            # Only try to load the PO if it's not a new unsaved document
+            po_doc = frappe.get_doc("Purchase Order", purchase_order_name)
+            if not sub_branch:
+                sub_branch = po_doc.custom_sub_branch
+            if not branch:
+                branch = po_doc.custom_branch
+        
+        # First try to get addresses from sub-branch
+        if sub_branch and sub_branch.strip() != "":
+            # Fetch sub-branch document to get address fields
+            try:
+                sub_branch_doc = frappe.get_doc("Sub Branch", sub_branch)
+                
+                # Get address values
+                billing_address = sub_branch_doc.address if hasattr(sub_branch_doc, 'address') else None
+                shipping_address = sub_branch_doc.custom_shipping_address if hasattr(sub_branch_doc, 'custom_shipping_address') else None
+                
+                if billing_address or shipping_address:
+                    result = {
+                        "status": "success",
+                        "billing_address": billing_address,
+                        "shipping_address": shipping_address,
+                        "source": "sub_branch"
+                    }
+                    
+                    # If Purchase Order is provided and it's a valid document, update it
+                    if po_doc:
+                        if billing_address:
+                            po_doc.supplier_address = billing_address
+                            
+                        if shipping_address:
+                            po_doc.shipping_address = shipping_address
+                            
+                        po_doc.save()
+                        frappe.db.commit()
+                        
+                    return result
+            except frappe.exceptions.DoesNotExistError:
+                # If sub-branch doesn't exist or has no addresses, continue to branch
+                pass
+                
+        # If we get here, either no sub-branch was specified or it had no addresses
+        # Now try to get addresses from branch
+        if branch and branch.strip() != "":
+            try:
+                branch_doc = frappe.get_doc("Branch", branch)
+                
+                # Get address values from branch
+                billing_address = branch_doc.address if hasattr(branch_doc, 'address') else None
+                shipping_address = branch_doc.custom_shipping_address if hasattr(branch_doc, 'custom_shipping_address') else None
+                
+                if not billing_address and not shipping_address:
+                    return {
+                        "status": "warning"
+                    }
+                
+                result = {
+                    "status": "success",
+                    "billing_address": billing_address,
+                    "shipping_address": shipping_address,
+                    "source": "branch"
+                }
+                
+                # If Purchase Order is provided and it's a valid document, update it
+                if po_doc:
+                    if billing_address:
+                        po_doc.supplier_address = billing_address
+                        
+                    if shipping_address:
+                        po_doc.shipping_address = shipping_address
+                        
+                    po_doc.save()
+                    frappe.db.commit()
+                    
+                return result
+            except frappe.exceptions.DoesNotExistError:
+                # If branch doesn't exist or has no addresses
+                return {
+                    "status": "warning"
+                }
+        
+        # If we get here, neither branch nor sub-branch had valid addresses
+        return {
+            "status": "warning"
+        }
+        
+    except frappe.exceptions.DoesNotExistError:
+        # Handle specific case when PO doesn't exist
+        return {
+            "status": "error"
+        }
+    except Exception as e:
+        frappe.log_error(f"Error fetching branch/sub-branch addresses: {str(e)}", 
+                        "Branch/Sub-branch Address Error")
+        return {
+            "status": "error"
+        }
 
 
