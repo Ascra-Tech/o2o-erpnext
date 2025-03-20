@@ -548,11 +548,22 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
         po_doc = None
         if purchase_order_name and not purchase_order_name.startswith('new-'):
             # Only try to load the PO if it's not a new unsaved document
-            po_doc = frappe.get_doc("Purchase Order", purchase_order_name)
-            if not sub_branch:
-                sub_branch = po_doc.custom_sub_branch
-            if not branch:
-                branch = po_doc.custom_branch
+            try:
+                po_doc = frappe.get_doc("Purchase Order", purchase_order_name)
+                if not sub_branch:
+                    sub_branch = po_doc.custom_sub_branch
+                if not branch:
+                    branch = po_doc.custom_branch
+            except Exception as e:
+                frappe.log_error(
+                    message=f"Error loading document: {str(e)}", 
+                    title="PO fetch error"
+                )
+                return {"status": "error", "message": "Could not load Purchase Order"}
+        
+        billing_address = None
+        shipping_address = None
+        source = None
         
         # First try to get addresses from sub-branch
         if sub_branch and sub_branch.strip() != "":
@@ -565,32 +576,13 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
                 shipping_address = sub_branch_doc.custom_shipping_address if hasattr(sub_branch_doc, 'custom_shipping_address') else None
                 
                 if billing_address or shipping_address:
-                    result = {
-                        "status": "success",
-                        "billing_address": billing_address,
-                        "shipping_address": shipping_address,
-                        "source": "sub_branch"
-                    }
-                    
-                    # If Purchase Order is provided and it's a valid document, update it
-                    if po_doc:
-                        if billing_address:
-                            po_doc.supplier_address = billing_address
-                            
-                        if shipping_address:
-                            po_doc.shipping_address = shipping_address
-                            
-                        po_doc.save()
-                        frappe.db.commit()
-                        
-                    return result
+                    source = "sub_branch"
             except frappe.exceptions.DoesNotExistError:
                 # If sub-branch doesn't exist or has no addresses, continue to branch
                 pass
                 
-        # If we get here, either no sub-branch was specified or it had no addresses
-        # Now try to get addresses from branch
-        if branch and branch.strip() != "":
+        # If no addresses found, try to get addresses from branch
+        if (not billing_address and not shipping_address) and branch and branch.strip() != "":
             try:
                 branch_doc = frappe.get_doc("Branch", branch)
                 
@@ -598,49 +590,65 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
                 billing_address = branch_doc.address if hasattr(branch_doc, 'address') else None
                 shipping_address = branch_doc.custom_shipping_address if hasattr(branch_doc, 'custom_shipping_address') else None
                 
-                if not billing_address and not shipping_address:
-                    return {
-                        "status": "warning"
-                    }
-                
-                result = {
-                    "status": "success",
-                    "billing_address": billing_address,
-                    "shipping_address": shipping_address,
-                    "source": "branch"
-                }
-                
-                # If Purchase Order is provided and it's a valid document, update it
-                if po_doc:
-                    if billing_address:
-                        po_doc.supplier_address = billing_address
-                        
-                    if shipping_address:
-                        po_doc.shipping_address = shipping_address
-                        
-                    po_doc.save()
-                    frappe.db.commit()
-                    
-                return result
+                if billing_address or shipping_address:
+                    source = "branch"
             except frappe.exceptions.DoesNotExistError:
-                # If branch doesn't exist or has no addresses
-                return {
-                    "status": "warning"
-                }
+                # Branch doesn't exist or has no addresses
+                pass
+        
+        # If we found addresses (from either source), prepare result
+        if billing_address or shipping_address:
+            result = {
+                "status": "success",
+                "billing_address": billing_address,
+                "shipping_address": shipping_address,
+                "source": source
+            }
+            
+            # If Purchase Order is provided and it's a valid document, update it
+            if po_doc and purchase_order_name:
+                # Instead of trying to update the document directly, use a more robust approach
+                # Use direct SQL update to avoid concurrent modification issues
+                update_fields = {}
+                if billing_address:
+                    update_fields["supplier_address"] = billing_address
+                if shipping_address:
+                    update_fields["shipping_address"] = shipping_address
+                
+                if update_fields:
+                    try:
+                        # Update directly using SQL to bypass document versioning
+                        frappe.db.set_value("Purchase Order", purchase_order_name, update_fields)
+                        frappe.db.commit()
+                    except Exception as e:
+                        frappe.log_error(
+                            message=f"Failed to update addresses: {str(e)}", 
+                            title="Address update error"
+                        )
+                        # Continue without failing - we'll still return the addresses found
+            
+            return result
         
         # If we get here, neither branch nor sub-branch had valid addresses
         return {
-            "status": "warning"
+            "status": "warning",
+            "message": "No addresses found"
         }
         
     except frappe.exceptions.DoesNotExistError:
         # Handle specific case when PO doesn't exist
         return {
-            "status": "error"
+            "status": "error",
+            "message": "Document not found"
         }
     except Exception as e:
-        frappe.log_error(f"Error fetching branch/sub-branch addresses: {str(e)}", 
-                        "Branch/Sub-branch Address Error")
+        # Fix for the title length issue - use a shorter title and put details in the message
+        error_type = type(e).__name__
+        frappe.log_error(
+            message=f"Details: {str(e)}", 
+            title=f"Address fetch error: {error_type}"
+        )
         return {
-            "status": "error"
+            "status": "error",
+            "message": f"Error fetching addresses: {error_type}"
         }
