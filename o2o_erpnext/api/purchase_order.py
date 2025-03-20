@@ -479,18 +479,15 @@ def calculate_gst_values(doc_name):
             
             # Calculate item totals
             item_total_tax = sgst_amount + cgst_amount + igst_amount
-            item_grand_total = net_amount + item_total_tax
-            
-            # Set custom fields for the item
             item.custom_gstn_value = item_total_tax
-            item.custom_grand_total = item_grand_total
+            item.custom_grand_total = net_amount + item_total_tax
             
             # Add to document totals
             doc_total_sgst += sgst_amount
             doc_total_cgst += cgst_amount
             doc_total_igst += igst_amount
             doc_total_tax += item_total_tax
-            doc_grand_total += item_grand_total
+            doc_grand_total += item_total_tax + net_amount
             doc_net_total += net_amount
         
         # Update document-level custom fields if they exist
@@ -505,6 +502,10 @@ def calculate_gst_values(doc_name):
         
         if hasattr(po_doc, 'custom_total_tax'):
             po_doc.custom_total_tax = doc_total_tax
+            
+        # Add this line to set the custom_total_gstn field
+        if hasattr(po_doc, 'custom_total_gstn'):
+            po_doc.custom_total_gstn = doc_total_tax
         
         if hasattr(po_doc, 'custom_net_total'):
             po_doc.custom_net_total = doc_net_total
@@ -643,5 +644,3 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
         return {
             "status": "error"
         }
-
-
