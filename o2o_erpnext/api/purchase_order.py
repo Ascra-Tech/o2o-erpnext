@@ -1,7 +1,9 @@
 import frappe
 from frappe import _
-from frappe.utils import flt, get_datetime
+from frappe.utils import flt, get_datetime, today
 from frappe.exceptions import DoesNotExistError
+import datetime
+import json
 
 @frappe.whitelist()
 def validate_and_set_purchase_order_defaults(doc_name=None):
@@ -22,6 +24,9 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
             
         if employee.custom_supplier:
             po_doc.supplier = employee.custom_supplier
+            # Set supplier code based on supplier
+            if po_doc.supplier:
+                po_doc.custom_supplier_code = po_doc.supplier[:3].upper() if po_doc.supplier else ""
             
         approver_info = None
         if employee.branch:
@@ -34,12 +39,17 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
             
         if employee.custom_sub_branch:
             po_doc.custom_sub_branch = employee.custom_sub_branch
+        
+        # Set order code
+        update_order_code(po_doc)
             
         if not doc_name:
             response_data = {
                 "supplier": employee.custom_supplier,
                 "custom_branch": employee.branch,
-                "custom_sub_branch": employee.custom_sub_branch
+                "custom_sub_branch": employee.custom_sub_branch,
+                "custom_supplier_code": po_doc.custom_supplier_code if hasattr(po_doc, 'custom_supplier_code') else "",
+                "custom_order_code": po_doc.custom_order_code if hasattr(po_doc, 'custom_order_code') else ""
             }
             
             if approver_info:
@@ -51,7 +61,7 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
                 "data": response_data
             }
         
-        po_doc.save()
+        po_doc.save(ignore_version=True)
         frappe.db.commit()
         
         return {
@@ -63,6 +73,22 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
         frappe.log_error(f"Error in Purchase Order auto-fill: {str(e)}", 
                         "Purchase Order API Error")
         raise e
+
+
+def update_order_code(po_doc):
+    """Update Order Code based on transaction date"""
+    if po_doc.docstatus == 0:  # Only for draft documents
+        if not po_doc.transaction_date:
+            po_doc.transaction_date = today()
+            
+        try:
+            date_obj = get_datetime(po_doc.transaction_date).date()
+            weekday = date_obj.strftime("%a").upper()
+            year_yy = date_obj.strftime("%y")
+            
+            po_doc.custom_order_code = f"POA{weekday}{year_yy}"
+        except Exception as e:
+            frappe.log_error(f"Error updating order code: {str(e)}", "Order Code Error")
 
 
 def get_branch_approver_info(branch):
@@ -153,8 +179,7 @@ def set_branch_approver_for_purchase_order(purchase_order_name):
         approver_info = f"{approver.employee_name}:{approver.custom_user_email}"
         
         # Update the Purchase Order
-        po_doc.custom__approver_name_and_email = approver_info
-        po_doc.save()
+        frappe.db.set_value("Purchase Order", purchase_order_name, "custom__approver_name_and_email", approver_info)
         frappe.db.commit()
         
         return {
@@ -514,17 +539,58 @@ def calculate_gst_values(doc_name):
             po_doc.custom_grand_total = doc_grand_total
         
         # Save the document with ignore_permissions to ensure it saves
-        po_doc.save(ignore_permissions=True)
+        # Also use ignore_version to bypass timestamp checks
+        po_doc.save(ignore_permissions=True, ignore_version=True)
         frappe.db.commit()
         
         return {
             "status": "success",
-            "message": _("GST values calculated successfully")
+            #"message": _("GST values calculated successfully")
         }
     
     except Exception as e:
         frappe.log_error(f"Error calculating GST values: {str(e)}", 
                         "GST Calculation Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+@frappe.whitelist()
+def calculate_item_gst_values(items_json):
+    """
+    Calculate GST values for items without saving to the database.
+    For client-side use to preview GST calculations before saving.
+    """
+    try:
+        items = json.loads(items_json)
+        result = []
+        
+        for item in items:
+            # Convert tax values to float, defaulting to 0 if None
+            sgst_amount = float(item.get('sgst_amount') or 0)
+            cgst_amount = float(item.get('cgst_amount') or 0)
+            igst_amount = float(item.get('igst_amount') or 0)
+            net_amount = float(item.get('net_amount') or 0)
+            
+            # Calculate item totals
+            item_total_tax = sgst_amount + cgst_amount + igst_amount
+            grand_total = net_amount + item_total_tax
+            
+            result.append({
+                'name': item.get('name'),
+                'custom_gstn_value': item_total_tax,
+                'custom_grand_total': grand_total
+            })
+            
+        return {
+            "status": "success",
+            "data": result
+        }
+    
+    except Exception as e:
+        frappe.log_error(f"Error calculating item GST values: {str(e)}", 
+                        "Item GST Calculation Error")
         return {
             "status": "error",
             "message": str(e)
@@ -547,19 +613,15 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
         # Handle different input scenarios
         po_doc = None
         if purchase_order_name and not purchase_order_name.startswith('new-'):
-            # Only try to load the PO if it's not a new unsaved document
             try:
+                # Only try to load the PO if it's not a new unsaved document
                 po_doc = frappe.get_doc("Purchase Order", purchase_order_name)
                 if not sub_branch:
                     sub_branch = po_doc.custom_sub_branch
                 if not branch:
                     branch = po_doc.custom_branch
-            except Exception as e:
-                frappe.log_error(
-                    message=f"Error loading document: {str(e)}", 
-                    title="PO fetch error"
-                )
-                return {"status": "error", "message": "Could not load Purchase Order"}
+            except frappe.exceptions.DoesNotExistError:
+                return {"status": "error", "message": "Purchase Order not found"}
         
         billing_address = None
         shipping_address = None
@@ -607,7 +669,6 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
             
             # If Purchase Order is provided and it's a valid document, update it
             if po_doc and purchase_order_name:
-                # Instead of trying to update the document directly, use a more robust approach
                 # Use direct SQL update to avoid concurrent modification issues
                 update_fields = {}
                 if billing_address:
@@ -625,7 +686,6 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
                             message=f"Failed to update addresses: {str(e)}", 
                             title="Address update error"
                         )
-                        # Continue without failing - we'll still return the addresses found
             
             return result
         
@@ -634,15 +694,8 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
             "status": "warning",
             "message": "No addresses found"
         }
-        
-    except frappe.exceptions.DoesNotExistError:
-        # Handle specific case when PO doesn't exist
-        return {
-            "status": "error",
-            "message": "Document not found"
-        }
+            
     except Exception as e:
-        # Fix for the title length issue - use a shorter title and put details in the message
         error_type = type(e).__name__
         frappe.log_error(
             message=f"Details: {str(e)}", 
@@ -651,4 +704,635 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
         return {
             "status": "error",
             "message": f"Error fetching addresses: {error_type}"
+        }
+
+@frappe.whitelist()
+def is_branch_level_user():
+    """Check if current user has the branch-level role"""
+    user_roles = frappe.get_roles(frappe.session.user)
+    return 'Person Raising Request Branch' in user_roles
+
+@frappe.whitelist()
+def get_hierarchy_data(branch=None, sub_branch=None):
+    """Get hierarchy data for validations"""
+    result = {
+        'sub_branch': None,
+        'branch': None,
+        'supplier': None,
+        'is_branch_user': is_branch_level_user()
+    }
+    
+    # For branch-level users, only get branch and supplier
+    if result['is_branch_user']:
+        if branch:
+            branch_data = frappe.get_value('Branch', branch,
+                ['custom_supplier', 'custom_capex_budget', 'custom_opex_budget', 
+                'custom_minimum_order_value', 'custom_maximum_order_value'],
+                as_dict=1
+            )
+            result['branch'] = branch_data
+            
+            if branch_data and branch_data.get('custom_supplier'):
+                supplier_data = frappe.get_value('Supplier', branch_data.get('custom_supplier'),
+                    ['custom_capex_budget', 'custom_opex_budget', 'custom_minimum_order_value', 
+                    'custom_maximum_order_value', 'custom_budget_start_date', 'custom_budget_end_date'],
+                    as_dict=1
+                )
+                result['supplier'] = supplier_data
+    
+    # For sub-branch users, get the full hierarchy
+    else:
+        if sub_branch:
+            sub_branch_data = frappe.get_value('Sub Branch', sub_branch,
+                ['branch', 'custom_supplier', 'capex_budget', 'opex_budget', 
+                'minimum_order_value', 'maximum_order_value'],
+                as_dict=1
+            )
+            result['sub_branch'] = sub_branch_data
+            
+            if sub_branch_data and sub_branch_data.get('branch'):
+                branch_data = frappe.get_value('Branch', sub_branch_data.get('branch'),
+                    ['custom_supplier', 'custom_capex_budget', 'custom_opex_budget', 
+                    'custom_minimum_order_value', 'custom_maximum_order_value'],
+                    as_dict=1
+                )
+                result['branch'] = branch_data
+                
+                if branch_data and branch_data.get('custom_supplier'):
+                    supplier_data = frappe.get_value('Supplier', branch_data.get('custom_supplier'),
+                        ['custom_capex_budget', 'custom_opex_budget', 'custom_minimum_order_value', 
+                        'custom_maximum_order_value', 'custom_budget_start_date', 'custom_budget_end_date'],
+                        as_dict=1
+                    )
+                    result['supplier'] = supplier_data
+    
+    return result
+
+@frappe.whitelist()
+def validate_purchase_order(doc_name=None, doc_json=None):
+    """Validate Purchase Order - comprehensive validation function"""
+    try:
+        if doc_name:
+            doc = frappe.get_doc("Purchase Order", doc_name)
+        elif doc_json:
+            doc = json.loads(doc_json)
+        else:
+            return {
+                "status": "error",
+                "message": "Either doc_name or doc_json must be provided"
+            }
+        
+        validation_results = {
+            "status": "success",
+            "validations": {},
+            "capex_total": 0,
+            "opex_total": 0
+        }
+        
+        # Basic validations
+        validation_results["validations"]["branch"] = validate_branch_mandatory(doc)
+        validation_results["validations"]["sub_branch"] = validate_sub_branch_mandatory(doc)
+        validation_results["validations"]["transaction_date"] = validate_transaction_date_mandatory(doc)
+        validation_results["validations"]["hierarchy"] = validate_hierarchy(doc)
+        
+        # If we have items, do more validations
+        if doc.get('items') and len(doc.get('items')) > 0:
+            # Calculate CAPEX and OPEX totals
+            capex_total, opex_total = calculate_capex_opex_totals(doc)
+            validation_results["capex_total"] = capex_total
+            validation_results["opex_total"] = opex_total
+            
+            # Validate order value and budgets
+            validation_results["validations"]["order_value"] = validate_order_value(doc)
+            validation_results["validations"]["budget_dates"] = validate_budget_dates(doc)
+            validation_results["validations"]["budgets"] = validate_budgets(doc, capex_total, opex_total)
+        
+        # Check if any validation failed
+        for key, result in validation_results["validations"].items():
+            if result.get("status") == "error":
+                validation_results["status"] = "error"
+                break
+                
+        return validation_results
+    
+    except Exception as e:
+        frappe.log_error(f"Error validating Purchase Order: {str(e)}",
+                      "Validation Error")
+        return {
+            "status": "error", 
+            "message": f"Validation error: {str(e)}"
+        }
+
+def validate_branch_mandatory(doc):
+    """Validate that branch is provided"""
+    if not doc.get('custom_branch'):
+        return {
+            "status": "error",
+            "message": "Branch is mandatory for Purchase Order"
+        }
+    return {"status": "success"}
+
+def validate_sub_branch_mandatory(doc):
+    """Validate that sub-branch is provided (for non-branch users)"""
+    # Skip for branch-level users
+    if is_branch_level_user():
+        return {"status": "success"}
+    
+    # For regular users, sub-branch is mandatory
+    if not doc.get('custom_sub_branch'):
+        return {
+            "status": "error",
+            "message": "Sub-branch is mandatory for Purchase Order"
+        }
+    return {"status": "success"}
+
+def validate_transaction_date_mandatory(doc):
+    """Validate that transaction date is provided"""
+    if not doc.get('transaction_date'):
+        return {
+            "status": "error",
+            "message": "Transaction Date is mandatory"
+        }
+    return {"status": "success"}
+
+def validate_hierarchy(doc):
+    """Validate branch and sub-branch hierarchy relationship"""
+    try:
+        # Get hierarchy data
+        hierarchy_data = get_hierarchy_data(
+            branch=doc.get('custom_branch'),
+            sub_branch=doc.get('custom_sub_branch')
+        )
+        
+        # For branch-level users, just check if branch exists
+        if hierarchy_data['is_branch_user']:
+            if not hierarchy_data['branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch branch details"
+                }
+            return {"status": "success"}
+        
+        # For sub-branch users, check the full hierarchy
+        else:
+            if not hierarchy_data['sub_branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch sub-branch details"
+                }
+            
+            if hierarchy_data['sub_branch'].get('branch') != doc.get('custom_branch'):
+                return {
+                    "status": "error",
+                    "message": "Selected sub-branch does not belong to the selected branch"
+                }
+            return {"status": "success"}
+    
+    except Exception as e:
+        frappe.log_error(f"Error validating hierarchy: {str(e)}", "Hierarchy Validation Error")
+        return {
+            "status": "error",
+            "message": f"Error validating hierarchy: {str(e)}"
+        }
+
+def calculate_capex_opex_totals(doc):
+    """Calculate total CAPEX and OPEX amounts"""
+    capex_total = 0
+    opex_total = 0
+    
+    if not doc.get('items'):
+        return capex_total, opex_total
+        
+    for item in doc.get('items'):
+        if not item.get('custom_product_type'):
+            continue
+            
+        item_amount = flt(item.get('amount'))
+        if item_amount:
+            if item.get('custom_product_type') == 'Capex':
+                capex_total += item_amount
+            elif item.get('custom_product_type') == 'Opex':
+                opex_total += item_amount
+    
+    return capex_total, opex_total
+
+def validate_order_value(doc):
+    """Validate minimum and maximum order values"""
+    try:
+        if not doc.get('items') or len(doc.get('items')) == 0:
+            return {"status": "success"}
+            
+        total = flt(doc.get('total'))
+        
+        # Get hierarchy data
+        hierarchy_data = get_hierarchy_data(
+            branch=doc.get('custom_branch'),
+            sub_branch=doc.get('custom_sub_branch')
+        )
+        
+        if not hierarchy_data['supplier']:
+            return {
+                "status": "error",
+                "message": "Could not fetch supplier details"
+            }
+        
+        # For branch-level users
+        if hierarchy_data['is_branch_user']:
+            if not hierarchy_data['branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch branch details"
+                }
+            
+            # Branch
+            branch_min = flt(hierarchy_data['branch'].get('custom_minimum_order_value'))
+            branch_max = flt(hierarchy_data['branch'].get('custom_maximum_order_value'))
+            
+            if (branch_min != 0 or branch_max != 0) and (total < branch_min or total > branch_max):
+                return {
+                    "status": "error",
+                    "message": f"Total order value ({total}) must be between Branch's minimum value {branch_min} and maximum value {branch_max}"
+                }
+            
+            # Supplier
+            supplier_min = flt(hierarchy_data['supplier'].get('custom_minimum_order_value'))
+            supplier_max = flt(hierarchy_data['supplier'].get('custom_maximum_order_value'))
+            
+            if (supplier_min != 0 or supplier_max != 0) and (total < supplier_min or total > supplier_max):
+                return {
+                    "status": "error",
+                    "message": f"Total order value ({total}) must be between Supplier's minimum value {supplier_min} and maximum value {supplier_max}"
+                }
+        
+        # For sub-branch users
+        else:
+            if not hierarchy_data['sub_branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch sub-branch details"
+                }
+            
+            # Sub-Branch
+            sub_branch_min = flt(hierarchy_data['sub_branch'].get('minimum_order_value'))
+            sub_branch_max = flt(hierarchy_data['sub_branch'].get('maximum_order_value'))
+            
+            if (sub_branch_min != 0 or sub_branch_max != 0) and (total < sub_branch_min or total > sub_branch_max):
+                return {
+                    "status": "error",
+                    "message": f"Total order value ({total}) must be between Sub-branch's minimum value {sub_branch_min} and maximum value {sub_branch_max}"
+                }
+            
+            # Supplier
+            supplier_min = flt(hierarchy_data['supplier'].get('custom_minimum_order_value'))
+            supplier_max = flt(hierarchy_data['supplier'].get('custom_maximum_order_value'))
+            
+            if (supplier_min != 0 or supplier_max != 0) and (total < supplier_min or total > supplier_max):
+                return {
+                    "status": "error",
+                    "message": f"Total order value ({total}) must be between Supplier's minimum value {supplier_min} and maximum value {supplier_max}"
+                }
+        
+        return {"status": "success"}
+    
+    except Exception as e:
+        frappe.log_error(f"Error validating order value: {str(e)}", "Order Value Validation Error")
+        return {
+            "status": "error",
+            "message": f"Error validating order value: {str(e)}"
+        }
+
+def validate_budget_dates(doc):
+    """Validate transaction date against budget dates"""
+    try:
+        transaction_date = get_datetime(doc.get('transaction_date')).date()
+        transaction_day = transaction_date.day
+        
+        # Get hierarchy data
+        hierarchy_data = get_hierarchy_data(
+            branch=doc.get('custom_branch'),
+            sub_branch=doc.get('custom_sub_branch')
+        )
+        
+        if not hierarchy_data['supplier']:
+            return {
+                "status": "error",
+                "message": "Could not fetch supplier details"
+            }
+        
+        # Parse budget days as integers
+        try:
+            budget_start_day = int(hierarchy_data['supplier'].get('custom_budget_start_date', 1))
+            budget_end_day = int(hierarchy_data['supplier'].get('custom_budget_end_date', 31))
+        except (ValueError, TypeError):
+            budget_start_day = 1
+            budget_end_day = 31
+        
+        if transaction_day < budget_start_day or transaction_day > budget_end_day:
+            return {
+                "status": "error",
+                "message": f"Transaction date day ({transaction_day}) must be within supplier's budget days range: {budget_start_day} to {budget_end_day}"
+            }
+        
+        return {"status": "success"}
+    
+    except Exception as e:
+        frappe.log_error(f"Error validating budget dates: {str(e)}", "Budget Dates Validation Error")
+        return {
+            "status": "error",
+            "message": f"Error validating budget dates: {str(e)}"
+        }
+
+def validate_budgets(doc, capex_total, opex_total):
+    """Validate CAPEX and OPEX budgets"""
+    try:
+        if not doc.get('items') or len(doc.get('items')) == 0:
+            return {"status": "success"}
+        
+        # First check if all items have product type
+        for item in doc.get('items'):
+            if not item.get('custom_product_type'):
+                return {
+                    "status": "error",
+                    "message": f"Product Type must be set for item: {item.get('item_code') or item.get('idx')}"
+                }
+        
+        # Get hierarchy data
+        hierarchy_data = get_hierarchy_data(
+            branch=doc.get('custom_branch'),
+            sub_branch=doc.get('custom_sub_branch')
+        )
+        
+        if not hierarchy_data['supplier']:
+            return {
+                "status": "error",
+                "message": "Could not fetch supplier details"
+            }
+        
+        # For branch-level users
+        if hierarchy_data['is_branch_user']:
+            if not hierarchy_data['branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch branch details"
+                }
+            
+            # Validate CAPEX
+            if capex_total > 0:
+                # Branch
+                branch_capex = flt(hierarchy_data['branch'].get('custom_capex_budget'))
+                if branch_capex > 0 and capex_total > branch_capex:
+                    return {
+                        "status": "error",
+                        "message": f"Total Capex amount ({capex_total}) exceeds Branch Capex budget ({branch_capex})"
+                    }
+                
+                # Supplier
+                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
+                if supplier_capex > 0 and capex_total > supplier_capex:
+                    return {
+                        "status": "error",
+                        "message": f"Total Capex amount ({capex_total}) exceeds Supplier Capex budget ({supplier_capex})"
+                    }
+            
+            # Validate OPEX
+            if opex_total > 0:
+                # Branch
+                branch_opex = flt(hierarchy_data['branch'].get('custom_opex_budget'))
+                if branch_opex > 0 and opex_total > branch_opex:
+                    return {
+                        "status": "error",
+                        "message": f"Total Opex amount ({opex_total}) exceeds Branch Opex budget ({branch_opex})"
+                    }
+                
+                # Supplier
+                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
+                if supplier_opex > 0 and opex_total > supplier_opex:
+                    return {
+                        "status": "error",
+                        "message": f"Total Opex amount ({opex_total}) exceeds Supplier Opex budget ({supplier_opex})"
+                    }
+        
+        # For sub-branch users
+        else:
+            if not hierarchy_data['sub_branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch sub-branch details"
+                }
+            
+            # Validate CAPEX
+            if capex_total > 0:
+                # Sub-Branch
+                sub_branch_capex = flt(hierarchy_data['sub_branch'].get('capex_budget'))
+                if sub_branch_capex > 0 and capex_total > sub_branch_capex:
+                    return {
+                        "status": "error",
+                        "message": f"Total Capex amount ({capex_total}) exceeds Sub-branch Capex budget ({sub_branch_capex})"
+                    }
+                
+                # Supplier
+                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
+                if supplier_capex > 0 and capex_total > supplier_capex:
+                    return {
+                        "status": "error",
+                        "message": f"Total Capex amount ({capex_total}) exceeds Supplier Capex budget ({supplier_capex})"
+                    }
+            
+            # Validate OPEX
+            if opex_total > 0:
+                # Sub-branch
+                sub_branch_opex = flt(hierarchy_data['sub_branch'].get('opex_budget'))
+                if sub_branch_opex > 0 and opex_total > sub_branch_opex:
+                    return {
+                        "status": "error",
+                        "message": f"Total Opex amount ({opex_total}) exceeds Sub-branch Opex budget ({sub_branch_opex})"
+                    }
+                
+                # Supplier
+                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
+                if supplier_opex > 0 and opex_total > supplier_opex:
+                    return {
+                        "status": "error",
+                        "message": f"Total Opex amount ({opex_total}) exceeds Supplier Opex budget ({supplier_opex})"
+                    }
+        
+        return {"status": "success"}
+    
+    except Exception as e:
+        frappe.log_error(f"Error validating budgets: {str(e)}", "Budget Validation Error")
+        return {
+            "status": "error",
+            "message": f"Error validating budgets: {str(e)}"
+        }
+
+@frappe.whitelist()
+def update_budgets(doc_name, capex_total=0, opex_total=0):
+    """Update budgets after Purchase Order is submitted"""
+    try:
+        capex_total = flt(capex_total)
+        opex_total = flt(opex_total)
+        
+        if capex_total == 0 and opex_total == 0:
+            return {"status": "success", "message": "No budget updates needed"}
+        
+        doc = frappe.get_doc("Purchase Order", doc_name)
+        is_branch_user = is_branch_level_user()
+        
+        # Get hierarchy data
+        hierarchy_data = get_hierarchy_data(
+            branch=doc.custom_branch,
+            sub_branch=doc.custom_sub_branch
+        )
+        
+        if not hierarchy_data['supplier']:
+            return {
+                "status": "error",
+                "message": "Could not fetch supplier details"
+            }
+        
+        updates = []
+        
+        # For branch-level users
+        if is_branch_user:
+            if not hierarchy_data['branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch branch details"
+                }
+            
+            # Update CAPEX Budget for Branch
+            if capex_total > 0 and hierarchy_data['branch'].get('custom_capex_budget'):
+                branch_capex = flt(hierarchy_data['branch'].get('custom_capex_budget'))
+                if branch_capex > 0:
+                    new_branch_capex = branch_capex - capex_total
+                    frappe.db.set_value('Branch', doc.custom_branch, 'custom_capex_budget', new_branch_capex)
+                    updates.append(f"Branch Capex budget updated to {new_branch_capex}")
+            
+            # Update CAPEX Budget for Supplier
+            if capex_total > 0 and hierarchy_data['branch'].get('custom_supplier'):
+                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
+                if supplier_capex > 0:
+                    new_supplier_capex = supplier_capex - capex_total
+                    frappe.db.set_value('Supplier', hierarchy_data['branch'].get('custom_supplier'), 'custom_capex_budget', new_supplier_capex)
+                    updates.append(f"Supplier Capex budget updated to {new_supplier_capex}")
+            
+            # Update OPEX Budget for Branch
+            if opex_total > 0 and hierarchy_data['branch'].get('custom_opex_budget'):
+                branch_opex = flt(hierarchy_data['branch'].get('custom_opex_budget'))
+                if branch_opex > 0:
+                    new_branch_opex = branch_opex - opex_total
+                    frappe.db.set_value('Branch', doc.custom_branch, 'custom_opex_budget', new_branch_opex)
+                    updates.append(f"Branch Opex budget updated to {new_branch_opex}")
+            
+            # Update OPEX Budget for Supplier
+            if opex_total > 0 and hierarchy_data['branch'].get('custom_supplier'):
+                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
+                if supplier_opex > 0:
+                    new_supplier_opex = supplier_opex - opex_total
+                    frappe.db.set_value('Supplier', hierarchy_data['branch'].get('custom_supplier'), 'custom_opex_budget', new_supplier_opex)
+                    updates.append(f"Supplier Opex budget updated to {new_supplier_opex}")
+        
+        # For sub-branch users
+        else:
+            if not hierarchy_data['sub_branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch sub-branch details"
+                }
+            
+            # Update CAPEX Budget for Sub-Branch
+            if capex_total > 0 and hierarchy_data['sub_branch'].get('capex_budget'):
+                sub_branch_capex = flt(hierarchy_data['sub_branch'].get('capex_budget'))
+                if sub_branch_capex > 0:
+                    new_sub_branch_capex = sub_branch_capex - capex_total
+                    frappe.db.set_value('Sub Branch', doc.custom_sub_branch, 'capex_budget', new_sub_branch_capex)
+                    updates.append(f"Sub Branch Capex budget updated to {new_sub_branch_capex}")
+            
+            # Update CAPEX Budget for Supplier
+            if capex_total > 0 and hierarchy_data['branch'] and hierarchy_data['branch'].get('custom_supplier'):
+                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
+                if supplier_capex > 0:
+                    new_supplier_capex = supplier_capex - capex_total
+                    frappe.db.set_value('Supplier', hierarchy_data['branch'].get('custom_supplier'), 'custom_capex_budget', new_supplier_capex)
+                    updates.append(f"Supplier Capex budget updated to {new_supplier_capex}")
+            
+            # Update OPEX Budget for Sub-Branch
+            if opex_total > 0 and hierarchy_data['sub_branch'].get('opex_budget'):
+                sub_branch_opex = flt(hierarchy_data['sub_branch'].get('opex_budget'))
+                if sub_branch_opex > 0:
+                    new_sub_branch_opex = sub_branch_opex - opex_total
+                    frappe.db.set_value('Sub Branch', doc.custom_sub_branch, 'opex_budget', new_sub_branch_opex)
+                    updates.append(f"Sub Branch Opex budget updated to {new_sub_branch_opex}")
+            
+            # Update OPEX Budget for Supplier
+            if opex_total > 0 and hierarchy_data['branch'] and hierarchy_data['branch'].get('custom_supplier'):
+                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
+                if supplier_opex > 0:
+                    new_supplier_opex = supplier_opex - opex_total
+                    frappe.db.set_value('Supplier', hierarchy_data['branch'].get('custom_supplier'), 'custom_opex_budget', new_supplier_opex)
+                    updates.append(f"Supplier Opex budget updated to {new_supplier_opex}")
+        
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": "Budgets updated successfully",
+            "updates": updates
+        }
+    
+    except Exception as e:
+        frappe.log_error(f"Error updating budgets: {str(e)}", "Budget Update Error")
+        return {
+            "status": "error",
+            "message": f"Error updating budgets: {str(e)}"
+        }
+    
+@frappe.whitelist()
+def update_budgets_for_modified_po(doc_name):
+    """
+    Update budgets when a Purchase Order is modified by only accounting for
+    the difference in CAPEX/OPEX amounts.
+    """
+    try:
+        # Get the current Purchase Order
+        current_po = frappe.get_doc("Purchase Order", doc_name)
+        
+        # Get the last saved CAPEX/OPEX totals from custom fields
+        prev_capex_total = flt(current_po.get('custom_last_capex_total', 0))
+        prev_opex_total = flt(current_po.get('custom_last_opex_total', 0))
+        
+        # Calculate current CAPEX/OPEX totals
+        current_capex_total, current_opex_total = calculate_capex_opex_totals(current_po)
+        
+        # Calculate the delta (difference)
+        capex_delta = current_capex_total - prev_capex_total
+        opex_delta = current_opex_total - prev_opex_total
+        
+        # Only update budgets if there's a positive delta (new items added or amounts increased)
+        capex_to_deduct = max(0, capex_delta)
+        opex_to_deduct = max(0, opex_delta)
+        
+        # Update the custom fields to store the current totals for next time
+        frappe.db.set_value('Purchase Order', doc_name, {
+            'custom_last_capex_total': current_capex_total,
+            'custom_last_opex_total': current_opex_total
+        })
+        
+        # Update budgets with only the delta amounts
+        if capex_to_deduct > 0 or opex_to_deduct > 0:
+            result = update_budgets(doc_name, capex_to_deduct, opex_to_deduct)
+            result["message"] = f"Updated budgets for additional CAPEX: {capex_to_deduct}, OPEX: {opex_to_deduct}"
+            return result
+        else:
+            return {
+                "status": "success",
+                "message": "No budget updates needed - no increase in CAPEX/OPEX amounts"
+            }
+    
+    except Exception as e:
+        frappe.log_error(f"Error updating budgets for modified PO: {str(e)}", 
+                       "Budget Update Error")
+        return {
+            "status": "error",
+            "message": f"Error updating budgets: {str(e)}"
         }
