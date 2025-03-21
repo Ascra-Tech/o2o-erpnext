@@ -4,13 +4,13 @@
   "doctype": "Workflow",
   "document_type": "Purchase Order",
   "is_active": 1,
-  "modified": "2025-01-10 13:10:03.390159",
+  "modified": "2025-03-21 13:32:36.339369",
   "name": "Purchase Order",
   "override_status": 0,
   "send_email_alert": 0,
   "states": [
    {
-    "allow_edit": "Person Raising Request",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -25,7 +25,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Requisition Approver",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -40,7 +40,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Requisition Approver",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -55,7 +55,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "PO Approver",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "1",
     "is_optional_state": 0,
@@ -70,7 +70,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "PO Approver",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -85,7 +85,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Super Requisition Approval",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -100,7 +100,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Super Requisition Rejector",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -115,7 +115,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Super PO Approval",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -130,7 +130,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Super PO Rejector",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,

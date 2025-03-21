@@ -261,7 +261,8 @@ fixtures = [
     "Workflow Action",
     "Print Format",
     "Number Card",
-    "Report"
+    "Report",
+    "Workflow Action Master"
 ]
 
 doc_events = {

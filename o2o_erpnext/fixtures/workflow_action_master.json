@@ -1,0 +1,72 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-12 12:00:17.121910",
+  "name": "Approve",
+  "workflow_action_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-12 12:00:17.123460",
+  "name": "Reject",
+  "workflow_action_name": "Reject"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-12 12:00:17.125361",
+  "name": "Review",
+  "workflow_action_name": "Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-21 13:10:53.786130",
+  "name": "PO Approve",
+  "workflow_action_name": "PO Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-21 13:11:16.425494",
+  "name": "PO Reject",
+  "workflow_action_name": "PO Reject"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-21 13:11:33.237707",
+  "name": "Update",
+  "workflow_action_name": "Update"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-21 13:11:41.585124",
+  "name": "Requisition Approve",
+  "workflow_action_name": "Requisition Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-21 13:11:50.149176",
+  "name": "Requisition Reject",
+  "workflow_action_name": "Requisition Reject"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-21 13:12:05.449806",
+  "name": "Super Requisition Approve",
+  "workflow_action_name": "Super Requisition Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-03-21 13:12:13.271402",
+  "name": "Super Requisition Reject",
+  "workflow_action_name": "Super Requisition Reject"
+ }
+]
