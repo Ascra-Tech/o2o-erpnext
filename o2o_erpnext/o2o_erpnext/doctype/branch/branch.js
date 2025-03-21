@@ -43,11 +43,7 @@ frappe.ui.form.on('Branch', {
         if (frm.supplier_check_timeout) {
             clearTimeout(frm.supplier_check_timeout);
         }
-    }
-});
-
-frappe.ui.form.on('Branch', {
-    refresh: function(frm) {
+        
         // Clear existing custom buttons
         frm.remove_custom_button('Create Address');
         frm.remove_custom_button('Delete Address');
@@ -98,14 +94,10 @@ frappe.ui.form.on('Branch', {
                             reqd: 1
                         },
                         {
-                            fieldname: 'county',
-                            label: __('County'),
-                            fieldtype: 'Data'
-                        },
-                        {
                             fieldname: 'state',
                             label: __('State/Province'),
-                            fieldtype: 'Data',
+                            fieldtype: 'Select',
+                            options: '\nAndhra Pradesh\nArunachal Pradesh\nAssam\nBihar\nChhattisgarh\nGoa\nGujarat\nHaryana\nHimachal Pradesh\nJharkhand\nKarnataka\nKerala\nMadhya Pradesh\nMaharashtra\nManipur\nMeghalaya\nMizoram\nNagaland\nOdisha\nPunjab\nRajasthan\nSikkim\nTamil Nadu\nTelangana\nTripura\nUttar Pradesh\nUttarakhand\nWest Bengal\nAndaman and Nicobar Islands\nChandigarh\nDadra and Nagar Haveli and Daman and Diu\nDelhi\nJammu and Kashmir\nLadakh\nLakshadweep\nPuducherry',
                             reqd: 1
                         },
                         {
