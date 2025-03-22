@@ -248,22 +248,22 @@ scheduler_events = {
 # }
 
 fixtures = [
-    #"Role",
-    #"Role Profile",
+    "Role",
+    "Role Profile",
     "Client Script",
-    #"Server Script",
-    #"Tax Category",
-    #"Workspace",
-    #"Custom HTML Block",
+    "Server Script",
+    "Tax Category",
+    "Workspace",
+    "Custom HTML Block",
     "Custom DocPerm",
-    #"Workflow",
-    #"Workflow State",
-    #"Workflow Action",
-    #"Print Format",
-    #"Number Card",
-    #"Report",
-    #"Workflow Action Master",
-    #"Module Profile",
+    "Workflow",
+    "Workflow State",
+    "Workflow Action",
+    "Print Format",
+    "Number Card",
+    "Report",
+    "Workflow Action Master",
+    "Module Profile",
 ]
 
 doc_events = {
