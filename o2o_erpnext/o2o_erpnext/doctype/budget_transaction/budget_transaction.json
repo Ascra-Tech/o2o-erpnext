@@ -1,0 +1,170 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:transaction_id",
+ "creation": "2025-03-22 12:10:54.374365",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_qbwo",
+  "created_by",
+  "transaction_id",
+  "transaction_date",
+  "reference_doctype",
+  "reference_name",
+  "amended_from",
+  "entity_name",
+  "column_break_fqei",
+  "transaction_type",
+  "entity_type",
+  "budget_type",
+  "amount",
+  "description",
+  "status",
+  "previous_budget_value",
+  "new_budget_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_qbwo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Transaction",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "transaction_id",
+   "fieldtype": "Data",
+   "label": "Transaction ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Transaction Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Refrence DocType",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "entity_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Entity Type",
+   "options": "Supplier\nBranch\nSub Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "budget_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Budget Type",
+   "options": "CAPEX\nOPEX",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Transaction Type",
+   "options": "Credit\nDebit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "Description"
+  },
+  {
+   "fieldname": "created_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Created By",
+   "options": "User"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nCancelled\nSubmitted"
+  },
+  {
+   "fieldname": "column_break_fqei",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "entity_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Entity Name",
+   "options": "entity_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "previous_budget_value",
+   "fieldtype": "Data",
+   "label": "Previous Budget Value"
+  },
+  {
+   "fieldname": "new_budget_value",
+   "fieldtype": "Data",
+   "label": "New Budget Value"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-03-22 12:59:35.537975",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "Budget Transaction",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

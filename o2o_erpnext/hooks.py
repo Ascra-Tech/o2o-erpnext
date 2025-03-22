@@ -248,22 +248,22 @@ scheduler_events = {
 # }
 
 fixtures = [
-    "Role",
-    "Role Profile",
+    #"Role",
+    #"Role Profile",
     "Client Script",
-    "Server Script",
-    "Tax Category",
-    "Workspace",
-    "Custom HTML Block",
+    #"Server Script",
+    #"Tax Category",
+    #"Workspace",
+    #"Custom HTML Block",
     "Custom DocPerm",
-    "Workflow",
-    "Workflow State",
-    "Workflow Action",
-    "Print Format",
-    "Number Card",
-    "Report",
-    "Workflow Action Master",
-    "Module Profile",
+    #"Workflow",
+    #"Workflow State",
+    #"Workflow Action",
+    #"Print Format",
+    #"Number Card",
+    #"Report",
+    #"Workflow Action Master",
+    #"Module Profile",
 ]
 
 doc_events = {
@@ -316,4 +316,8 @@ permission_query_conditions = {
 
 doctype_js = {
     "Branch": "o2o_erpnext/doctype/branch/branch.js"
+}
+
+doctype_js = {
+    "Purchase Order": "o2o_erpnext/o2o_erpnext/purchase_order.js"
 }

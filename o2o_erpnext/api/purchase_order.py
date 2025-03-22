@@ -4,6 +4,8 @@ from frappe.utils import flt, get_datetime, today
 from frappe.exceptions import DoesNotExistError
 import datetime
 import json
+import uuid
+from frappe.utils import now
 
 @frappe.whitelist()
 def validate_and_set_purchase_order_defaults(doc_name=None):
@@ -1288,51 +1290,430 @@ def update_budgets(doc_name, capex_total=0, opex_total=0):
         }
     
 @frappe.whitelist()
-def update_budgets_for_modified_po(doc_name):
+def update_budgets_for_po(doc_name, is_new=False):
     """
-    Update budgets when a Purchase Order is modified by only accounting for
-    the difference in CAPEX/OPEX amounts.
+    Update budgets for Purchase Orders (both new and existing).
+    
+    For new POs: Deduct the full amount and initialize tracking fields
+    For existing POs: Calculate the delta from previous values and apply accordingly
+    
+    Always fetches the current budget values before making changes to account for
+    any manual budget adjustments that may have been made outside this process.
+    Records all budget transactions.
     """
     try:
         # Get the current Purchase Order
         current_po = frappe.get_doc("Purchase Order", doc_name)
         
-        # Get the last saved CAPEX/OPEX totals from custom fields
-        prev_capex_total = flt(current_po.get('custom_last_capex_total', 0))
-        prev_opex_total = flt(current_po.get('custom_last_opex_total', 0))
-        
         # Calculate current CAPEX/OPEX totals
         current_capex_total, current_opex_total = calculate_capex_opex_totals(current_po)
         
-        # Calculate the delta (difference)
-        capex_delta = current_capex_total - prev_capex_total
-        opex_delta = current_opex_total - prev_opex_total
+        # Determine delta values based on whether this is new or existing
+        if is_new == "true" or is_new is True:
+            # For new POs, use the full amounts
+            capex_delta = current_capex_total
+            opex_delta = current_opex_total
+        else:
+            # For existing POs, calculate delta from previous values
+            prev_capex_total = flt(current_po.get('custom_last_capex_total', 0))
+            prev_opex_total = flt(current_po.get('custom_last_opex_total', 0))
+            
+            capex_delta = current_capex_total - prev_capex_total
+            opex_delta = current_opex_total - prev_opex_total
         
-        # Only update budgets if there's a positive delta (new items added or amounts increased)
-        capex_to_deduct = max(0, capex_delta)
-        opex_to_deduct = max(0, opex_delta)
-        
-        # Update the custom fields to store the current totals for next time
+        # Update the tracking fields regardless of new or existing
         frappe.db.set_value('Purchase Order', doc_name, {
             'custom_last_capex_total': current_capex_total,
             'custom_last_opex_total': current_opex_total
         })
         
-        # Update budgets with only the delta amounts
-        if capex_to_deduct > 0 or opex_to_deduct > 0:
-            result = update_budgets(doc_name, capex_to_deduct, opex_to_deduct)
-            result["message"] = f"Updated budgets for additional CAPEX: {capex_to_deduct}, OPEX: {opex_to_deduct}"
-            return result
-        else:
+        # Only proceed if there are changes to apply
+        if capex_delta == 0 and opex_delta == 0:
             return {
                 "status": "success",
-                "message": "No budget updates needed - no increase in CAPEX/OPEX amounts"
+                "message": "No budget updates needed - no change in CAPEX/OPEX amounts"
             }
+        
+        # Get hierarchy data
+        hierarchy_data = get_hierarchy_data(
+            branch=current_po.custom_branch,
+            sub_branch=current_po.custom_sub_branch
+        )
+        
+        if not hierarchy_data['supplier']:
+            return {
+                "status": "error",
+                "message": "Could not fetch supplier details"
+            }
+        
+        updates = []
+        transactions = []
+        is_branch_user = is_branch_level_user()
+        
+        # For branch-level users
+        if is_branch_user:
+            if not hierarchy_data['branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch branch details"
+                }
+            
+            # Update CAPEX Budget for Branch
+            if capex_delta != 0:
+                # Record transaction for branch CAPEX
+                transaction_id = record_budget_transaction(
+                    entity_type="Branch",
+                    entity_name=current_po.custom_branch,
+                    budget_type="CAPEX",
+                    amount=-capex_delta,  # Negative for deduction
+                    reference_doctype="Purchase Order",
+                    reference_name=doc_name,
+                    description=f"CAPEX budget adjustment of {abs(capex_delta)} from Purchase Order {doc_name}"
+                )
+                
+                if transaction_id:
+                    transactions.append(transaction_id)
+                    
+                    # Get the updated value (after transaction)
+                    current_branch_capex = frappe.db.get_value('Branch', current_po.custom_branch, 'custom_capex_budget') or 0
+                    
+                    if capex_delta > 0:
+                        action = f"decreased by {abs(capex_delta)}"
+                    else:
+                        action = f"increased by {abs(capex_delta)}"
+                        
+                    updates.append(f"Branch Capex budget {action} to {current_branch_capex}")
+            
+            # Update CAPEX Budget for Supplier
+            if capex_delta != 0 and hierarchy_data['branch'].get('custom_supplier'):
+                supplier = hierarchy_data['branch'].get('custom_supplier')
+                
+                # Record transaction for supplier CAPEX
+                transaction_id = record_budget_transaction(
+                    entity_type="Supplier",
+                    entity_name=supplier,
+                    budget_type="CAPEX",
+                    amount=-capex_delta,  # Negative for deduction
+                    reference_doctype="Purchase Order",
+                    reference_name=doc_name,
+                    description=f"CAPEX budget adjustment of {abs(capex_delta)} from Purchase Order {doc_name}"
+                )
+                
+                if transaction_id:
+                    transactions.append(transaction_id)
+                    
+                    # Get the updated value (after transaction)
+                    current_supplier_capex = frappe.db.get_value('Supplier', supplier, 'custom_capex_budget') or 0
+                    
+                    if capex_delta > 0:
+                        action = f"decreased by {abs(capex_delta)}"
+                    else:
+                        action = f"increased by {abs(capex_delta)}"
+                        
+                    updates.append(f"Supplier Capex budget {action} to {current_supplier_capex}")
+            
+            # Update OPEX Budget for Branch
+            if opex_delta != 0:
+                # Record transaction for branch OPEX
+                transaction_id = record_budget_transaction(
+                    entity_type="Branch",
+                    entity_name=current_po.custom_branch,
+                    budget_type="OPEX",
+                    amount=-opex_delta,  # Negative for deduction
+                    reference_doctype="Purchase Order",
+                    reference_name=doc_name,
+                    description=f"OPEX budget adjustment of {abs(opex_delta)} from Purchase Order {doc_name}"
+                )
+                
+                if transaction_id:
+                    transactions.append(transaction_id)
+                    
+                    # Get the updated value (after transaction)
+                    current_branch_opex = frappe.db.get_value('Branch', current_po.custom_branch, 'custom_opex_budget') or 0
+                    
+                    if opex_delta > 0:
+                        action = f"decreased by {abs(opex_delta)}"
+                    else:
+                        action = f"increased by {abs(opex_delta)}"
+                        
+                    updates.append(f"Branch Opex budget {action} to {current_branch_opex}")
+            
+            # Update OPEX Budget for Supplier
+            if opex_delta != 0 and hierarchy_data['branch'].get('custom_supplier'):
+                supplier = hierarchy_data['branch'].get('custom_supplier')
+                
+                # Record transaction for supplier OPEX
+                transaction_id = record_budget_transaction(
+                    entity_type="Supplier",
+                    entity_name=supplier,
+                    budget_type="OPEX",
+                    amount=-opex_delta,  # Negative for deduction
+                    reference_doctype="Purchase Order",
+                    reference_name=doc_name,
+                    description=f"OPEX budget adjustment of {abs(opex_delta)} from Purchase Order {doc_name}"
+                )
+                
+                if transaction_id:
+                    transactions.append(transaction_id)
+                    
+                    # Get the updated value (after transaction)
+                    current_supplier_opex = frappe.db.get_value('Supplier', supplier, 'custom_opex_budget') or 0
+                    
+                    if opex_delta > 0:
+                        action = f"decreased by {abs(opex_delta)}"
+                    else:
+                        action = f"increased by {abs(opex_delta)}"
+                        
+                    updates.append(f"Supplier Opex budget {action} to {current_supplier_opex}")
+        
+        # For sub-branch users
+        else:
+            if not hierarchy_data['sub_branch']:
+                return {
+                    "status": "error",
+                    "message": "Could not fetch sub-branch details"
+                }
+            
+            # Update CAPEX Budget for Sub-Branch
+            if capex_delta != 0:
+                # Record transaction for sub-branch CAPEX
+                transaction_id = record_budget_transaction(
+                    entity_type="Sub Branch",
+                    entity_name=current_po.custom_sub_branch,
+                    budget_type="CAPEX",
+                    amount=-capex_delta,  # Negative for deduction
+                    reference_doctype="Purchase Order",
+                    reference_name=doc_name,
+                    description=f"CAPEX budget adjustment of {abs(capex_delta)} from Purchase Order {doc_name}"
+                )
+                
+                if transaction_id:
+                    transactions.append(transaction_id)
+                    
+                    # Get the updated value (after transaction)
+                    current_sub_branch_capex = frappe.db.get_value('Sub Branch', current_po.custom_sub_branch, 'capex_budget') or 0
+                    
+                    if capex_delta > 0:
+                        action = f"decreased by {abs(capex_delta)}"
+                    else:
+                        action = f"increased by {abs(capex_delta)}"
+                        
+                    updates.append(f"Sub Branch Capex budget {action} to {current_sub_branch_capex}")
+            
+            # Update CAPEX Budget for Supplier
+            if capex_delta != 0 and hierarchy_data['branch'] and hierarchy_data['branch'].get('custom_supplier'):
+                supplier = hierarchy_data['branch'].get('custom_supplier')
+                
+                # Record transaction for supplier CAPEX
+                transaction_id = record_budget_transaction(
+                    entity_type="Supplier",
+                    entity_name=supplier,
+                    budget_type="CAPEX",
+                    amount=-capex_delta,  # Negative for deduction
+                    reference_doctype="Purchase Order",
+                    reference_name=doc_name,
+                    description=f"CAPEX budget adjustment of {abs(capex_delta)} from Purchase Order {doc_name}"
+                )
+                
+                if transaction_id:
+                    transactions.append(transaction_id)
+                    
+                    # Get the updated value (after transaction)
+                    current_supplier_capex = frappe.db.get_value('Supplier', supplier, 'custom_capex_budget') or 0
+                    
+                    if capex_delta > 0:
+                        action = f"decreased by {abs(capex_delta)}"
+                    else:
+                        action = f"increased by {abs(capex_delta)}"
+                        
+                    updates.append(f"Supplier Capex budget {action} to {current_supplier_capex}")
+            
+            # Update OPEX Budget for Sub-Branch
+            if opex_delta != 0:
+                # Record transaction for sub-branch OPEX
+                transaction_id = record_budget_transaction(
+                    entity_type="Sub Branch",
+                    entity_name=current_po.custom_sub_branch,
+                    budget_type="OPEX",
+                    amount=-opex_delta,  # Negative for deduction
+                    reference_doctype="Purchase Order",
+                    reference_name=doc_name,
+                    description=f"OPEX budget adjustment of {abs(opex_delta)} from Purchase Order {doc_name}"
+                )
+                
+                if transaction_id:
+                    transactions.append(transaction_id)
+                    
+                    # Get the updated value (after transaction)
+                    current_sub_branch_opex = frappe.db.get_value('Sub Branch', current_po.custom_sub_branch, 'opex_budget') or 0
+                    
+                    if opex_delta > 0:
+                        action = f"decreased by {abs(opex_delta)}"
+                    else:
+                        action = f"increased by {abs(opex_delta)}"
+                        
+                    updates.append(f"Sub Branch Opex budget {action} to {current_sub_branch_opex}")
+            
+            # Update OPEX Budget for Supplier
+            if opex_delta != 0 and hierarchy_data['branch'] and hierarchy_data['branch'].get('custom_supplier'):
+                supplier = hierarchy_data['branch'].get('custom_supplier')
+                
+                # Record transaction for supplier OPEX
+                transaction_id = record_budget_transaction(
+                    entity_type="Supplier",
+                    entity_name=supplier,
+                    budget_type="OPEX",
+                    amount=-opex_delta,  # Negative for deduction
+                    reference_doctype="Purchase Order",
+                    reference_name=doc_name,
+                    description=f"OPEX budget adjustment of {abs(opex_delta)} from Purchase Order {doc_name}"
+                )
+                
+                if transaction_id:
+                    transactions.append(transaction_id)
+                    
+                    # Get the updated value (after transaction)
+                    current_supplier_opex = frappe.db.get_value('Supplier', supplier, 'custom_opex_budget') or 0
+                    
+                    if opex_delta > 0:
+                        action = f"decreased by {abs(opex_delta)}"
+                    else:
+                        action = f"increased by {abs(opex_delta)}"
+                        
+                    updates.append(f"Supplier Opex budget {action} to {current_supplier_opex}")
+        
+        # Store transaction IDs in Purchase Order for reference
+        if transactions:
+            transaction_ids = ','.join(transactions)
+            # Add a custom field in Purchase Order to store budget transaction IDs
+            if not hasattr(current_po, 'custom_budget_transactions'):
+                # If field doesn't exist yet, you might need to create it
+                frappe.db.set_value('Purchase Order', doc_name, 'custom_budget_transactions', transaction_ids)
+            else:
+                # Append to existing transactions
+                existing_ids = current_po.get('custom_budget_transactions', '')
+                if existing_ids:
+                    transaction_ids = f"{existing_ids},{transaction_ids}"
+                frappe.db.set_value('Purchase Order', doc_name, 'custom_budget_transactions', transaction_ids)
+        
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": "Budgets updated successfully",
+            "updates": updates,
+            "transactions": transactions
+        }
     
     except Exception as e:
-        frappe.log_error(f"Error updating budgets for modified PO: {str(e)}", 
+        frappe.log_error(f"Error updating budgets for PO: {str(e)}", 
                        "Budget Update Error")
         return {
             "status": "error",
             "message": f"Error updating budgets: {str(e)}"
         }
+    
+
+@frappe.whitelist()
+def get_current_budgets(branch=None, sub_branch=None):
+    """Get current budget values for branch and sub-branch"""
+    result = {
+        'branch': None,
+        'sub_branch': None,
+        'is_branch_user': is_branch_level_user()
+    }
+    
+    if branch:
+        branch_data = frappe.get_value('Branch', branch,
+            ['custom_supplier', 'custom_capex_budget', 'custom_opex_budget'],
+            as_dict=1
+        )
+        result['branch'] = branch_data
+    
+    if sub_branch:
+        sub_branch_data = frappe.get_value('Sub Branch', sub_branch,
+            ['branch', 'capex_budget', 'opex_budget'],
+            as_dict=1
+        )
+        result['sub_branch'] = sub_branch_data
+    
+    return result
+
+
+def record_budget_transaction(entity_type, entity_name, budget_type, amount, reference_doctype=None, reference_name=None, description=None):
+    """
+    Create a budget transaction record
+    """
+    try:
+        # Determine transaction type
+        transaction_type = "Credit" if amount >= 0 else "Debit"
+        abs_amount = abs(amount)
+        
+        # Get the appropriate field name based on entity type and budget type
+        if entity_type == "Sub Branch":
+            field_name = "capex_budget" if budget_type == "CAPEX" else "opex_budget"
+        else:  # Branch or Supplier
+            field_name = f"custom_{budget_type.lower()}_budget"
+            
+        # Get current budget value
+        current_value = frappe.db.get_value(entity_type, entity_name, field_name) or 0
+        current_value = flt(current_value)
+        
+        # Calculate new budget value
+        if transaction_type == "Credit":
+            new_value = current_value + abs_amount
+        else:  # Debit
+            new_value = current_value - abs_amount
+        
+        # Directly update the budget value
+        frappe.db.set_value(entity_type, entity_name, field_name, new_value)
+            
+        # Generate a unique transaction ID
+        transaction_id = f"BT-{uuid.uuid4().hex[:8].upper()}"
+        
+        # Create the transaction record
+        transaction = frappe.new_doc("Budget Transaction")
+        transaction.transaction_id = transaction_id
+        transaction.transaction_date = now()
+        transaction.created_by = frappe.session.user
+        transaction.entity_type = entity_type
+        transaction.entity_name = entity_name
+        transaction.budget_type = budget_type
+        transaction.amount = abs_amount  # Always store as positive
+        transaction.transaction_type = transaction_type
+        transaction.previous_budget_value = current_value
+        transaction.new_budget_value = new_value
+        
+        # Set reference document if provided
+        if reference_doctype and reference_name:
+            transaction.reference_doctype = reference_doctype
+            transaction.reference_name = reference_name
+            
+        # Set description
+        if description:
+            transaction.description = description
+        else:
+            transaction.description = f"{transaction_type} of {abs_amount} in {budget_type} budget for {entity_type} {entity_name}"
+            
+        # Save the transaction
+        transaction.insert()
+        
+        # Try to submit with explicit error catching
+        try:
+            transaction.submit()
+            frappe.db.commit()
+        except Exception as submit_error:
+            frappe.log_error(
+                message=f"Failed to submit budget transaction {transaction_id}: {str(submit_error)}", 
+                title="Budget Transaction Submit Error"
+            )
+            # Even if submission fails, we've still updated the budget value
+        
+        return transaction_id
+    
+    except Exception as e:
+        frappe.log_error(
+            message=f"Error recording budget transaction: {str(e)}", 
+            title="Budget Transaction Error"
+        )
+        return None
