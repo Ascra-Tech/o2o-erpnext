@@ -5637,11 +5637,11 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2025-01-29 13:40:29.509912",
+  "modified": "2025-03-25 12:28:42.721848",
   "module": "o2o ErpNext",
   "name": "Freight Report New",
   "prepared_report": 0,
-  "query": "SELECT `tabPurchase Invoice`.supplier as \"Entity:Link/Supplier:200\",\n        `tabSupplier`.custom_gstin__uin as \"GST Number:Data:120\",\n        `tabPurchase Receipt`.custom_state_name \"State:Data:120\",\n        `tabPurchase Invoice`.name as \"Invoice Number:Link/Purchase Invoice:120\",\n         cn.name AS \"Credit Note Number:Link/Purchase Invoice:120\",\n        `tabPurchase Invoice`.posting_date as \"Invoice Date:Date:120\",\n        `tabPurchase Receipt`.name as \"Purchase Receipt:Link/Purchase Receipt:120\",\n        `tabPurchase Receipt`.custom_weight_in_kg as \"Box Quantity\t:Int:120\",\n        `tabPurchase Receipt`.custom_rate_per_kg as \"Freight Rate:Int:120\",\n        `tabPurchase Receipt`.custom_freight_tax_rate_ as \"Gst Rate:Int:120\",\n        `tabPurchase Receipt`.custom_freight_amount as \"Freight Amount:Int:120\",\n        `tabPurchase Receipt`.custom_cgst_amount as \"CGST:Currency:120\",\n        `tabPurchase Receipt`.custom_sgst_amount as \"SGST:Currency:120\",\n        `tabPurchase Receipt`.custom_igst_amount as \"IGST:Currency:120\",\n        (`tabPurchase Receipt`.custom_freight_amount + `tabPurchase Receipt`.custom_cgst_amount + `tabPurchase Receipt`.custom_sgst_amount + `tabPurchase Receipt`.custom_igst_amount) as \"Total Freight Amount:Currency:120\"\n        \nFROM `tabPurchase Invoice`\nINNER JOIN `tabPurchase Invoice Freight Cost` on `tabPurchase Invoice`.name = `tabPurchase Invoice Freight Cost`.parent\nINNER JOIN `tabSupplier` on `tabSupplier`.name = `tabPurchase Invoice`.supplier\nINNER JOIN `tabPurchase Receipt` on `tabPurchase Invoice Freight Cost`.purchase_receipt = `tabPurchase Receipt`.name\nLEFT JOIN \n    `tabPurchase Invoice` AS cn\nON \n    cn.return_against = `tabPurchase Invoice`.name",
+  "query": "SELECT `tabPurchase Invoice`.supplier as \"Entity:Link/Supplier:200\",\n        `tabSupplier`.gstin as \"GST Number:Data:120\",\n        `tabPurchase Receipt`.custom_state_name \"State:Data:120\",\n        `tabPurchase Invoice`.name as \"Invoice Number:Link/Purchase Invoice:120\",\n         cn.name AS \"Credit Note Number:Link/Purchase Invoice:120\",\n        `tabPurchase Invoice`.posting_date as \"Invoice Date:Date:120\",\n        `tabPurchase Receipt`.name as \"Purchase Receipt:Link/Purchase Receipt:120\",\n        `tabPurchase Receipt`.custom_weight_in_kg as \"Box Quantity\t:Int:120\",\n        `tabPurchase Receipt`.custom_rate_per_kg as \"Freight Rate:Int:120\",\n        `tabPurchase Receipt`.custom_freight_tax_rate_ as \"Gst Rate:Int:120\",\n        `tabPurchase Receipt`.custom_freight_amount as \"Freight Amount:Int:120\",\n        `tabPurchase Receipt`.custom_cgst_amount as \"CGST:Currency:120\",\n        `tabPurchase Receipt`.custom_sgst_amount as \"SGST:Currency:120\",\n        `tabPurchase Receipt`.custom_igst_amount as \"IGST:Currency:120\",\n        (`tabPurchase Receipt`.custom_freight_amount + `tabPurchase Receipt`.custom_cgst_amount + `tabPurchase Receipt`.custom_sgst_amount + `tabPurchase Receipt`.custom_igst_amount) as \"Total Freight Amount:Currency:120\"\n        \nFROM `tabPurchase Invoice`\nINNER JOIN `tabPurchase Invoice Freight Cost` on `tabPurchase Invoice`.name = `tabPurchase Invoice Freight Cost`.parent\nINNER JOIN `tabSupplier` on `tabSupplier`.name = `tabPurchase Invoice`.supplier\nINNER JOIN `tabPurchase Receipt` on `tabPurchase Invoice Freight Cost`.purchase_receipt = `tabPurchase Receipt`.name\nLEFT JOIN \n    `tabPurchase Invoice` AS cn\nON \n    cn.return_against = `tabPurchase Invoice`.name",
   "ref_doctype": "Purchase Invoice",
   "reference_report": null,
   "report_name": "Freight Report New",
@@ -5823,11 +5823,11 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2025-01-29 13:48:15.520084",
+  "modified": "2025-03-25 12:29:30.318742",
   "module": "o2o ErpNext",
   "name": "Invoice Report New",
   "prepared_report": 0,
-  "query": "SELECT `tabPurchase Invoice`.supplier as \"Entity:Link/Supplier:200\",\n        `tabPurchase Invoice`.posting_date as \"Invoice Date:Date:120\",\n         cn.name AS \"Credit Note Number:Link/Purchase Invoice:120\",\n        `tabPurchase Invoice`.name as \"Invoice Number:Link/Purchase Invoice:200\",\n        `tabPurchase Invoice Item`.item_group as \"Product Category:Link/Item Group:200\",\n        `tabPurchase Invoice`.total as \"Gross Amount:Currency:200\",\n        `tabPurchase Invoice`.custom_5_goods_value as \"Taxable@5:Currency:200\",\n        `tabPurchase Invoice`.custom_12_goods_value as \"Taxable@12:Currency:200\",\n        `tabPurchase Invoice`.custom_18_goods_value as \"Taxable@18:Currency:200\",\n        `tabPurchase Invoice`.custom_28_goods_value as \"Taxable@28:Currency:200\",\n        `tabPurchase Invoice`.custom_total_cgst as \"CGST:Currency:200\",\n        `tabPurchase Invoice`.custom_total_sgst as \"SGST:Currency:200\",\n        `tabPurchase Invoice`.custom_total_igst as \"IGST:Currency:200\",\n        `tabPurchase Invoice`.custom_freight_amount as \"Freight Cost:Currency:200\",\n        `tabPurchase Invoice`.custom_freight_taxes as \"Freight GST:Currency:200\",\n        (`tabPurchase Invoice`.total + `tabPurchase Invoice`.custom_total_cgst + `tabPurchase Invoice`.custom_total_sgst + `tabPurchase Invoice`.custom_total_igst + `tabPurchase Invoice`.custom_freight_amount + `tabPurchase Invoice`.custom_freight_taxes) as \"Total:Currency:200\",\n        `tabSupplier`.custom_gstin__uin as \"GST Number:Data:120\"\n        \nFROM `tabPurchase Invoice`\nINNER JOIN `tabPurchase Invoice Item`\nON `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.parent\nINNER JOIN `tabSupplier` on `tabSupplier`.name = `tabPurchase Invoice`.supplier\nLEFT JOIN \n    `tabPurchase Invoice` AS cn\nON \n    cn.return_against = `tabPurchase Invoice`.name\ngroup by `tabPurchase Invoice`.name",
+  "query": "SELECT `tabPurchase Invoice`.supplier as \"Entity:Link/Supplier:200\",\n        `tabPurchase Invoice`.posting_date as \"Invoice Date:Date:120\",\n         cn.name AS \"Credit Note Number:Link/Purchase Invoice:120\",\n        `tabPurchase Invoice`.name as \"Invoice Number:Link/Purchase Invoice:200\",\n        `tabPurchase Invoice Item`.item_group as \"Product Category:Link/Item Group:200\",\n        `tabPurchase Invoice`.total as \"Gross Amount:Currency:200\",\n        `tabPurchase Invoice`.custom_5_goods_value as \"Taxable@5:Currency:200\",\n        `tabPurchase Invoice`.custom_12_goods_value as \"Taxable@12:Currency:200\",\n        `tabPurchase Invoice`.custom_18_goods_value as \"Taxable@18:Currency:200\",\n        `tabPurchase Invoice`.custom_28_goods_value as \"Taxable@28:Currency:200\",\n        `tabPurchase Invoice`.custom_total_cgst as \"CGST:Currency:200\",\n        `tabPurchase Invoice`.custom_total_sgst as \"SGST:Currency:200\",\n        `tabPurchase Invoice`.custom_total_igst as \"IGST:Currency:200\",\n        `tabPurchase Invoice`.custom_freight_amount as \"Freight Cost:Currency:200\",\n        `tabPurchase Invoice`.custom_freight_taxes as \"Freight GST:Currency:200\",\n        (`tabPurchase Invoice`.total + `tabPurchase Invoice`.custom_total_cgst + `tabPurchase Invoice`.custom_total_sgst + `tabPurchase Invoice`.custom_total_igst + `tabPurchase Invoice`.custom_freight_amount + `tabPurchase Invoice`.custom_freight_taxes) as \"Total:Currency:200\",\n        `tabSupplier`.gstin as \"GST Number:Data:120\"\n        \nFROM `tabPurchase Invoice`\nINNER JOIN `tabPurchase Invoice Item`\nON `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.parent\nINNER JOIN `tabSupplier` on `tabSupplier`.name = `tabPurchase Invoice`.supplier\nLEFT JOIN \n    `tabPurchase Invoice` AS cn\nON \n    cn.return_against = `tabPurchase Invoice`.name\ngroup by `tabPurchase Invoice`.name",
   "ref_doctype": "Purchase Invoice",
   "reference_report": null,
   "report_name": "Invoice Report New",
@@ -9049,6 +9049,116 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Accounts User"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"columns\":[{\"fieldname\":\"supplier\",\"fieldtype\":\"Link\",\"label\":\"Supplier\",\"insert_after_index\":0,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"options\":\"Supplier\",\"width\":100,\"id\":\"supplier\",\"name\":\"Supplier\",\"editable\":false,\"compareValue\":null},{\"label\":\"Purchase Order\",\"fieldname\":\"purchase_order\",\"fieldtype\":\"Link\",\"options\":\"Purchase Order\",\"width\":160,\"id\":\"purchase_order\",\"name\":\"Purchase Order\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"transaction_date\",\"fieldtype\":\"Date\",\"label\":\"Created At\",\"insert_after_index\":2,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"width\":100,\"id\":\"transaction_date\",\"name\":\"Created At\",\"editable\":false},{\"fieldname\":\"custom__approved_at\",\"fieldtype\":\"Datetime\",\"label\":\" Approved At\",\"insert_after_index\":3,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"width\":100,\"id\":\"custom__approved_at\",\"name\":\" Approved At\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"custom_total_pl\",\"fieldtype\":\"Currency\",\"label\":\"Total P&L\",\"insert_after_index\":4,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"width\":100,\"id\":\"custom_total_pl\",\"name\":\"Total P&L\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"base_grand_total\",\"fieldtype\":\"Currency\",\"label\":\"Grand Total (Company Currency)\",\"insert_after_index\":4,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"options\":\"Company:company:default_currency\",\"width\":100,\"id\":\"base_grand_total\",\"name\":\"Grand Total (Company Currency)\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"custom_total_purchase_cost\",\"fieldtype\":\"Currency\",\"label\":\"Total Purchase Cost\",\"insert_after_index\":5,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"width\":100,\"id\":\"custom_total_purchase_cost\",\"name\":\"Total Purchase Cost\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"custom_branch\",\"fieldtype\":\"Link\",\"label\":\"Branch\",\"insert_after_index\":7,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"options\":\"Branch\",\"width\":100,\"id\":\"custom_branch\",\"name\":\"Branch\",\"editable\":false,\"compareValue\":null}],\"filters\":{\"company\":\"o2op2p\",\"from_date\":\"2025-02-25\",\"to_date\":\"2025-03-25\",\"name\":[],\"status\":[]}}",
+  "letter_head": null,
+  "modified": "2025-03-25 13:42:25.983781",
+  "module": "Buying",
+  "name": "P&L Dashboard",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Purchase Order",
+  "reference_report": "Purchase Order Analysis",
+  "report_name": "P&L Dashboard",
+  "report_script": null,
+  "report_type": "Custom Report",
+  "roles": [
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Person Raising Request"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "PO Approver"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Supplier"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Super PO Approval"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "requisition rejector"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "PO Rejector"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Vendor User"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Entity Admin User"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Person Raising Request Branch"
+   },
+   {
+    "parent": "P&L Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
    }
   ],
   "timeout": 0
