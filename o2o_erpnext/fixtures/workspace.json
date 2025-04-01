@@ -14052,7 +14052,7 @@
  },
  {
   "charts": [],
-  "content": "[{\"id\":\"ky9NSobqTB\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Product Details</span>\",\"col\":12}},{\"id\":\"pAeNgi797H\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Category Master\",\"col\":3}},{\"id\":\"rkruwlLpgG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sub Category Master\",\"col\":3}},{\"id\":\"KLQIAGHGuD\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Brand Master\",\"col\":3}},{\"id\":\"kqjvg5vJWc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Product Master\",\"col\":3}}]",
+  "content": "[{\"id\":\"ky9NSobqTB\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Product Details</span>\",\"col\":12}},{\"id\":\"pAeNgi797H\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Category Master\",\"col\":3}},{\"id\":\"rkruwlLpgG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sub Category Master\",\"col\":3}},{\"id\":\"KLQIAGHGuD\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Brand Master\",\"col\":3}},{\"id\":\"kqjvg5vJWc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Product Master\",\"col\":3}},{\"id\":\"aZGyGVjOff\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Create Catalog\",\"col\":3}},{\"id\":\"83kR6-375B\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Product Restrictions\",\"col\":3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -14063,13 +14063,27 @@
   "is_hidden": 0,
   "label": "Product",
   "links": [],
-  "modified": "2025-03-13 19:26:22.478176",
+  "modified": "2025-04-01 12:35:38.196875",
   "module": null,
   "name": "Product",
   "number_cards": [
    {
     "label": "Category Master",
     "number_card_name": "Category Master",
+    "parent": "Product",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "Product Restrictions",
+    "number_card_name": "Product Restrictions",
+    "parent": "Product",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "Create Catalog",
+    "number_card_name": "Create Catalog",
     "parent": "Product",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
