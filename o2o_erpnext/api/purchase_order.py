@@ -30,17 +30,37 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
             if po_doc.supplier:
                 po_doc.custom_supplier_code = po_doc.supplier[:3].upper() if po_doc.supplier else ""
             
-        approver_info = None
+        branch_approver_info = None
         if employee.branch:
             po_doc.custom_branch = employee.branch
             
             # Find branch approver once we set the branch
-            approver_info = get_branch_approver_info(employee.branch)
-            if approver_info:
-                po_doc.custom__approver_name_and_email = approver_info
+            branch_approver_info = get_branch_approver_info(employee.branch)
+            if branch_approver_info:
+                po_doc.custom__approver_name_and_email = branch_approver_info
+                
+                # Extract and set the PO approver email
+                approver_parts = branch_approver_info.split(':', 1)
+                if len(approver_parts) > 1:
+                    po_doc.custom_po_approver_email = approver_parts[1]
             
+        requisition_approver_info = None
         if employee.custom_sub_branch:
             po_doc.custom_sub_branch = employee.custom_sub_branch
+            
+            # Only set requisition approver if approval flow is "3 way"
+            if employee.custom_supplier:
+                approval_flow = frappe.db.get_value("Supplier", employee.custom_supplier, "custom_approval_flow")
+                if approval_flow == "3 way":
+                    # Find requisition approver once we set the sub-branch
+                    requisition_approver_info = get_sub_branch_requisition_approver(employee.custom_sub_branch)
+                    if requisition_approver_info:
+                        po_doc.custom_requisition_approver_name_and_email = requisition_approver_info
+                        
+                        # Extract and set the requisition approver email
+                        approver_parts = requisition_approver_info.split(':', 1)
+                        if len(approver_parts) > 1:
+                            po_doc.custom_requisition_approver_email = approver_parts[1]
         
         # Set order code
         update_order_code(po_doc)
@@ -54,8 +74,19 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
                 "custom_order_code": po_doc.custom_order_code if hasattr(po_doc, 'custom_order_code') else ""
             }
             
-            if approver_info:
-                response_data["custom__approver_name_and_email"] = approver_info
+            if branch_approver_info:
+                response_data["custom__approver_name_and_email"] = branch_approver_info
+                # Also include the PO approver email in the response
+                approver_parts = branch_approver_info.split(':', 1)
+                if len(approver_parts) > 1:
+                    response_data["custom_po_approver_email"] = approver_parts[1]
+                
+            if requisition_approver_info:
+                response_data["custom_requisition_approver_name_and_email"] = requisition_approver_info
+                # Also include the requisition approver email in the response
+                approver_parts = requisition_approver_info.split(':', 1)
+                if len(approver_parts) > 1:
+                    response_data["custom_requisition_approver_email"] = approver_parts[1]
                 
             return {
                 "status": "success",
@@ -180,8 +211,13 @@ def set_branch_approver_for_purchase_order(purchase_order_name):
         # Format and set the approver information
         approver_info = f"{approver.employee_name}:{approver.custom_user_email}"
         
-        # Update the Purchase Order
+        # Update the Purchase Order with approver name and email
         frappe.db.set_value("Purchase Order", purchase_order_name, "custom__approver_name_and_email", approver_info)
+        
+        # Extract and set the email in the dedicated field
+        if approver.custom_user_email:
+            frappe.db.set_value("Purchase Order", purchase_order_name, "custom_po_approver_email", approver.custom_user_email)
+        
         frappe.db.commit()
         
         return {
@@ -1717,3 +1753,128 @@ def record_budget_transaction(entity_type, entity_name, budget_type, amount, ref
             title="Budget Transaction Error"
         )
         return None
+
+@frappe.whitelist()
+def get_sub_branch_requisition_approver(sub_branch):
+    """Helper function to find sub-branch requisition approver information"""
+    try:
+        if not sub_branch:
+            return None
+            
+        # Search for Employee with Requisition Approver role in custom_roles
+        # and matching sub-branch
+        employees = frappe.get_all(
+            "Employee",
+            filters={
+                "custom_sub_branch": sub_branch,
+                "custom_roles": ["like", "%Requisition Approver%"]
+            },
+            fields=["name", "employee_name", "custom_user_email"]
+        )
+        
+        # If no employee found with exact match, try searching employees with access to this sub-branch
+        if not employees:
+            # Try to find employees with this sub-branch in their custom_sub_branch_list
+            frappe.log_error(f"No direct requisition approver found for {sub_branch}, searching for employees with access", "Requisition Approver Debug")
+            
+            # Get all employees with Requisition Approver role
+            potential_approvers = frappe.get_all(
+                "Employee",
+                filters={
+                    "custom_roles": ["like", "%Requisition Approver%"]
+                },
+                fields=["name", "employee_name", "custom_user_email"]
+            )
+            
+            # For each potential approver, check if they have access to this sub-branch
+            for approver in potential_approvers:
+                # Get the employee's sub branch list
+                sub_branches = frappe.get_all(
+                    "Sub Branch Table",
+                    filters={"parent": approver.name},
+                    fields=["sub_branch"],
+                    pluck="sub_branch"
+                )
+                
+                # If this sub-branch is in their list, use this approver
+                if sub_branch in sub_branches:
+                    employees = [approver]
+                    break
+        
+        if not employees:
+            frappe.log_error(f"No requisition approver found for sub-branch: {sub_branch}", "Requisition Approver Debug")
+            return None
+            
+        # Take the first matching employee
+        approver = employees[0]
+        
+        # Format approver information
+        return f"{approver.employee_name}:{approver.custom_user_email}"
+            
+    except Exception as e:
+        frappe.log_error(f"Error finding sub-branch requisition approver: {str(e)}", 
+                        "Get Sub-Branch Requisition Approver Error")
+        return None
+
+@frappe.whitelist()
+def set_requisition_approver_for_purchase_order(purchase_order_name):
+    try:
+        # Get the Purchase Order document
+        po_doc = frappe.get_doc("Purchase Order", purchase_order_name)
+        
+        # Check if supplier has "3 way" approval flow
+        if po_doc.supplier:
+            approval_flow = frappe.db.get_value("Supplier", po_doc.supplier, "custom_approval_flow")
+            if approval_flow != "3 way":
+                # For non-3-way approval, don't set requisition approver
+                return {
+                    "status": "info",
+                    "message": _("Requisition Approver only required for 3-way approval flow")
+                }
+        
+        # Get the sub-branch from Purchase Order
+        sub_branch = po_doc.custom_sub_branch
+        
+        if not sub_branch:
+            frappe.throw(_("Purchase Order does not have a sub-branch assigned"), 
+                        title=_("Missing Sub-Branch"))
+        
+        # Get the requisition approver
+        approver_info = get_sub_branch_requisition_approver(sub_branch)
+        
+        if not approver_info:
+            frappe.msgprint(
+                _("No Requisition Approver found for sub-branch {0}").format(sub_branch),
+                title=_("Approver Not Found")
+            )
+            return {
+                "status": "warning",
+                "message": _("No Requisition Approver found")
+            }
+        
+        # Update the Purchase Order with approver name and email
+        frappe.db.set_value("Purchase Order", purchase_order_name, 
+                          "custom_requisition_approver_name_and_email", approver_info)
+        
+        # Extract and set the email in the dedicated email field
+        approver_parts = approver_info.split(':', 1)
+        if len(approver_parts) > 1:
+            req_approver_email = approver_parts[1]
+            frappe.db.set_value("Purchase Order", purchase_order_name, 
+                              "custom_requisition_approver_email", req_approver_email)
+        
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": _("Requisition Approver set successfully"),
+            "approver": approver_info
+        }
+            
+    except Exception as e:
+        frappe.log_error(f"Error setting requisition approver: {str(e)}", 
+                        "Set Requisition Approver Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
