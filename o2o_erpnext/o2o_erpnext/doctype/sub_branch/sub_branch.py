@@ -63,8 +63,7 @@ class SubBranch(Document):
         # Copy fields from address_data to the address document
         fields_to_copy = [
             "address_line1", "address_line2", "city", "county", "state", 
-            "country", "pincode", "phone", "email_id", "gstin", 
-            "gst_category", "tax_category"
+            "country", "pincode", "gstin", "gst_category", "tax_category"
         ]
         
         for field in fields_to_copy:
