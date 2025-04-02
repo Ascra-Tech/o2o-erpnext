@@ -982,24 +982,36 @@ def validate_order_value(doc):
                     "message": "Could not fetch branch details"
                 }
             
-            # Branch
+            # Branch minimum check
             branch_min = flt(hierarchy_data['branch'].get('custom_minimum_order_value'))
-            branch_max = flt(hierarchy_data['branch'].get('custom_maximum_order_value'))
-            
-            if (branch_min != 0 or branch_max != 0) and (total < branch_min or total > branch_max):
+            if branch_min > 0 and total < branch_min:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must be between Branch's minimum value {branch_min} and maximum value {branch_max}"
+                    "message": f"Total order value ({total}) must be at least {branch_min}"
                 }
             
-            # Supplier
-            supplier_min = flt(hierarchy_data['supplier'].get('custom_minimum_order_value'))
-            supplier_max = flt(hierarchy_data['supplier'].get('custom_maximum_order_value'))
-            
-            if (supplier_min != 0 or supplier_max != 0) and (total < supplier_min or total > supplier_max):
+            # Branch maximum check
+            branch_max = flt(hierarchy_data['branch'].get('custom_maximum_order_value'))
+            if branch_max > 0 and total > branch_max:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must be between Supplier's minimum value {supplier_min} and maximum value {supplier_max}"
+                    "message": f"Total order value ({total}) must not exceed {branch_max}"
+                }
+            
+            # Supplier minimum check
+            supplier_min = flt(hierarchy_data['supplier'].get('custom_minimum_order_value'))
+            if supplier_min > 0 and total < supplier_min:
+                return {
+                    "status": "error",
+                    "message": f"Total order value ({total}) must be at least {supplier_min}"
+                }
+            
+            # Supplier maximum check
+            supplier_max = flt(hierarchy_data['supplier'].get('custom_maximum_order_value'))
+            if supplier_max > 0 and total > supplier_max:
+                return {
+                    "status": "error",
+                    "message": f"Total order value ({total}) must not exceed {supplier_max}"
                 }
         
         # For sub-branch users
@@ -1010,24 +1022,36 @@ def validate_order_value(doc):
                     "message": "Could not fetch sub-branch details"
                 }
             
-            # Sub-Branch
+            # Sub-Branch minimum check
             sub_branch_min = flt(hierarchy_data['sub_branch'].get('minimum_order_value'))
-            sub_branch_max = flt(hierarchy_data['sub_branch'].get('maximum_order_value'))
-            
-            if (sub_branch_min != 0 or sub_branch_max != 0) and (total < sub_branch_min or total > sub_branch_max):
+            if sub_branch_min > 0 and total < sub_branch_min:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must be between Sub-branch's minimum value {sub_branch_min} and maximum value {sub_branch_max}"
+                    "message": f"Total order value ({total}) must be at least {sub_branch_min}"
                 }
             
-            # Supplier
-            supplier_min = flt(hierarchy_data['supplier'].get('custom_minimum_order_value'))
-            supplier_max = flt(hierarchy_data['supplier'].get('custom_maximum_order_value'))
-            
-            if (supplier_min != 0 or supplier_max != 0) and (total < supplier_min or total > supplier_max):
+            # Sub-Branch maximum check
+            sub_branch_max = flt(hierarchy_data['sub_branch'].get('maximum_order_value'))
+            if sub_branch_max > 0 and total > sub_branch_max:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must be between Supplier's minimum value {supplier_min} and maximum value {supplier_max}"
+                    "message": f"Total order value ({total}) must not exceed {sub_branch_max}"
+                }
+            
+            # Supplier minimum check
+            supplier_min = flt(hierarchy_data['supplier'].get('custom_minimum_order_value'))
+            if supplier_min > 0 and total < supplier_min:
+                return {
+                    "status": "error",
+                    "message": f"Total order value ({total}) must be at least {supplier_min}"
+                }
+            
+            # Supplier maximum check
+            supplier_max = flt(hierarchy_data['supplier'].get('custom_maximum_order_value'))
+            if supplier_max > 0 and total > supplier_max:
+                return {
+                    "status": "error",
+                    "message": f"Total order value ({total}) must not exceed {supplier_max}"
                 }
         
         return {"status": "success"}
