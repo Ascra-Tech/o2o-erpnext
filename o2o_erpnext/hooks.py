@@ -308,6 +308,13 @@ doc_events = {
     }
 }
 
+doc_events = {
+    "Supplier": {
+        "after_insert": "o2o_erpnext.supplier_hooks.create_party_specific_item",
+        # "before_delete": "o2o_erpnext.supplier_hooks.delete_party_specific_items"
+    }
+}
+
 permission_query_conditions = {
     "Purchase Order": "o2o_erpnext.api.purchase_order.get_permission_query_conditions"
 }

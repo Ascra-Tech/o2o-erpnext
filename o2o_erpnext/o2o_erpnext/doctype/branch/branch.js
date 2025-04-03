@@ -120,17 +120,6 @@ frappe.ui.form.on('Branch', {
                             fieldtype: 'Column Break'
                         },
                         {
-                            fieldname: 'email_id',
-                            label: __('Email Address'),
-                            fieldtype: 'Data',
-                            options: 'Email'
-                        },
-                        {
-                            fieldname: 'phone',
-                            label: __('Phone'),
-                            fieldtype: 'Data'
-                        },
-                        {
                             fieldname: 'is_primary_address',
                             label: __('Preferred Billing Address'),
                             fieldtype: 'Check',
