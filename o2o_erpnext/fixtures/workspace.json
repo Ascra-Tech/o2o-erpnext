@@ -14052,7 +14052,7 @@
  },
  {
   "charts": [],
-  "content": "[{\"id\":\"ky9NSobqTB\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Product Details</span>\",\"col\":12}},{\"id\":\"pAeNgi797H\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Category Master\",\"col\":3}},{\"id\":\"rkruwlLpgG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sub Category Master\",\"col\":3}},{\"id\":\"KLQIAGHGuD\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Brand Master\",\"col\":3}},{\"id\":\"kqjvg5vJWc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Product Master\",\"col\":3}},{\"id\":\"aZGyGVjOff\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Create Catalog\",\"col\":3}},{\"id\":\"83kR6-375B\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Product Restrictions\",\"col\":3}}]",
+  "content": "[{\"id\":\"ky9NSobqTB\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Product Details</span>\",\"col\":12}},{\"id\":\"gBw2MQBDNp\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item / Products\",\"col\":4}},{\"id\":\"COe5me6tWT\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Product Catalouge\",\"col\":4}},{\"id\":\"6UcktQbDpK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Restrict Products\",\"col\":4}},{\"id\":\"wWOe_qyR1Q\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"KLQIAGHGuD\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Brand Master\",\"col\":4}},{\"id\":\"rkruwlLpgG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sub Category Master\",\"col\":4}},{\"id\":\"pAeNgi797H\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Category Master\",\"col\":4}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -14063,27 +14063,13 @@
   "is_hidden": 0,
   "label": "Product",
   "links": [],
-  "modified": "2025-04-01 12:35:38.196875",
+  "modified": "2025-04-04 14:22:54.560834",
   "module": null,
   "name": "Product",
   "number_cards": [
    {
     "label": "Category Master",
     "number_card_name": "Category Master",
-    "parent": "Product",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
-    "label": "Product Restrictions",
-    "number_card_name": "Product Restrictions",
-    "parent": "Product",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
-    "label": "Create Catalog",
-    "number_card_name": "Create Catalog",
     "parent": "Product",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
@@ -14098,13 +14084,6 @@
    {
     "label": "Brand Master",
     "number_card_name": "Brand Master",
-    "parent": "Product",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
-    "label": "Product Master",
-    "number_card_name": "Product Master",
     "parent": "Product",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
@@ -14135,7 +14114,56 @@
    }
   ],
   "sequence_id": 32.0,
-  "shortcuts": [],
+  "shortcuts": [
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Item / Products",
+    "link_to": null,
+    "parent": "Product",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "URL",
+    "url": "/app/item/view/list"
+   },
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Restrict Products",
+    "link_to": null,
+    "parent": "Product",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "URL",
+    "url": "/app/party-specific-item/view/list"
+   },
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Product Catalouge",
+    "link_to": null,
+    "parent": "Product",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "URL",
+    "url": "/app/item-price/view/list"
+   }
+  ],
   "title": "Product"
  },
  {
@@ -14173,7 +14201,7 @@
  },
  {
   "charts": [],
-  "content": "[{\"id\":\"ZWSNqrMQfy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Entity</span>\",\"col\":12}},{\"id\":\"1UZjaNRmbB\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Entity Master\",\"col\":3}},{\"id\":\"4f1-gVmhiB\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sub Entity Master\",\"col\":3}},{\"id\":\"7NTB440T5r\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Branch Master\",\"col\":3}},{\"id\":\"eIlqgqcrGw\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Vendor Master\",\"col\":3}},{\"id\":\"xB7fiPsG5x\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"GST Master\",\"col\":3}},{\"id\":\"xdFw9Us1Mc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"AMC Master\",\"col\":3}},{\"id\":\"1-fOad78cD\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Bank Master\",\"col\":3}}]",
+  "content": "[{\"id\":\"ZWSNqrMQfy\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Entity</span>\",\"col\":12}},{\"id\":\"9pccdrjxrv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Entity\",\"col\":3}},{\"id\":\"IaZD-P6TE_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sub Entity\",\"col\":3}},{\"id\":\"w4QjfBTbiZ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Branch\",\"col\":3}},{\"id\":\"k1UTdAFhp0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sub branch\",\"col\":3}},{\"id\":\"-F8BnBnMlX\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"eIlqgqcrGw\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Vendor Master\",\"col\":3}},{\"id\":\"xB7fiPsG5x\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"GST Master\",\"col\":3}},{\"id\":\"xdFw9Us1Mc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"AMC Master\",\"col\":3}},{\"id\":\"1-fOad78cD\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Bank Master\",\"col\":3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -14184,7 +14212,7 @@
   "is_hidden": 0,
   "label": "Entity",
   "links": [],
-  "modified": "2025-03-13 19:26:22.505100",
+  "modified": "2025-04-04 13:56:59.485365",
   "module": null,
   "name": "Entity",
   "number_cards": [
@@ -14196,22 +14224,8 @@
     "parenttype": "Workspace"
    },
    {
-    "label": "Entity Master",
-    "number_card_name": "Entity Master",
-    "parent": "Entity",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
     "label": "GST Master",
     "number_card_name": "GST Master",
-    "parent": "Entity",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
-    "label": "Sub Entity Master",
-    "number_card_name": "Sub Entity Master",
     "parent": "Entity",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
@@ -14226,13 +14240,6 @@
    {
     "label": "Vendor Master",
     "number_card_name": "Vendor Master",
-    "parent": "Entity",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
-    "label": "Branch Master",
-    "number_card_name": "Branch Master",
     "parent": "Entity",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
@@ -14263,7 +14270,72 @@
    }
   ],
   "sequence_id": 33.0,
-  "shortcuts": [],
+  "shortcuts": [
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Sub Entity",
+    "link_to": null,
+    "parent": "Entity",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "URL",
+    "url": "/app/supplier?custom_sub_entity=1"
+   },
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Entity",
+    "link_to": null,
+    "parent": "Entity",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "URL",
+    "url": "/app/supplier?custom_entity=1"
+   },
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Branch",
+    "link_to": null,
+    "parent": "Entity",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "URL",
+    "url": "/app/branch/view/list"
+   },
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Sub branch",
+    "link_to": null,
+    "parent": "Entity",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "URL",
+    "url": "/app/sub-branch/view/list"
+   }
+  ],
   "title": "Entity"
  },
  {

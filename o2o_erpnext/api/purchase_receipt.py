@@ -75,6 +75,114 @@ def get_supplier_vendors(supplier):
                         "Get Supplier Vendors Error")
         return []
 
+@frappe.whitelist()
+def check_linked_purchase_invoices(purchase_receipt):
+    """Check if a Purchase Receipt has linked Purchase Invoices in Draft or Submitted status"""
+    if not purchase_receipt:
+        return {"success": False, "message": "Purchase Receipt name is required"}
+   
+    try:
+        # Log start of check (concise)
+        frappe.log_error(f"Checking PR: {purchase_receipt}", "PI Check")
+        
+        # Direct query approach with docstatus check
+        linked_invoices = frappe.db.sql("""
+            SELECT pi.name, pi.status, pi.docstatus
+            FROM `tabPurchase Invoice` pi
+            JOIN `tabPurchase Invoice Item` pii ON pii.parent = pi.name
+            WHERE pii.purchase_receipt = %s
+            AND pi.docstatus IN (0, 1)
+        """, purchase_receipt, as_dict=1)
+        
+        # Log count only to avoid truncation
+        frappe.log_error(f"Found {len(linked_invoices)} invoices", "PI Check")
+        
+        if not linked_invoices:
+            return {
+                "success": True,
+                "message": "No linked Purchase Invoices found",
+                "has_active_invoices": False,
+                "invoices": []
+            }
+        
+        # IMPORTANT: Directly consider docstatus 0 and 1 as active
+        # Instead of checking status field
+        active_invoices = []
+        for inv in linked_invoices:
+            if inv.docstatus in [0, 1]:  # 0=Draft, 1=Submitted
+                active_invoices.append(inv)
+                # Log each invoice separately to avoid truncation
+                frappe.log_error(f"Active: {inv.name} status={inv.status} docstatus={inv.docstatus}", "PI Check")
+        
+        if active_invoices:
+            return {
+                "success": True,
+                "message": f"Found {len(active_invoices)} active linked Purchase Invoices",
+                "has_active_invoices": True,
+                "invoices": active_invoices
+            }
+        else:
+            return {
+                "success": True,
+                "message": "No active linked Purchase Invoices found",
+                "has_active_invoices": False,
+                "invoices": linked_invoices
+            }
+    except Exception as e:
+        error_msg = f"Error: {str(e)}"
+        frappe.log_error(error_msg, "PI Check Error")
+        return {
+            "success": False,
+            "message": error_msg,
+            "has_active_invoices": False,
+            "invoices": []
+        }
+
+@frappe.whitelist()
+def block_invoice_creation_if_linked(purchase_receipt):
+    """
+    Checks if any linked purchase invoices exist for a purchase receipt and blocks
+    creation of new invoices if active ones are found.
+    
+    Returns:
+        dict: {
+            "allow_creation": True/False,
+            "message": str,
+            "invoices": list of invoices (if any)
+        }
+    """
+    try:
+        result = check_linked_purchase_invoices(purchase_receipt)
+        
+        if not result["success"]:
+            return {
+                "allow_creation": False,
+                "message": result["message"],
+                "invoices": []
+            }
+        
+        if result["has_active_invoices"]:
+            invoice_details = [f"{inv['name']} ({inv['status']})" for inv in result["invoices"]]
+            return {
+                "allow_creation": False,
+                "message": f"Cannot create Purchase Invoice. This Purchase Receipt is already linked to active invoices: {', '.join(invoice_details)}",
+                "invoices": result["invoices"]
+            }
+        
+        return {
+            "allow_creation": True,
+            "message": "No active Purchase Invoices found. You can create a new one.",
+            "invoices": []
+        }
+    except Exception as e:
+        frappe.log_error(f"Error in block_invoice_creation: {str(e)}", 
+                        "Purchase Receipt API Error")
+        return {
+            "allow_creation": False,
+            "message": f"Error checking linked invoices: {str(e)}",
+            "invoices": []
+        }
+
 class PurchaseReceiptValidation:
     """
     Validation logic for Purchase Receipt.
