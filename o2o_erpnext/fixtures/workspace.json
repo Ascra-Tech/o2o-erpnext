@@ -561,7 +561,7 @@
  },
  {
   "charts": [],
-  "content": "[{\"id\":\"g_ZBUxzcbW\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">User Details</span>\",\"col\":12}},{\"id\":\"xHYE8ipU-i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Role Profile\",\"col\":3}},{\"id\":\"Ye2YSD2rUz\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Employee\",\"col\":3}},{\"id\":\"2OIyYf9tFa\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"City Master\",\"col\":3}},{\"id\":\"bskgdZLoSg\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"State Master\",\"col\":3}}]",
+  "content": "[{\"id\":\"g_ZBUxzcbW\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">User Details</span>\",\"col\":12}},{\"id\":\"xHYE8ipU-i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Role Profile\",\"col\":3}},{\"id\":\"Ye2YSD2rUz\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Employee\",\"col\":3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -572,17 +572,10 @@
   "is_hidden": 0,
   "label": "Employees",
   "links": [],
-  "modified": "2025-03-20 17:13:22.625662",
+  "modified": "2025-04-05 14:09:19.718775",
   "module": null,
   "name": "Employees",
   "number_cards": [
-   {
-    "label": "City Master",
-    "number_card_name": "City Master",
-    "parent": "Employees",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
    {
     "label": "Employee",
     "number_card_name": "Employee",
@@ -593,13 +586,6 @@
    {
     "label": "Role Profile",
     "number_card_name": "User Role Profile",
-    "parent": "Employees",
-    "parentfield": "number_cards",
-    "parenttype": "Workspace"
-   },
-   {
-    "label": "State Master",
-    "number_card_name": "State Master",
     "parent": "Employees",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
