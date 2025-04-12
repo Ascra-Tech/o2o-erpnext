@@ -1,135 +1,182 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "field:sub_branch_name",
- "creation": "2025-01-04 13:33:50.169806",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "branch",
-  "custom_supplier",
-  "column_break_ewyn",
-  "branch_code",
-  "sub_branch_name",
-  "section_break_etax",
-  "minimum_order_value",
-  "opex_budget",
-  "created_at",
-  "address_html",
-  "address",
-  "column_break_fqjc",
-  "maximum_order_value",
-  "capex_budget",
-  "updated_at"
- ],
- "fields": [
-  {
-   "fetch_from": "branch.supplier",
-   "fieldname": "custom_supplier",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Supplier",
-   "options": "Supplier",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "branch",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Branch",
-   "options": "Branch",
-   "reqd": 1
-  },
-  {
-   "fieldname": "sub_branch_name",
-   "fieldtype": "Data",
-   "label": "Sub Branch Name",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "column_break_ewyn",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "label": "Branch Code"
-  },
-  {
-   "fieldname": "section_break_etax",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "minimum_order_value",
-   "fieldtype": "Data",
-   "label": "Minimum Order Value"
-  },
-  {
-   "fieldname": "opex_budget",
-   "fieldtype": "Data",
-   "label": "Opex Budget"
-  },
-  {
-   "fieldname": "created_at",
-   "fieldtype": "Date",
-   "label": "Created At"
-  },
-  {
-   "fieldname": "column_break_fqjc",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "maximum_order_value",
-   "fieldtype": "Data",
-   "label": "Maximum Order Value"
-  },
-  {
-   "fieldname": "capex_budget",
-   "fieldtype": "Data",
-   "label": "Capex Budget"
-  },
-  {
-   "fieldname": "updated_at",
-   "fieldtype": "Datetime",
-   "label": "Updated At"
-  },
-  {
-   "fieldname": "address_html",
-   "fieldtype": "HTML",
-   "label": "Address"
-  },
-  {
-   "fieldname": "address",
-   "fieldtype": "Link",
-   "label": "Primary Address",
-   "options": "Address"
-  }
- ],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-02-28 13:21:06.025531",
- "modified_by": "Administrator",
- "module": "o2o ErpNext",
- "name": "Sub Branch",
- "naming_rule": "By fieldname",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
-}
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "field:sub_branch_name",
+    "creation": "2025-01-04 13:33:50.169806",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+     "branch",
+     "custom_supplier",
+     "column_break_ewyn",
+     "branch_code",
+     "sub_branch_name",
+     "section_break_etax",
+     "minimum_order_value",
+     "opex_budget",
+     "created_at",
+     "address_html",
+     "address",
+     "column_break_fqjc",
+     "maximum_order_value",
+     "capex_budget",
+     "updated_at",
+     "tax_details_section",
+     "gstin",
+     "gst_state",
+     "tax_details_column_break",
+     "gst_category",
+     "gst_state_number",
+     "tax_category"
+    ],
+    "fields": [
+     {
+      "fetch_from": "branch.supplier",
+      "fieldname": "custom_supplier",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Supplier",
+      "options": "Supplier",
+      "read_only": 1,
+      "reqd": 1
+     },
+     {
+      "fieldname": "branch",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Branch",
+      "options": "Branch",
+      "reqd": 1
+     },
+     {
+      "fieldname": "sub_branch_name",
+      "fieldtype": "Data",
+      "label": "Sub Branch Name",
+      "reqd": 1,
+      "unique": 1
+     },
+     {
+      "fieldname": "column_break_ewyn",
+      "fieldtype": "Column Break"
+     },
+     {
+      "fieldname": "branch_code",
+      "fieldtype": "Data",
+      "label": "Branch Code"
+     },
+     {
+      "fieldname": "section_break_etax",
+      "fieldtype": "Section Break"
+     },
+     {
+      "fieldname": "minimum_order_value",
+      "fieldtype": "Data",
+      "label": "Minimum Order Value"
+     },
+     {
+      "fieldname": "opex_budget",
+      "fieldtype": "Data",
+      "label": "Opex Budget"
+     },
+     {
+      "fieldname": "created_at",
+      "fieldtype": "Date",
+      "label": "Created At"
+     },
+     {
+      "fieldname": "column_break_fqjc",
+      "fieldtype": "Column Break"
+     },
+     {
+      "fieldname": "maximum_order_value",
+      "fieldtype": "Data",
+      "label": "Maximum Order Value"
+     },
+     {
+      "fieldname": "capex_budget",
+      "fieldtype": "Data",
+      "label": "Capex Budget"
+     },
+     {
+      "fieldname": "updated_at",
+      "fieldtype": "Datetime",
+      "label": "Updated At"
+     },
+     {
+      "fieldname": "address_html",
+      "fieldtype": "HTML",
+      "label": "Address"
+     },
+     {
+      "fieldname": "address",
+      "fieldtype": "Link",
+      "label": "Primary Address",
+      "options": "Address"
+     },
+     {
+      "fieldname": "tax_details_section",
+      "fieldtype": "Section Break",
+      "label": "Tax Details"
+     },
+     {
+      "fieldname": "gstin",
+      "fieldtype": "Data",
+      "label": "GSTIN / UIN"
+     },
+     {
+      "fieldname": "gst_state",
+      "fieldtype": "Select",
+      "label": "GST State",
+      "options": "\nAndaman and Nicobar Islands\nAndhra Pradesh\nArunachal Pradesh\nAssam\nBihar\nChandigarh\nChhattisgarh\nDadra and Nagar Haveli and Daman and Diu\nDelhi\nGoa\nGujarat\nHaryana\nHimachal Pradesh\nJammu and Kashmir\nJharkhand\nKarnataka\nKerala\nLadakh\nLakshadweep Islands\nMadhya Pradesh\nMaharashtra\nManipur\nMeghalaya\nMizoram\nNagaland\nOdisha\nOther Countries\nOther Territory\nPuducherry\nPunjab\nRajasthan\nSikkim\nTamil Nadu\nTelangana\nTripura\nUttar Pradesh\nUttarakhand\nWest Bengal"
+     },
+     {
+      "fieldname": "tax_details_column_break",
+      "fieldtype": "Column Break"
+     },
+     {
+      "fieldname": "gst_category",
+      "fieldtype": "Select",
+      "label": "GST Category",
+      "options": "Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nDeemed Export\nUIN Holders\nTax Deductor\nTax Collector\nInput Service Distributor",
+      "default": "Unregistered",
+      "reqd": 1
+     },
+     {
+      "fieldname": "gst_state_number",
+      "fieldtype": "Data",
+      "label": "GST State Number",
+      "read_only": 1
+     },
+     {
+      "fieldname": "tax_category",
+      "fieldtype": "Link",
+      "label": "Tax Category",
+      "options": "Tax Category"
+     }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2025-02-28 13:21:06.025531",
+    "modified_by": "Administrator",
+    "module": "o2o ErpNext",
+    "name": "Sub Branch",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+     {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+     }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+   }

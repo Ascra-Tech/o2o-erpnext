@@ -6,6 +6,97 @@ from frappe.model.document import Document
 class Branch(Document):
     def validate(self):
         self.validate_supplier()
+        self.update_gst_state_number()
+    
+    def update_gst_state_number(self):
+        """Update GST State Number based on GST State"""
+        if self.gst_state:
+            state_code_map = {
+                "Andaman and Nicobar Islands": "35",
+                "Andhra Pradesh": "37",
+                "Arunachal Pradesh": "12",
+                "Assam": "18",
+                "Bihar": "10",
+                "Chandigarh": "04",
+                "Chhattisgarh": "22",
+                "Dadra and Nagar Haveli and Daman and Diu": "26",
+                "Delhi": "07",
+                "Goa": "30",
+                "Gujarat": "24",
+                "Haryana": "06",
+                "Himachal Pradesh": "02",
+                "Jammu and Kashmir": "01",
+                "Jharkhand": "20",
+                "Karnataka": "29",
+                "Kerala": "32",
+                "Ladakh": "38",
+                "Lakshadweep Islands": "31",
+                "Madhya Pradesh": "23",
+                "Maharashtra": "27",
+                "Manipur": "14",
+                "Meghalaya": "17",
+                "Mizoram": "15",
+                "Nagaland": "13",
+                "Odisha": "21",
+                "Other Countries": "96",
+                "Other Territory": "97",
+                "Puducherry": "34",
+                "Punjab": "03",
+                "Rajasthan": "08",
+                "Sikkim": "11",
+                "Tamil Nadu": "33",
+                "Telangana": "36",
+                "Tripura": "16",
+                "Uttar Pradesh": "09",
+                "Uttarakhand": "05",
+                "West Bengal": "19"
+            }
+            self.gst_state_number = state_code_map.get(self.gst_state, "")
+    
+    @frappe.whitelist()
+    def copy_tax_details_from_address(self):
+        """Copy tax details from linked address to Branch"""
+        if self.address:
+            address_doc = frappe.get_doc("Address", self.address)
+            if address_doc:
+                # Copy GST details from address
+                self.gstin = address_doc.gstin
+                self.gst_state = address_doc.gst_state
+                self.gst_category = address_doc.gst_category
+                self.gst_state_number = address_doc.gst_state_number
+                self.tax_category = address_doc.tax_category
+                self.save(ignore_permissions=True)
+                return {
+                    "status": "success",
+                    "message": "Tax details copied from address successfully"
+                }
+        return {
+            "status": "error",
+            "message": "No address found to copy details from"
+        }
+
+    @frappe.whitelist()
+    def sync_tax_details_with_address(self):
+        """Sync tax details between Branch and Address"""
+        if not self.address:
+            frappe.throw(_("No primary address linked to this Branch"))
+            
+        address_doc = frappe.get_doc("Address", self.address)
+        
+        # Update address with Branch tax details
+        address_doc.gstin = self.gstin
+        address_doc.gst_state = self.gst_state
+        address_doc.gst_category = self.gst_category
+        address_doc.gst_state_number = self.gst_state_number
+        address_doc.tax_category = self.tax_category
+        
+        address_doc.save(ignore_permissions=True)
+        
+        frappe.msgprint(_("Tax details synced with primary address"))
+        return {
+            "status": "success",
+            "message": "Tax details synced successfully"
+        }
     
     def validate_supplier(self):
         if not self.custom_supplier:

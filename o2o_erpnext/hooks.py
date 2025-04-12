@@ -322,7 +322,8 @@ permission_query_conditions = {
 
 
 doctype_js = {
-    "Branch": "o2o_erpnext/doctype/branch/branch.js"
+    "Branch": "o2o_erpnext/doctype/branch/branch.js",
+    "Sub Branch": "o2o_erpnext/doctype/sub_branch/sub_branch.js"
 }
 
 doctype_js = {

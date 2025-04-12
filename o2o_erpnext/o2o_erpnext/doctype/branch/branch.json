@@ -1,74 +1,153 @@
 {
- "actions": [],
- "allow_import": 1,
- "allow_rename": 1,
- "autoname": "field:branch",
- "creation": "2013-01-10 16:34:13",
- "doctype": "DocType",
- "document_type": "Setup",
- "engine": "InnoDB",
- "field_order": [
-  "branch",
-  "address_html",
-  "address"
- ],
- "fields": [
-  {
-   "fieldname": "branch",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Branch",
-   "oldfieldname": "branch",
-   "oldfieldtype": "Data",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "address_html",
-   "fieldtype": "HTML",
-   "label": "Address"
-  },
-  {
-   "fieldname": "address",
-   "fieldtype": "Link",
-   "label": "Primary Address",
-   "options": "Address"
-  }
- ],
- "icon": "fa fa-code-fork",
- "idx": 1,
- "links": [],
- "modified": "2025-02-28 13:20:51.096794",
- "modified_by": "Administrator",
- "module": "o2o ErpNext",
- "name": "Branch",
- "naming_rule": "By fieldname",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR User",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "HR Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
-}
+    "actions": [],
+    "allow_import": 1,
+    "allow_rename": 1,
+    "autoname": "field:branch",
+    "creation": "2013-01-10 16:34:13",
+    "doctype": "DocType",
+    "document_type": "Setup",
+    "engine": "InnoDB",
+    "field_order": [
+     "branch",
+     "address_section",
+     "address_html",
+     "address",
+     "custom_billing_address_details",
+     "column_break_address",
+     "custom_shipping_address",
+     "custom_shipping_address_details",
+     "tax_details_section",
+     "gstin",
+     "gst_state",
+     "tax_details_column_break",
+     "gst_category",
+     "gst_state_number",
+     "tax_category"
+    ],
+    "fields": [
+     {
+      "fieldname": "branch",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Branch",
+      "oldfieldname": "branch",
+      "oldfieldtype": "Data",
+      "reqd": 1,
+      "unique": 1
+     },
+     {
+      "fieldname": "address_section",
+      "fieldtype": "Section Break",
+      "label": "Address Information"
+     },
+     {
+      "fieldname": "address_html",
+      "fieldtype": "HTML",
+      "label": "Address"
+     },
+     {
+      "fieldname": "address",
+      "fieldtype": "Link",
+      "label": "Primary Address",
+      "options": "Address"
+     },
+     {
+      "fieldname": "custom_billing_address_details",
+      "fieldtype": "Small Text",
+      "label": "Billing Address Details",
+      "read_only": 1
+     },
+     {
+      "fieldname": "column_break_address",
+      "fieldtype": "Column Break"
+     },
+     {
+      "fieldname": "custom_shipping_address",
+      "fieldtype": "Link",
+      "label": "Shipping Address",
+      "options": "Address"
+     },
+     {
+      "fieldname": "custom_shipping_address_details",
+      "fieldtype": "Small Text",
+      "label": "Shipping Address Details",
+      "read_only": 1
+     },
+     {
+      "fieldname": "tax_details_section",
+      "fieldtype": "Section Break",
+      "label": "Tax Details"
+     },
+     {
+      "fieldname": "gstin",
+      "fieldtype": "Data",
+      "label": "GSTIN / UIN"
+     },
+     {
+      "fieldname": "gst_state",
+      "fieldtype": "Select",
+      "label": "GST State",
+      "options": "\nAndaman and Nicobar Islands\nAndhra Pradesh\nArunachal Pradesh\nAssam\nBihar\nChandigarh\nChhattisgarh\nDadra and Nagar Haveli and Daman and Diu\nDelhi\nGoa\nGujarat\nHaryana\nHimachal Pradesh\nJammu and Kashmir\nJharkhand\nKarnataka\nKerala\nLadakh\nLakshadweep Islands\nMadhya Pradesh\nMaharashtra\nManipur\nMeghalaya\nMizoram\nNagaland\nOdisha\nOther Countries\nOther Territory\nPuducherry\nPunjab\nRajasthan\nSikkim\nTamil Nadu\nTelangana\nTripura\nUttar Pradesh\nUttarakhand\nWest Bengal"
+     },
+     {
+      "fieldname": "tax_details_column_break",
+      "fieldtype": "Column Break"
+     },
+     {
+      "fieldname": "gst_category",
+      "fieldtype": "Select",
+      "label": "GST Category",
+      "options": "Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nDeemed Export\nUIN Holders\nTax Deductor\nTax Collector\nInput Service Distributor",
+      "default": "Unregistered",
+      "reqd": 1
+     },
+     {
+      "fieldname": "gst_state_number",
+      "fieldtype": "Data",
+      "label": "GST State Number",
+      "read_only": 1
+     },
+     {
+      "fieldname": "tax_category",
+      "fieldtype": "Link",
+      "label": "Tax Category",
+      "options": "Tax Category"
+     }
+    ],
+    "icon": "fa fa-code-fork",
+    "idx": 1,
+    "links": [],
+    "modified": "2025-02-28 13:20:51.096794",
+    "modified_by": "Administrator",
+    "module": "o2o ErpNext",
+    "name": "Branch",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+     {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "HR User",
+      "share": 1,
+      "write": 1
+     },
+     {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "HR Manager",
+      "share": 1,
+      "write": 1
+     }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+   }
