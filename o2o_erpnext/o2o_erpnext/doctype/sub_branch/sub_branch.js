@@ -4,6 +4,7 @@ frappe.ui.form.on('Sub Branch', {
         frm.remove_custom_button('Create Address');
         frm.remove_custom_button('Delete Address');
         frm.remove_custom_button('Update Address');
+        frm.remove_custom_button('Copy Tax Details from Address', 'Tax Actions'); // Remove the Copy Tax Details button
         
         // Check if addresses exist
         let billing_exists = frm.doc.address ? true : false;
@@ -590,29 +591,8 @@ frappe.ui.form.on('Sub Branch', {
             });
         });
         
-        // Add tax detail sync buttons
+        // Modify Tax Actions section - only keep the Update Address button
         if (frm.doc.address) {
-            frm.add_custom_button(__('Copy Tax Details from Address'), function() {
-                frm.call({
-                    doc: frm.doc,
-                    method: 'copy_tax_details_from_address',
-                    callback: function(r) {
-                        if (r.message && r.message.status === "success") {
-                            frappe.show_alert({
-                                message: __("Tax details copied successfully"),
-                                indicator: 'green'
-                            });
-                            frm.refresh();
-                        } else {
-                            frappe.show_alert({
-                                message: __("Failed to copy tax details"),
-                                indicator: 'red'
-                            });
-                        }
-                    }
-                });
-            }, __('Tax Actions'));
-
             frm.add_custom_button(__('Update Address with Tax Details'), function() {
                 frm.call({
                     doc: frm.doc,
@@ -733,5 +713,41 @@ frappe.ui.form.on('Sub Branch', {
                 });
             }
         }
+    },
+    
+    // Auto-fetch tax details when address is changed
+    address: function(frm) {
+        if (frm.doc.address) {
+            // Fetch tax details from address
+            fetch_tax_details_from_address(frm);
+        }
     }
 });
+
+// Function to fetch tax details from address
+function fetch_tax_details_from_address(frm) {
+    frappe.call({
+        method: "frappe.client.get",
+        args: {
+            doctype: "Address",
+            name: frm.doc.address
+        },
+        callback: function(response) {
+            if (response.message) {
+                const address_doc = response.message;
+                
+                // Update tax fields from address
+                frm.set_value('gstin', address_doc.gstin);
+                frm.set_value('gst_state', address_doc.gst_state);
+                frm.set_value('gst_state_number', address_doc.gst_state_number);
+                frm.set_value('tax_category', address_doc.tax_category);
+                frm.set_value('gst_category', address_doc.gst_category);
+                
+                frappe.show_alert({
+                    message: __('Tax details fetched automatically from address'),
+                    indicator: 'green'
+                });
+            }
+        }
+    });
+}
