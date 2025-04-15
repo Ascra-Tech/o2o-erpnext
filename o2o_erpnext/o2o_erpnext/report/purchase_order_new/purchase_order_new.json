@@ -1,7 +1,8 @@
 {
  "add_total_row": 0,
+ "add_translate_data": 0,
  "columns": [],
- "creation": "2025-01-29 13:46:21.911604",
+ "creation": "2025-04-12 12:21:04.033456",
  "disabled": 0,
  "docstatus": 0,
  "doctype": "Report",
@@ -9,13 +10,13 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-01-29 13:46:21.911604",
+ "modified": "2025-04-15 16:32:53.717433",
  "modified_by": "Administrator",
  "module": "o2o ErpNext",
  "name": "Purchase Order New",
  "owner": "Administrator",
  "prepared_report": 0,
- "query": "SELECT  \n    `tabPurchase Order`.supplier AS \"Entity:Link/Supplier:200\",\n    `tabPurchase Order`.custom_branch AS \"Branch:Link/Branch:200\",\n    CONCAT_WS('\\n', `tabAddress`.address_line1, `tabAddress`.address_line2, `tabAddress`.city) AS \"Shipping Address:Data:300\",\n    `tabPurchase Order`.owner AS \"Created By:Data:200\",\n    `tabPurchase Order`.name AS \"Order Number:Link/Purchase Order:200\",\n    `tabPurchase Order`.custom_order_code AS \"Order Code:Data:200\",\n    `tabPurchase Order`.grand_total AS \"Gross Total:Currency:200\",\n    `tabPurchase Order`.workflow_state AS \"Order Status:Data:200\",\n    `tabPurchase Order`.custom_created_at AS \"Created At:Datetime:200\",\n    `tabPurchase Order`.custom_updated_at AS \"Updated At:Datetime:200\",\n    `tabPurchase Order`.custom__approved_at AS \"Approved At:Date:200\"\nFROM \n    `tabPurchase Order`\nINNER JOIN \n    `tabAddress` ON `tabPurchase Order`.shipping_address = `tabAddress`.name\nGROUP BY \n    `tabPurchase Order`.name, \n    `tabPurchase Order`.supplier, \n    `tabPurchase Order`.custom_branch, \n    `tabPurchase Order`.owner, \n    `tabPurchase Order`.grand_total,\n    `tabPurchase Order`.workflow_state, \n    `tabPurchase Order`.transaction_date, \n    `tabPurchase Order`.custom_order_code,\n    `tabPurchase Order`.custom__approved_at,\n    `tabAddress`.address_line1,\n    `tabAddress`.address_line2,\n    `tabAddress`.city\nORDER BY \n    `tabPurchase Order`.transaction_date DESC;\n",
+ "query": "SELECT  \n    `tabPurchase Order`.supplier AS \"Entity:Link/Supplier:200\",\n    `tabPurchase Order`.custom_branch AS \"Branch:Link/Branch:200\",\n    CONCAT_WS('\\n', `tabAddress`.address_line1, `tabAddress`.address_line2, `tabAddress`.city) AS \"Shipping Address:Data:300\",\n    `tabPurchase Order`.owner AS \"Created By:Data:200\",\n    `tabPurchase Order`.name AS \"Order Number:Link/Purchase Order:200\",\n    `tabPurchase Order`.custom_order_code AS \"Order Code:Data:200\",\n    `tabPurchase Order`.grand_total AS \"Gross Total:Currency:200\",\n    `tabPurchase Order`.workflow_state AS \"Order Status:Data:200\",\n    `tabPurchase Order`.transaction_date AS \"Created At:Datetime:200\",\n    `tabPurchase Order`.custom_updated_at AS \"Updated At:Datetime:200\",\n    `tabPurchase Order`.custom__approved_at AS \"Approved At:Date:200\"\nFROM \n    `tabPurchase Order`\nINNER JOIN \n    `tabAddress` ON `tabPurchase Order`.shipping_address = `tabAddress`.name\nGROUP BY \n    `tabPurchase Order`.name, \n    `tabPurchase Order`.supplier, \n    `tabPurchase Order`.custom_branch, \n    `tabPurchase Order`.owner, \n    `tabPurchase Order`.grand_total,\n    `tabPurchase Order`.workflow_state, \n    `tabPurchase Order`.transaction_date, \n    `tabPurchase Order`.custom_order_code,\n    `tabPurchase Order`.custom__approved_at,\n    `tabAddress`.address_line1,\n    `tabAddress`.address_line2,\n    `tabAddress`.city\nORDER BY \n    `tabPurchase Order`.transaction_date DESC;\n",
  "ref_doctype": "Purchase Order",
  "report_name": "Purchase Order New",
  "report_type": "Query Report",
@@ -45,16 +46,10 @@
    "role": "Super PO Approval"
   },
   {
-   "role": "requisition rejector"
-  },
-  {
    "role": "PO Rejector"
   },
   {
    "role": "Vendor User"
-  },
-  {
-   "role": "Entity Admin User"
   }
  ],
  "timeout": 0
