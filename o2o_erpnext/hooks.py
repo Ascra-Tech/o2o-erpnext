@@ -255,7 +255,7 @@ fixtures = [
     #"Tax Category",
     #"Workspace",
     #"Custom HTML Block",
-    #"Custom DocPerm",
+    "Custom DocPerm",
     #"Workflow",
     #"Workflow State",
     #"Workflow Action",
