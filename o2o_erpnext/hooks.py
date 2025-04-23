@@ -250,19 +250,19 @@ scheduler_events = {
 fixtures = [
     #"Role",
     #"Role Profile",
-    #"Client Script",
+    "Client Script",
     #"Server Script",
     #"Tax Category",
-    "Workspace",
+    #"Workspace",
     #"Custom HTML Block",
-    "Custom DocPerm",
+    #"Custom DocPerm",
     #"Workflow",
     #"Workflow State",
     #"Workflow Action",
     #"Print Format",
     #"Number Card",
-    "Report",
-    "Role Permission for Page and Report",
+    #"Report",
+    #"Role Permission for Page and Report",
     #"Workflow Action Master",
     #"Module Profile",
 ]
@@ -330,3 +330,14 @@ doctype_js = {
 doctype_js = {
     "Purchase Order": "o2o_erpnext/o2o_erpnext/purchase_order.js"
 }
+
+# Reports
+# -------
+reports = [
+    {
+        "doctype": "Purchase Order", 
+        "name": "Supplier PO",
+        "report_type": "Script Report",
+        "module": "o2o ErpNext"
+    }
+]

@@ -258,6 +258,7 @@ class PurchaseOrderValidation:
             )
         return True
 
+# get_permission_query_conditions - Updated version
 def get_permission_query_conditions(user, doctype):
     """
     Returns SQL conditions to filter Purchase Orders based on user roles and related employee/supplier data.
@@ -267,7 +268,7 @@ def get_permission_query_conditions(user, doctype):
     if "Administrator" in roles:
         return None  # Administrator can see all
     
-        # Then check if user has Person Raising Request Branch role
+    # Check if user has Person Raising Request Branch role
     if "Person Raising Request Branch" in roles:
         # Get employee linked to the user
         employee = frappe.db.get_value("Employee", 
@@ -314,7 +315,7 @@ def get_permission_query_conditions(user, doctype):
         if employee.branch:
             conditions.append(f"`tabPurchase Order`.custom_branch = '{employee.branch}'")
 
-        # --- Sub-Branch Filtering (Primary OR any secondary sub-branch) ---
+        # --- Sub-Branch Filtering (Primary OR any secondary sub-branch OR no sub-branch at all) ---
         sub_branch_conditions = []
 
         # 1. Primary Sub-Branch (custom_sub_branch)
@@ -339,6 +340,9 @@ def get_permission_query_conditions(user, doctype):
                 # Log error but continue execution
                 frappe.log_error(f"Error fetching sub branches: {str(e)}", "Permission Query Error")
 
+        # 3. ADDED: Branch-level POs with no sub-branch specified
+        sub_branch_conditions.append("(`tabPurchase Order`.custom_sub_branch IS NULL OR TRIM(`tabPurchase Order`.custom_sub_branch) = '')")
+        
         # Combine sub-branch conditions with OR
         if sub_branch_conditions:
             conditions.append(f"({' OR '.join(sub_branch_conditions)})")
@@ -404,7 +408,7 @@ def get_permission_query_conditions(user, doctype):
         frappe.throw(_("Not Allowed to see PO"))
         return "1=0"
 
-
+# has_permission - Updated version
 def has_permission(doc, user=None, permission_type=None):
     """
     Additional permission check at document level
@@ -464,11 +468,14 @@ def has_permission(doc, user=None, permission_type=None):
         matches_supplier = (doc.supplier == employee.custom_supplier)
         matches_branch = (doc.custom_branch == employee.branch)
         
-        # Check if document's sub-branch matches either primary or any additional sub-branch
-        matches_sub_branch = (doc.custom_sub_branch == employee.custom_sub_branch or 
-                             doc.custom_sub_branch in additional_sub_branches)
+        # Check if document's sub-branch matches either primary or any additional sub-branch OR is empty (branch-level PO)
+        matches_sub_branch = (
+            doc.custom_sub_branch == employee.custom_sub_branch or 
+            doc.custom_sub_branch in additional_sub_branches or
+            not doc.custom_sub_branch  # ADDED: Branch-level POs with no sub-branch
+        )
         
-        # For approver roles, must match supplier and branch, AND match at least one sub-branch
+        # For approver roles, must match supplier and branch, AND match at least one sub-branch or have no sub-branch
         return matches_supplier and matches_branch and matches_sub_branch
     
     # Check Person Raising Request role
