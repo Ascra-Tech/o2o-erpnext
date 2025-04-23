@@ -6,7 +6,10 @@ def get_data():
         "transactions": [
             {
                 "label": _("Connections"),
-                "items": ["Supplier"]
+                "items": ["Supplier", "Company"]
             }
-        ]
+        ],
+        "non_standard_fieldnames": {
+            "Company": "custom_vendor"
+        }
     }

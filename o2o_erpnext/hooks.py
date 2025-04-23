@@ -267,6 +267,8 @@ fixtures = [
     #"Module Profile",
 ]
 
+# Add this near the end of your hooks.py file (but not inside any other variable declaration)
+
 doc_events = {
     "Sales Order": {
         "validate": "o2o_erpnext.custom_sales_order.CustomSalesOrder.validate_delivery_date"
@@ -324,7 +326,7 @@ permission_query_conditions = {
 
 doctype_js = {
     "Branch": "o2o_erpnext/doctype/branch/branch.js",
-    "Sub Branch": "o2o_erpnext/doctype/sub_branch/sub_branch.js"
+    "Sub Branch": "o2o_erpnext/doctype/sub_branch/sub_branch.js",
 }
 
 doctype_js = {
@@ -341,3 +343,5 @@ reports = [
         "module": "o2o ErpNext"
     }
 ]
+
+

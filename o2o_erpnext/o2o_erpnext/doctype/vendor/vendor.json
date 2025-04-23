@@ -16,6 +16,7 @@
   "image",
   "signature",
   "language",
+  "linked_company",
   "more_details_section",
   "email_id",
   "mobile_no",
@@ -143,11 +144,18 @@
    "label": "User Id",
    "read_only": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "linked_company",
+   "fieldtype": "Link",
+   "label": "Linked Company",
+   "options": "Company",
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-29 10:32:56.930340",
+ "modified": "2025-04-24 02:23:55.047861",
  "modified_by": "Administrator",
  "module": "o2o ErpNext",
  "name": "Vendor",
@@ -187,6 +195,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
