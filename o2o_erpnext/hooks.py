@@ -250,10 +250,10 @@ scheduler_events = {
 fixtures = [
     #"Role",
     #"Role Profile",
-    "Client Script",
+    #"Client Script",
     #"Server Script",
     #"Tax Category",
-    #"Workspace",
+    "Workspace",
     #"Custom HTML Block",
     #"Custom DocPerm",
     #"Workflow",
