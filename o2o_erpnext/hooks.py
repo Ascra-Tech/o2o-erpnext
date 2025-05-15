@@ -331,6 +331,8 @@ doctype_js = {
     "Purchase Order": "o2o_erpnext/o2o_erpnext/purchase_order.js"
 }
 
+
+
 # Reports
 # -------
 reports = [
