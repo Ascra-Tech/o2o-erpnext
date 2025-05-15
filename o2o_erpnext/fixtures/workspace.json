@@ -14651,7 +14651,7 @@
  },
  {
   "charts": [],
-  "content": "[{\"id\":\"9LVaPnlJOF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Invoice Reports\",\"col\":3}},{\"id\":\"EqWFvDa8Xc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"HSN Report\",\"col\":3}},{\"id\":\"d-_jzvYiUP\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mis Report\",\"col\":3}},{\"id\":\"vOzTWV1WQr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Freight Report\",\"col\":3}},{\"id\":\"UsXppeP7mQ\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"RVNb91-lH4\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Invoice</span>\",\"col\":12}},{\"id\":\"M3jkBefw3Q\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Purchase Receipt(DC Generated)\",\"col\":3}},{\"id\":\"c85Pf7hOiE\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Purchase Receipt(DC Rejected)\",\"col\":3}},{\"id\":\"cQnv9OK8WZ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Purchase Invoice Generated\",\"col\":3}},{\"id\":\"NAi7m267b0\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Purchase Invoice Cancelled\",\"col\":3}}]",
+  "content": "[{\"id\":\"9LVaPnlJOF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Invoice Reports\",\"col\":3}},{\"id\":\"EqWFvDa8Xc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"HSN Report\",\"col\":3}},{\"id\":\"d-_jzvYiUP\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mis Report\",\"col\":3}},{\"id\":\"vOzTWV1WQr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Freight Report\",\"col\":3}},{\"id\":\"UsXppeP7mQ\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"RVNb91-lH4\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Invoice</span>\",\"col\":12}},{\"id\":\"M3jkBefw3Q\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Purchase Receipt(DC Generated)\",\"col\":3}},{\"id\":\"c85Pf7hOiE\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Purchase Receipt(DC Rejected)\",\"col\":3}},{\"id\":\"cQnv9OK8WZ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Purchase Invoice Generated\",\"col\":3}},{\"id\":\"NAi7m267b0\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Purchase Invoice Cancelled\",\"col\":3}},{\"id\":\"05Il2usQ3p\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Credit Note List\",\"col\":3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -14662,13 +14662,20 @@
   "is_hidden": 0,
   "label": "Invoice",
   "links": [],
-  "modified": "2025-03-13 19:26:22.560970",
+  "modified": "2025-05-14 17:18:55.599348",
   "module": null,
   "name": "Invoice",
   "number_cards": [
    {
     "label": "Purchase Receipt(DC Rejected)",
     "number_card_name": "Purchase Receipt(DC Rejected)",
+    "parent": "Invoice",
+    "parentfield": "number_cards",
+    "parenttype": "Workspace"
+   },
+   {
+    "label": "Credit Note List",
+    "number_card_name": "Credit Note List",
     "parent": "Invoice",
     "parentfield": "number_cards",
     "parenttype": "Workspace"
