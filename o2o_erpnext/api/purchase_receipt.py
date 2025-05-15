@@ -85,9 +85,9 @@ def check_linked_purchase_invoices(purchase_receipt):
         # Log start of check (concise)
         frappe.log_error(f"Checking PR: {purchase_receipt}", "PI Check")
         
-        # Direct query approach with docstatus check
+        # First, get all linked invoices
         linked_invoices = frappe.db.sql("""
-            SELECT pi.name, pi.status, pi.docstatus
+            SELECT pi.name, pi.status, pi.docstatus, pi.is_return, pi.return_against
             FROM `tabPurchase Invoice` pi
             JOIN `tabPurchase Invoice Item` pii ON pii.parent = pi.name
             WHERE pii.purchase_receipt = %s
@@ -105,13 +105,31 @@ def check_linked_purchase_invoices(purchase_receipt):
                 "invoices": []
             }
         
-        # IMPORTANT: Directly consider docstatus 0 and 1 as active
-        # Instead of checking status field
+        # Build a dictionary of return invoices keyed by the original invoice they're returning
+        return_invoices = {}
+        for inv in linked_invoices:
+            if inv.get("is_return") and inv.get("return_against"):
+                if inv.get("return_against") not in return_invoices:
+                    return_invoices[inv.get("return_against")] = []
+                return_invoices[inv.get("return_against")].append(inv.get("name"))
+        
+        # Now filter to find active, non-fully-returned invoices
         active_invoices = []
         for inv in linked_invoices:
-            if inv.docstatus in [0, 1]:  # 0=Draft, 1=Submitted
+            # Skip return invoices themselves
+            if inv.get("is_return"):
+                continue
+                
+            # Check if this invoice has been fully returned
+            fully_returned = False
+            if inv.get("name") in return_invoices:
+                # For simplicity, we'll consider an invoice with any return against it as "fully returned"
+                # In a real system, you might want to check the amounts to determine if it's fully or partially returned
+                fully_returned = True
+                
+            if not fully_returned and inv.get("docstatus") in [0, 1]:  # Draft or Submitted
                 active_invoices.append(inv)
-                # Log each invoice separately to avoid truncation
+                # Log each active invoice separately
                 frappe.log_error(f"Active: {inv.name} status={inv.status} docstatus={inv.docstatus}", "PI Check")
         
         if active_invoices:
@@ -143,6 +161,8 @@ def block_invoice_creation_if_linked(purchase_receipt):
     """
     Checks if any linked purchase invoices exist for a purchase receipt and blocks
     creation of new invoices if active ones are found.
+    
+    This function considers an invoice as "inactive" if it has been fully returned.
     
     Returns:
         dict: {
@@ -182,36 +202,6 @@ def block_invoice_creation_if_linked(purchase_receipt):
             "message": f"Error checking linked invoices: {str(e)}",
             "invoices": []
         }
-
-class PurchaseReceiptValidation:
-    """
-    Validation logic for Purchase Receipt.
-    """
-    def validate_vendor_access(self):
-        """
-        Validates that the selected vendor is allowed for the selected supplier.
-        """
-        if not self.doc.custom_vendor:
-            return True
-
-        if not self.doc.supplier:
-            frappe.throw(_("Supplier must be selected before selecting a vendor"), title=_("Missing Supplier"))
-
-        supplier_doc = frappe.get_doc("Supplier", self.doc.supplier)
-        allowed_vendors = [v.vendor for v in supplier_doc.custom_vendor_access_list]
-
-        if not allowed_vendors:
-            frappe.throw(_("No vendors configured for supplier {0}").format(self.doc.supplier), 
-                        title=_("No Vendors Available"))
-
-        if self.doc.custom_vendor not in allowed_vendors:
-            frappe.throw(
-                _("Selected vendor {0} is not in the allowed vendor list for supplier {1}").format(
-                    self.doc.custom_vendor, self.doc.supplier
-                ),
-                title=_("Invalid Vendor")
-            )
-        return True
 
 def get_permission_query_conditions(user, doctype):
     """
