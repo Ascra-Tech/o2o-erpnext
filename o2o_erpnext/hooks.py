@@ -254,6 +254,7 @@ fixtures = [
     "Server Script",
     #"Tax Category",
     "Workspace",
+    "Notification",
     #"Custom HTML Block",
     #"Custom DocPerm",
     #"Workflow",

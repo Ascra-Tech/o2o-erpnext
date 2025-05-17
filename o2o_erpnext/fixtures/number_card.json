@@ -2289,7 +2289,7 @@
  },
  {
   "aggregate_function_based_on": "",
-  "color": "#ed6c4c",
+  "color": null,
   "currency": "INR",
   "docstatus": 0,
   "doctype": "Number Card",
@@ -2302,7 +2302,7 @@
   "is_standard": 0,
   "label": "Credit Note List",
   "method": null,
-  "modified": "2025-05-17 11:24:04.737602",
+  "modified": "2025-05-14 17:18:18.899201",
   "module": null,
   "name": "Credit Note List",
   "parent_document_type": "",
