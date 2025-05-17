@@ -2,6 +2,17 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
+  "dt": "Purchase Invoice",
+  "enabled": 1,
+  "modified": "2025-05-15 15:13:25.770162",
+  "module": "o2o ErpNext",
+  "name": "change label",
+  "script": "frappe.ui.form.on('Purchase Invoice', {\n    refresh: function(frm) {\n        console.log(\"====++++++++++++++++++++++++++++++\")\n       \n        setTimeout(() => {\n            \n            $('.dropdown-menu a.dropdown-item').each(function() {\n                if ($(this).text().trim() === \"Return / Debit Note\") {\n                    $(this).text(\"Return / Credit Note\");\n                }\n            });\n        }, 300); \n    }\n});\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
   "dt": "Supplier",
   "enabled": 1,
   "modified": "2025-04-21 13:05:54.355539",
@@ -818,10 +829,10 @@
   "doctype": "Client Script",
   "dt": "Purchase Order",
   "enabled": 1,
-  "modified": "2025-05-15 15:44:25.656364",
+  "modified": "2025-05-16 14:31:04.572546",
   "module": "o2o ErpNext",
   "name": "Copy Items",
-  "script": "frappe.ui.form.on('Purchase Order', {\n    validate: function(frm) {\n        // Check if the current user has the \"Person Raising Request\" role\n        if (frappe.user_roles.includes(\"Person Raising Request\")) {\n            // User has the required role, proceed with copying\n            \n            // First clear the custom table to ensure we don't have duplicate entries\n            frm.clear_table('custom_purchasing_details_original');\n            \n            // Copy items from the standard items table to the custom table\n            if (frm.doc.items && frm.doc.items.length > 0) {\n                frm.doc.items.forEach(function(item) {\n                    const original_item = frm.add_child('custom_purchasing_details_original');\n                    \n                    // Copy all fields from the source item to the target item\n                    Object.keys(item).forEach(function(field) {\n                        // Skip the 'name' field and parent references to avoid ID conflicts\n                        if (field !== 'name' && field !== 'parent' && field !== 'parentfield' && field !== 'parenttype' && field !== 'idx') {\n                            original_item[field] = item[field];\n                        }\n                    });\n                });\n                \n                // Refresh the custom table to show the copied items\n                frm.refresh_field('custom_purchasing_details_original');\n                \n                // Show a notification to the user\n                frappe.show_alert({\n                    message: __('Original items snapshot updated'),\n                    indicator: 'green'\n                }, 3);\n            }\n        }\n    }\n});",
+  "script": "frappe.ui.form.on('Purchase Order', {\n    validate: function(frm) {\n        if (frappe.user_roles.includes(\"Person Raising Request\")) {\n            frm.clear_table('custom_purchasing_details_original');\n\n            if (frm.doc.items && frm.doc.items.length > 0) {\n                frm.doc.items.forEach(function(item) {\n                    const original_item = frm.add_child('custom_purchasing_details_original');\n\n                    // Custom field mapping\n                    original_item.product_name = item.item_name;\n                    original_item.date = item.schedule_date;\n                    original_item.po_no = frm.doc.name;\n                    original_item.quantity = item.qty;\n                    original_item.amount = item.amount || (item.qty * item.rate);\n                });\n\n                frm.refresh_field('custom_purchasing_details_original');\n\n                frappe.show_alert({\n                    message: __('Original items snapshot updated'),\n                    indicator: 'green'\n                }, 3);\n            }\n        }\n    }\n});\n",
   "view": "Form"
  },
  {
@@ -833,6 +844,17 @@
   "module": "o2o ErpNext",
   "name": "Change debit note label",
   "script": "frappe.ui.form.on('Purchase Invoice', {\n    refresh: function(frm) {\n        console.log(\"====++++++++++++++++++++++++++++++\")\n       \n        setTimeout(() => {\n            \n            $('.dropdown-menu a.dropdown-item').each(function() {\n                if ($(this).text().trim() === \"Return / Debit Note\") {\n                    $(this).text(\"Return / Credit Note\");\n                }\n            });\n        }, 300); \n    }\n});",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Purchase Order",
+  "enabled": 0,
+  "modified": "2025-05-16 14:00:17.122435",
+  "module": "o2o ErpNext",
+  "name": "Copy table 1",
+  "script": "frappe.ui.form.on('Purchase Order', {\n    items: function(frm, cdt, cdn) {\n        let row = locals[cdt][cdn];  // Get the changed row\n        console.log(\"Custom Artwork Number Selected:\", row.custom_artwork_number);\n\n        new_row = frm.add_child(\"custom_purchasing_details_original\")\n        new_row.product_name = row.item_code\n\n        frm.refresh_field(\"custom_purchasing_details_original\");\n    }\n});",
   "view": "Form"
  }
 ]
