@@ -47,13 +47,13 @@
   "doctype_event": "Before Save",
   "enable_rate_limit": 0,
   "event_frequency": "All",
-  "modified": "2025-04-05 14:07:23.204870",
+  "modified": "2025-05-20 08:01:41.734063",
   "module": null,
   "name": "Approved-Update-Create-At",
   "rate_limit_count": 5,
   "rate_limit_seconds": 86400,
   "reference_doctype": "Purchase Order",
-  "script": "doc.custom_updated_at = frappe.utils.now()\n# doc.custom_created_at = frappe.utils.now()\n# doc.custom__approved_at = frappe.utils.now()\n        ",
+  "script": "# doc.custom_updated_at = frappe.utils.now()\n# doc.custom_created_at = frappe.utils.now()\n# doc.custom__approved_at = frappe.utils.now()\n\n\nif doc.workflow_state == \"PO Approved\" and not doc.custom__approved_at:\n    doc.custom__approved_at = frappe.utils.now_datetime()",
   "script_type": "DocType Event"
  },
  {
