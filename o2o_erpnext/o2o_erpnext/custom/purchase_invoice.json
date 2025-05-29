@@ -4050,7 +4050,11 @@
    "field_name": "accounting_dimensions_section",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.219241",
+=======
+   "modified": "2025-05-28 12:10:29.589678",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-accounting_dimensions_section-hidden",
@@ -4065,7 +4069,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.495770",
+   "creation": "2025-05-28 12:11:57.261188",
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4073,7 +4077,11 @@
    "field_name": "base_rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.232950",
+=======
+   "modified": "2025-05-28 12:11:57.261188",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-base_rounded_total-hidden",
@@ -4088,7 +4096,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.535115",
+   "creation": "2025-05-28 12:11:57.273547",
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4096,7 +4104,11 @@
    "field_name": "base_rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.246948",
+=======
+   "modified": "2025-05-28 12:11:57.273547",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-base_rounded_total-print_hide",
@@ -4119,7 +4131,11 @@
    "field_name": "bill_no",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.260276",
+=======
+   "modified": "2025-05-28 12:10:29.608987",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-bill_no-mandatory_depends_on",
@@ -4142,7 +4158,11 @@
    "field_name": "billing_address_display",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.275244",
+=======
+   "modified": "2025-05-28 12:10:29.614893",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-billing_address_display-label",
@@ -4165,7 +4185,11 @@
    "field_name": "billing_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.288849",
+=======
+   "modified": "2025-05-28 12:10:29.620703",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-billing_address-label",
@@ -4188,7 +4212,11 @@
    "field_name": "col_break_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.302206",
+=======
+   "modified": "2025-05-28 12:10:29.632156",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-col_break_address-label",
@@ -4211,7 +4239,11 @@
    "field_name": "company_billing_address_section",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.316422",
+=======
+   "modified": "2025-05-28 12:10:29.638610",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-company_billing_address_section-label",
@@ -4234,7 +4266,11 @@
    "field_name": "company_shipping_address_section",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.329114",
+=======
+   "modified": "2025-05-28 12:10:29.647636",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-company_shipping_address_section-label",
@@ -4257,7 +4293,11 @@
    "field_name": "currency_and_price_list",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.343209",
+=======
+   "modified": "2025-05-28 12:10:29.653475",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-currency_and_price_list-hidden",
@@ -4280,7 +4320,11 @@
    "field_name": "custom_12_goods_value",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.357042",
+=======
+   "modified": "2025-05-28 12:10:29.659354",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-custom_12_goods_value-in_list_view",
@@ -4303,7 +4347,11 @@
    "field_name": "custom_18_goods_value",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.370230",
+=======
+   "modified": "2025-05-28 12:10:29.668440",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-custom_18_goods_value-in_list_view",
@@ -4326,7 +4374,11 @@
    "field_name": "custom_5_goods_value",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.384134",
+=======
+   "modified": "2025-05-28 12:10:29.675201",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-custom_5_goods_value-in_list_view",
@@ -4349,7 +4401,11 @@
    "field_name": "custom_branch",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.397539",
+=======
+   "modified": "2025-05-28 12:10:29.681369",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-custom_branch-in_list_view",
@@ -4372,7 +4428,11 @@
    "field_name": "custom_state_name",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.411096",
+=======
+   "modified": "2025-05-28 12:10:29.687215",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-custom_state_name-in_list_view",
@@ -4387,7 +4447,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.638680",
+   "creation": "2025-05-28 12:11:57.312740",
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4395,7 +4455,11 @@
    "field_name": "disable_rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.424455",
+=======
+   "modified": "2025-05-28 12:11:57.312740",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-disable_rounded_total-default",
@@ -4418,7 +4482,11 @@
    "field_name": "due_date",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.439044",
+=======
+   "modified": "2025-05-28 12:10:29.699607",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-due_date-print_hide",
@@ -4441,7 +4509,11 @@
    "field_name": "grand_total",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.452683",
+=======
+   "modified": "2025-05-28 12:10:29.706585",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-grand_total-in_list_view",
@@ -4464,7 +4536,11 @@
    "field_name": "gst_category",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.465968",
+=======
+   "modified": "2025-05-28 12:10:29.715207",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-gst_category-hidden",
@@ -4479,7 +4555,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:38.187758",
+   "creation": "2025-05-28 12:11:57.535050",
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4487,7 +4563,11 @@
    "field_name": "in_words",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.479728",
+=======
+   "modified": "2025-05-28 12:11:57.535050",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-in_words-hidden",
@@ -4502,7 +4582,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:38.213549",
+   "creation": "2025-05-28 12:11:57.546437",
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4510,7 +4590,11 @@
    "field_name": "in_words",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.493820",
+=======
+   "modified": "2025-05-28 12:11:57.546437",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-in_words-print_hide",
@@ -4533,7 +4617,11 @@
    "field_name": "is_return",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.509512",
+=======
+   "modified": "2025-05-28 12:10:29.736782",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-is_return-label",
@@ -4556,7 +4644,11 @@
    "field_name": "is_subcontracted",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.522754",
+=======
+   "modified": "2025-05-28 12:10:29.744212",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-is_subcontracted-hidden",
@@ -4579,7 +4671,11 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.536446",
+=======
+   "modified": "2025-05-28 12:10:29.750527",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-main-default_print_format",
@@ -4594,7 +4690,11 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
+<<<<<<< HEAD
    "creation": "2025-05-29 18:52:04.098770",
+=======
+   "creation": "2025-05-28 12:32:01.355495",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4602,7 +4702,11 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:52:04.098770",
+=======
+   "modified": "2025-05-28 12:32:01.355495",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-main-field_order",
@@ -4625,7 +4729,11 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.563999",
+=======
+   "modified": "2025-05-28 12:10:29.764007",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-main-track_changes",
@@ -4648,7 +4756,11 @@
    "field_name": "more_info_tab",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.578511",
+=======
+   "modified": "2025-05-28 12:10:29.770454",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-more_info_tab-hidden",
@@ -4671,7 +4783,11 @@
    "field_name": "naming_series",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.591183",
+=======
+   "modified": "2025-05-28 12:10:29.776072",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-naming_series-default",
@@ -4694,7 +4810,11 @@
    "field_name": "naming_series",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.606242",
+=======
+   "modified": "2025-05-28 12:10:29.782515",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-naming_series-label",
@@ -4717,7 +4837,11 @@
    "field_name": "naming_series",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.619752",
+=======
+   "modified": "2025-05-28 12:10:29.789325",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-naming_series-options",
@@ -4740,7 +4864,11 @@
    "field_name": "payment_schedule",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.632578",
+=======
+   "modified": "2025-05-28 12:10:29.798762",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-payment_schedule-print_hide",
@@ -4763,7 +4891,11 @@
    "field_name": "payments_section",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.646446",
+=======
+   "modified": "2025-05-28 12:10:29.804383",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-payments_section-hidden",
@@ -4786,7 +4918,11 @@
    "field_name": "payments_tab",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.659213",
+=======
+   "modified": "2025-05-28 12:10:29.810233",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-payments_tab-hidden",
@@ -4809,7 +4945,11 @@
    "field_name": "place_of_supply",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.673112",
+=======
+   "modified": "2025-05-28 12:10:29.816620",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-place_of_supply-hidden",
@@ -4832,7 +4972,11 @@
    "field_name": "posting_date",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.685829",
+=======
+   "modified": "2025-05-28 12:10:29.822509",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-posting_date-in_list_view",
@@ -4855,7 +4999,11 @@
    "field_name": "posting_date",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.698616",
+=======
+   "modified": "2025-05-28 12:10:29.828973",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-posting_date-label",
@@ -4870,7 +5018,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.572749",
+   "creation": "2025-05-28 12:11:57.286559",
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4878,7 +5026,11 @@
    "field_name": "rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.713043",
+=======
+   "modified": "2025-05-28 12:11:57.286559",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-rounded_total-hidden",
@@ -4893,7 +5045,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.601905",
+   "creation": "2025-05-28 12:11:57.298959",
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4901,7 +5053,11 @@
    "field_name": "rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.725996",
+=======
+   "modified": "2025-05-28 12:11:57.298959",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-rounded_total-print_hide",
@@ -4916,7 +5072,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:43.913376",
+   "creation": "2025-05-28 12:11:58.647086",
    "default_value": null,
    "doc_type": "Purchase Invoice",
    "docstatus": 0,
@@ -4924,7 +5080,11 @@
    "field_name": "scan_barcode",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.742180",
+=======
+   "modified": "2025-05-28 12:11:58.647086",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-scan_barcode-hidden",
@@ -4947,7 +5107,11 @@
    "field_name": "section_addresses",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.755811",
+=======
+   "modified": "2025-05-28 12:10:29.852271",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-section_addresses-label",
@@ -4970,7 +5134,11 @@
    "field_name": "section_break_44",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.769227",
+=======
+   "modified": "2025-05-28 12:10:29.858813",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-section_break_44-hidden",
@@ -4993,7 +5161,11 @@
    "field_name": "shipping_address_display",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.782435",
+=======
+   "modified": "2025-05-28 12:10:29.864546",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-shipping_address_display-label",
@@ -5016,7 +5188,11 @@
    "field_name": "shipping_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.796211",
+=======
+   "modified": "2025-05-28 12:10:29.874078",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-shipping_address-hidden",
@@ -5039,7 +5215,11 @@
    "field_name": "shipping_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.811057",
+=======
+   "modified": "2025-05-28 12:10:29.880055",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-shipping_address-label",
@@ -5062,7 +5242,11 @@
    "field_name": "status",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.824484",
+=======
+   "modified": "2025-05-28 12:10:29.886491",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-status-in_list_view",
@@ -5085,7 +5269,11 @@
    "field_name": "supplier_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.837581",
+=======
+   "modified": "2025-05-28 12:10:29.892916",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-supplier_address-label",
@@ -5108,7 +5296,11 @@
    "field_name": "supplier_gstin",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.852457",
+=======
+   "modified": "2025-05-28 12:10:29.898997",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-supplier_gstin-in_list_view",
@@ -5131,7 +5323,11 @@
    "field_name": "supplier",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.865534",
+=======
+   "modified": "2025-05-28 12:10:29.904998",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-supplier-read_only",
@@ -5154,7 +5350,11 @@
    "field_name": "terms_tab",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.879837",
+=======
+   "modified": "2025-05-28 12:10:29.910812",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-terms_tab-hidden",
@@ -5177,7 +5377,11 @@
    "field_name": "title",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:53.893542",
+=======
+   "modified": "2025-05-28 12:10:29.918979",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice-title-in_list_view",

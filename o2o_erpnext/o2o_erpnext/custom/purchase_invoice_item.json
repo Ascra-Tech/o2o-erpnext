@@ -1354,7 +1354,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:44.127553",
+   "creation": "2025-05-28 12:11:58.793022",
    "default_value": null,
    "doc_type": "Purchase Invoice Item",
    "docstatus": 0,
@@ -1362,7 +1362,11 @@
    "field_name": "from_warehouse",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.473302",
+=======
+   "modified": "2025-05-28 12:11:58.793022",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-from_warehouse-hidden",
@@ -1385,7 +1389,11 @@
    "field_name": "item_code",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.486747",
+=======
+   "modified": "2025-05-28 12:10:30.990609",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-item_code-columns",
@@ -1408,7 +1416,11 @@
    "field_name": "item_group",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.501549",
+=======
+   "modified": "2025-05-28 12:10:30.997154",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-item_group-columns",
@@ -1431,7 +1443,11 @@
    "field_name": "item_group",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.517020",
+=======
+   "modified": "2025-05-28 12:10:31.005241",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-item_group-in_list_view",
@@ -1454,7 +1470,11 @@
    "field_name": "item_group",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.530659",
+=======
+   "modified": "2025-05-28 12:10:31.013033",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-item_group-label",
@@ -1477,7 +1497,11 @@
    "field_name": "item_tax_template",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.546002",
+=======
+   "modified": "2025-05-28 12:10:31.019980",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-item_tax_template-columns",
@@ -1500,7 +1524,11 @@
    "field_name": "item_tax_template",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.559545",
+=======
+   "modified": "2025-05-28 12:10:31.026989",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-item_tax_template-in_list_view",
@@ -1523,7 +1551,11 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.574567",
+=======
+   "modified": "2025-05-28 12:10:31.034930",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-main-field_order",
@@ -1546,7 +1578,11 @@
    "field_name": "net_rate",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.589677",
+=======
+   "modified": "2025-05-28 12:10:31.042192",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-net_rate-columns",
@@ -1569,7 +1605,11 @@
    "field_name": "price_list_rate",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.603422",
+=======
+   "modified": "2025-05-28 12:10:31.049247",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-price_list_rate-columns",
@@ -1592,7 +1632,11 @@
    "field_name": "qty",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.619445",
+=======
+   "modified": "2025-05-28 12:10:31.059747",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-qty-columns",
@@ -1615,7 +1659,11 @@
    "field_name": "rate",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 18:23:52.634383",
+=======
+   "modified": "2025-05-28 12:10:31.070610",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Invoice Item-rate-columns",

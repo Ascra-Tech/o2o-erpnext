@@ -1542,7 +1542,7 @@
    "_liked_by": null,
    "_user_tags": null,
    "allow_in_quick_entry": 0,
-   "allow_on_submit": 0,
+   "allow_on_submit": 1,
    "bold": 0,
    "collapsible": 0,
    "collapsible_depends_on": null,
@@ -2898,7 +2898,11 @@
    "field_name": "accounting_dimensions_section",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:46.825994",
+=======
+   "modified": "2025-05-28 12:10:24.554863",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-accounting_dimensions_section-hidden",
@@ -2921,7 +2925,11 @@
    "field_name": "apply_putaway_rule",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:46.843009",
+=======
+   "modified": "2025-05-28 12:10:24.563842",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-apply_putaway_rule-hidden",
@@ -2936,7 +2944,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.671016",
+   "creation": "2025-05-28 12:11:57.324729",
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -2944,7 +2952,11 @@
    "field_name": "base_rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:46.859514",
+=======
+   "modified": "2025-05-28 12:11:57.324729",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-base_rounded_total-hidden",
@@ -2959,7 +2971,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.702183",
+   "creation": "2025-05-28 12:11:57.337744",
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -2967,7 +2979,11 @@
    "field_name": "base_rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:46.883005",
+=======
+   "modified": "2025-05-28 12:11:57.337744",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-base_rounded_total-print_hide",
@@ -2990,7 +3006,11 @@
    "field_name": "billing_address_display",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:46.908502",
+=======
+   "modified": "2025-05-28 12:10:24.581129",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-billing_address_display-label",
@@ -3013,7 +3033,11 @@
    "field_name": "billing_address_section",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:46.934027",
+=======
+   "modified": "2025-05-28 12:10:24.585369",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-billing_address_section-label",
@@ -3036,7 +3060,11 @@
    "field_name": "billing_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:46.957151",
+=======
+   "modified": "2025-05-28 12:10:24.589922",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-billing_address-label",
@@ -3059,7 +3087,11 @@
    "field_name": "col_break_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:46.978864",
+=======
+   "modified": "2025-05-28 12:10:24.595478",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-col_break_address-label",
@@ -3082,7 +3114,11 @@
    "field_name": "contact_person",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.001864",
+=======
+   "modified": "2025-05-28 12:10:24.600429",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-contact_person-hidden",
@@ -3105,7 +3141,11 @@
    "field_name": "currency_and_price_list",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.023397",
+=======
+   "modified": "2025-05-28 12:10:24.608596",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-currency_and_price_list-hidden",
@@ -3128,7 +3168,11 @@
    "field_name": "custom_branch",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.039976",
+=======
+   "modified": "2025-05-28 12:10:24.613057",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-custom_branch-in_list_view",
@@ -3151,7 +3195,11 @@
    "field_name": "custom_state_name",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.055133",
+=======
+   "modified": "2025-05-28 12:10:24.617698",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-custom_state_name-in_list_view",
@@ -3174,7 +3222,11 @@
    "field_name": "custom_sub_branch",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.072866",
+=======
+   "modified": "2025-05-28 12:10:24.622713",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-custom_sub_branch-in_list_view",
@@ -3189,7 +3241,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.820518",
+   "creation": "2025-05-28 12:11:57.375372",
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -3197,7 +3249,11 @@
    "field_name": "disable_rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.089293",
+=======
+   "modified": "2025-05-28 12:11:57.375372",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-disable_rounded_total-default",
@@ -3220,7 +3276,11 @@
    "field_name": "grand_total",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.106296",
+=======
+   "modified": "2025-05-28 12:10:24.631839",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-grand_total-in_list_view",
@@ -3243,7 +3303,11 @@
    "field_name": "gst_category",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.122450",
+=======
+   "modified": "2025-05-28 12:10:24.636539",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-gst_category-hidden",
@@ -3258,7 +3322,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:38.239493",
+   "creation": "2025-05-28 12:11:57.558033",
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -3266,7 +3330,11 @@
    "field_name": "in_words",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.140354",
+=======
+   "modified": "2025-05-28 12:11:57.558033",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-in_words-hidden",
@@ -3281,7 +3349,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:38.267191",
+   "creation": "2025-05-28 12:11:57.569980",
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -3289,7 +3357,11 @@
    "field_name": "in_words",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.158724",
+=======
+   "modified": "2025-05-28 12:11:57.569980",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-in_words-print_hide",
@@ -3312,7 +3384,11 @@
    "field_name": "incoterm",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.177186",
+=======
+   "modified": "2025-05-28 12:10:24.650475",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-incoterm-hidden",
@@ -3335,7 +3411,11 @@
    "field_name": "is_subcontracted",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.194804",
+=======
+   "modified": "2025-05-28 12:10:24.655304",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-is_subcontracted-hidden",
@@ -3358,7 +3438,11 @@
    "field_name": "lr_date",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.213132",
+=======
+   "modified": "2025-05-28 12:10:24.659776",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-lr_date-default",
@@ -3381,7 +3465,11 @@
    "field_name": "lr_date",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.229919",
+=======
+   "modified": "2025-05-28 12:10:24.666592",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-lr_date-label",
@@ -3404,7 +3492,11 @@
    "field_name": "lr_date",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.249565",
+=======
+   "modified": "2025-05-28 12:10:24.670662",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-lr_date-print_hide",
@@ -3427,7 +3519,11 @@
    "field_name": "lr_no",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.269082",
+=======
+   "modified": "2025-05-28 12:10:24.674711",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-lr_no-label",
@@ -3450,7 +3546,11 @@
    "field_name": "lr_no",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.286823",
+=======
+   "modified": "2025-05-28 12:10:24.679200",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-lr_no-length",
@@ -3473,7 +3573,11 @@
    "field_name": "lr_no",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.303200",
+=======
+   "modified": "2025-05-28 12:10:24.683066",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-lr_no-print_hide",
@@ -3496,7 +3600,11 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.320233",
+=======
+   "modified": "2025-05-28 12:10:24.687188",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-main-default_print_format",
@@ -3511,7 +3619,11 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
+<<<<<<< HEAD
    "creation": "2025-05-29 16:33:39.626128",
+=======
+   "creation": "2025-05-28 12:30:19.589607",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -3519,7 +3631,11 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.335966",
+=======
+   "modified": "2025-05-28 12:30:19.589607",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-main-field_order",
@@ -3542,7 +3658,11 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.352815",
+=======
+   "modified": "2025-05-28 12:10:24.696426",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-main-quick_entry",
@@ -3565,7 +3685,11 @@
    "field_name": null,
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.368131",
+=======
+   "modified": "2025-05-28 12:10:24.700827",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-main-track_changes",
@@ -3588,7 +3712,11 @@
    "field_name": "more_info_tab",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.384219",
+=======
+   "modified": "2025-05-28 12:10:24.705250",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-more_info_tab-hidden",
@@ -3611,7 +3739,11 @@
    "field_name": "naming_series",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.399442",
+=======
+   "modified": "2025-05-28 12:10:24.710394",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-naming_series-default",
@@ -3634,7 +3766,11 @@
    "field_name": "naming_series",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.416583",
+=======
+   "modified": "2025-05-28 12:10:24.715366",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-naming_series-options",
@@ -3657,7 +3793,11 @@
    "field_name": "per_returned",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.432539",
+=======
+   "modified": "2025-05-28 12:10:24.722793",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-per_returned-in_list_view",
@@ -3680,7 +3820,11 @@
    "field_name": "posting_date",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.448372",
+=======
+   "modified": "2025-05-28 12:10:24.727856",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-posting_date-in_list_view",
@@ -3703,7 +3847,11 @@
    "field_name": "posting_date",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.465181",
+=======
+   "modified": "2025-05-28 12:10:24.732118",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-posting_date-label",
@@ -3726,7 +3874,11 @@
    "field_name": "provisional_expense_account",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.480635",
+=======
+   "modified": "2025-05-28 12:10:24.736560",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-provisional_expense_account-hidden",
@@ -3749,7 +3901,11 @@
    "field_name": "raw_material_details",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.494478",
+=======
+   "modified": "2025-05-28 12:10:24.740769",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-raw_material_details-hidden",
@@ -3764,7 +3920,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.741567",
+   "creation": "2025-05-28 12:11:57.350244",
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -3772,7 +3928,11 @@
    "field_name": "rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.509068",
+=======
+   "modified": "2025-05-28 12:11:57.350244",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-rounded_total-hidden",
@@ -3787,7 +3947,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:37.781140",
+   "creation": "2025-05-28 12:11:57.362230",
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -3795,7 +3955,11 @@
    "field_name": "rounded_total",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.523728",
+=======
+   "modified": "2025-05-28 12:11:57.362230",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-rounded_total-print_hide",
@@ -3810,7 +3974,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2025-03-15 15:18:43.801119",
+   "creation": "2025-05-28 12:11:58.746150",
    "default_value": null,
    "doc_type": "Purchase Receipt",
    "docstatus": 0,
@@ -3818,7 +3982,11 @@
    "field_name": "scan_barcode",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.538552",
+=======
+   "modified": "2025-05-28 12:11:58.746150",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-scan_barcode-hidden",
@@ -3841,7 +4009,11 @@
    "field_name": "sec_warehouse",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.553713",
+=======
+   "modified": "2025-05-28 12:10:24.762900",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-sec_warehouse-hidden",
@@ -3864,7 +4036,11 @@
    "field_name": "section_addresses",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.566914",
+=======
+   "modified": "2025-05-28 12:10:24.767192",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-section_addresses-label",
@@ -3887,7 +4063,11 @@
    "field_name": "section_break_42",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.580838",
+=======
+   "modified": "2025-05-28 12:10:24.771336",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-section_break_42-hidden",
@@ -3910,7 +4090,11 @@
    "field_name": "section_break_98",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.594192",
+=======
+   "modified": "2025-05-28 12:10:24.776413",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-section_break_98-label",
@@ -3933,7 +4117,11 @@
    "field_name": "shipping_address_display",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.608717",
+=======
+   "modified": "2025-05-28 12:10:24.789599",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-shipping_address_display-label",
@@ -3956,7 +4144,11 @@
    "field_name": "shipping_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.621934",
+=======
+   "modified": "2025-05-28 12:10:24.795244",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-shipping_address-label",
@@ -3979,7 +4171,11 @@
    "field_name": "shipping_rule",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.635038",
+=======
+   "modified": "2025-05-28 12:10:24.800937",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-shipping_rule-hidden",
@@ -4002,7 +4198,11 @@
    "field_name": "supplier_address",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.649970",
+=======
+   "modified": "2025-05-28 12:10:24.806530",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-supplier_address-label",
@@ -4025,7 +4225,11 @@
    "field_name": "supplier_delivery_note",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.663293",
+=======
+   "modified": "2025-05-28 12:10:24.812541",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-supplier_delivery_note-hidden",
@@ -4048,7 +4252,11 @@
    "field_name": "supplier_gstin",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.678397",
+=======
+   "modified": "2025-05-28 12:10:24.818416",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-supplier_gstin-hidden",
@@ -4071,7 +4279,11 @@
    "field_name": "supplier",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.692587",
+=======
+   "modified": "2025-05-28 12:10:24.823915",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-supplier-read_only",
@@ -4094,7 +4306,11 @@
    "field_name": "terms_tab",
    "idx": 0,
    "is_system_generated": 0,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.708214",
+=======
+   "modified": "2025-05-28 12:10:24.829536",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-terms_tab-hidden",
@@ -4117,7 +4333,11 @@
    "field_name": "title",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.722582",
+=======
+   "modified": "2025-05-28 12:10:24.834656",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-title-in_list_view",
@@ -4140,7 +4360,11 @@
    "field_name": "transporter_name",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.736344",
+=======
+   "modified": "2025-05-28 12:10:24.839763",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-transporter_name-fetch_from",
@@ -4163,7 +4387,11 @@
    "field_name": "transporter_name",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.751612",
+=======
+   "modified": "2025-05-28 12:10:24.845864",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-transporter_name-fieldtype",
@@ -4186,7 +4414,11 @@
    "field_name": "transporter_name",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.766046",
+=======
+   "modified": "2025-05-28 12:10:24.851668",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-transporter_name-no_copy",
@@ -4209,7 +4441,11 @@
    "field_name": "transporter_name",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.781727",
+=======
+   "modified": "2025-05-28 12:10:24.859671",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-transporter_name-print_hide",
@@ -4232,7 +4468,11 @@
    "field_name": "transporter_name",
    "idx": 0,
    "is_system_generated": 1,
+<<<<<<< HEAD
    "modified": "2025-05-29 17:23:47.795732",
+=======
+   "modified": "2025-05-28 12:10:24.864887",
+>>>>>>> 69a6661bd3442f3007cb85ad90a6fe9e91f131b6
    "modified_by": "Administrator",
    "module": null,
    "name": "Purchase Receipt-transporter_name-read_only",

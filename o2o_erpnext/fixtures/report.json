@@ -10,6 +10,202 @@
   "is_standard": "Yes",
   "javascript": null,
   "json": null,
+  "letter_head": null,
+  "modified": "2025-04-25 16:48:02.919623",
+  "module": "o2o ErpNext",
+  "name": "Purchase Order User",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Purchase Order",
+  "reference_report": null,
+  "report_name": "Purchase Order User",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Person Raising Request"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "PO Approver"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Supplier"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Super PO Approval"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "PO Rejector"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Vendor User"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Person Raising Request Branch"
+   },
+   {
+    "parent": "Purchase Order User",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2025-05-28 12:36:25.702597",
+  "module": "o2o ErpNext",
+  "name": "Profit and Loss Dashborad",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Purchase Order",
+  "reference_report": null,
+  "report_name": "Profit and Loss Dashborad",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Person Raising Request"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "PO Approver"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Requisition Approver"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Supplier"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Super PO Approval"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "PO Rejector"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Vendor User"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Person Raising Request Branch"
+   },
+   {
+    "parent": "Profit and Loss Dashborad",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
   "letter_head": "",
   "modified": "2017-06-23 04:46:43.209008",
   "module": "Manufacturing",
@@ -8892,92 +9088,6 @@
   "timeout": 0
  },
  {
-  "add_total_row": 0,
-  "add_translate_data": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2025-04-15 16:32:53.717433",
-  "module": "o2o ErpNext",
-  "name": "Purchase Order New",
-  "prepared_report": 0,
-  "query": "SELECT  \n    `tabPurchase Order`.supplier AS \"Entity:Link/Supplier:200\",\n    `tabPurchase Order`.custom_branch AS \"Branch:Link/Branch:200\",\n    CONCAT_WS('\\n', `tabAddress`.address_line1, `tabAddress`.address_line2, `tabAddress`.city) AS \"Shipping Address:Data:300\",\n    `tabPurchase Order`.owner AS \"Created By:Data:200\",\n    `tabPurchase Order`.name AS \"Order Number:Link/Purchase Order:200\",\n    `tabPurchase Order`.custom_order_code AS \"Order Code:Data:200\",\n    `tabPurchase Order`.grand_total AS \"Gross Total:Currency:200\",\n    `tabPurchase Order`.workflow_state AS \"Order Status:Data:200\",\n    `tabPurchase Order`.transaction_date AS \"Created At:Datetime:200\",\n    `tabPurchase Order`.custom_updated_at AS \"Updated At:Datetime:200\",\n    `tabPurchase Order`.custom__approved_at AS \"Approved At:Date:200\"\nFROM \n    `tabPurchase Order`\nINNER JOIN \n    `tabAddress` ON `tabPurchase Order`.shipping_address = `tabAddress`.name\nGROUP BY \n    `tabPurchase Order`.name, \n    `tabPurchase Order`.supplier, \n    `tabPurchase Order`.custom_branch, \n    `tabPurchase Order`.owner, \n    `tabPurchase Order`.grand_total,\n    `tabPurchase Order`.workflow_state, \n    `tabPurchase Order`.transaction_date, \n    `tabPurchase Order`.custom_order_code,\n    `tabPurchase Order`.custom__approved_at,\n    `tabAddress`.address_line1,\n    `tabAddress`.address_line2,\n    `tabAddress`.city\nORDER BY \n    `tabPurchase Order`.transaction_date DESC;\n",
-  "ref_doctype": "Purchase Order",
-  "reference_report": null,
-  "report_name": "Purchase Order New",
-  "report_script": null,
-  "report_type": "Query Report",
-  "roles": [
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase Manager"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase User"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Person Raising Request"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "PO Approver"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Requisition Approver"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Supplier"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Super PO Approval"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "PO Rejector"
-   },
-   {
-    "parent": "Purchase Order New",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Vendor User"
-   }
-  ],
-  "timeout": 0
- },
- {
   "add_total_row": 1,
   "add_translate_data": 0,
   "columns": [],
@@ -9049,104 +9159,6 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Accounts User"
-   }
-  ],
-  "timeout": 0
- },
- {
-  "add_total_row": 0,
-  "add_translate_data": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "No",
-  "javascript": null,
-  "json": "{\"columns\":[{\"fieldname\":\"supplier\",\"fieldtype\":\"Link\",\"label\":\"Supplier\",\"insert_after_index\":0,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"options\":\"Supplier\",\"width\":100,\"id\":\"supplier\",\"name\":\"Supplier\",\"editable\":false,\"compareValue\":null},{\"label\":\"Purchase Order\",\"fieldname\":\"purchase_order\",\"fieldtype\":\"Link\",\"options\":\"Purchase Order\",\"width\":160,\"id\":\"purchase_order\",\"name\":\"Purchase Order\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"transaction_date\",\"fieldtype\":\"Date\",\"label\":\"Created At\",\"insert_after_index\":2,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"width\":100,\"id\":\"transaction_date\",\"name\":\"Created At\",\"editable\":false},{\"fieldname\":\"custom__approved_at\",\"fieldtype\":\"Datetime\",\"label\":\" Approved At\",\"insert_after_index\":3,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"width\":100,\"id\":\"custom__approved_at\",\"name\":\" Approved At\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"custom_total_pl\",\"fieldtype\":\"Currency\",\"label\":\"Total P&L\",\"insert_after_index\":4,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"width\":100,\"id\":\"custom_total_pl\",\"name\":\"Total P&L\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"base_grand_total\",\"fieldtype\":\"Currency\",\"label\":\"Grand Total (Company Currency)\",\"insert_after_index\":4,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"options\":\"Company:company:default_currency\",\"width\":100,\"id\":\"base_grand_total\",\"name\":\"Grand Total (Company Currency)\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"custom_total_purchase_cost\",\"fieldtype\":\"Currency\",\"label\":\"Total Purchase Cost\",\"insert_after_index\":5,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"width\":100,\"id\":\"custom_total_purchase_cost\",\"name\":\"Total Purchase Cost\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"custom_branch\",\"fieldtype\":\"Link\",\"label\":\"Branch\",\"insert_after_index\":7,\"link_field\":{\"fieldname\":\"purchase_order\",\"names\":{}},\"doctype\":\"Purchase Order\",\"options\":\"Branch\",\"width\":100,\"id\":\"custom_branch\",\"name\":\"Branch\",\"editable\":false,\"compareValue\":null}],\"filters\":{\"company\":\"o2op2p\",\"from_date\":\"2025-02-25\",\"to_date\":\"2025-03-25\",\"name\":[],\"status\":[]}}",
-  "letter_head": null,
-  "modified": "2025-03-25 13:42:25.983781",
-  "module": "Buying",
-  "name": "P&L Dashboard",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Purchase Order",
-  "reference_report": "Purchase Order Analysis",
-  "report_name": "P&L Dashboard",
-  "report_script": null,
-  "report_type": "Custom Report",
-  "roles": [
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase Manager"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase User"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Person Raising Request"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "PO Approver"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Requisition Approver"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Supplier"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Super PO Approval"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "PO Rejector"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Vendor User"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Person Raising Request Branch"
-   },
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Employee"
    }
   ],
   "timeout": 0
