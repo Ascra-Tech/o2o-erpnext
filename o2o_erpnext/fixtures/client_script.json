@@ -856,5 +856,16 @@
   "name": "Copy table 1",
   "script": "frappe.ui.form.on('Purchase Order', {\n    items: function(frm, cdt, cdn) {\n        let row = locals[cdt][cdn];  // Get the changed row\n        console.log(\"Custom Artwork Number Selected:\", row.custom_artwork_number);\n\n        new_row = frm.add_child(\"custom_purchasing_details_original\")\n        new_row.product_name = row.item_code\n\n        frm.refresh_field(\"custom_purchasing_details_original\");\n    }\n});",
   "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Purchase Order",
+  "enabled": 0,
+  "modified": "2025-05-19 19:33:00.028123",
+  "module": "o2o ErpNext",
+  "name": "Approved At",
+  "script": "frappe.ui.form.on('Purchase Order', {\n    validate: function(frm) {\n        console.log(\"sssssssssssgggggggggggggg\")\n        if (frm.doc.workflow_state === \"PO Approved\") {\n            frm.set_value('custom__approved_at', frappe.datetime.now_datetime());\n        }\n        console.log(\"Approved at:\", frm.doc.custom__approved_at);\n    }\n});\n",
+  "view": "Form"
  }
 ]
