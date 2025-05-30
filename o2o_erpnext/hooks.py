@@ -15,15 +15,7 @@ required_apps = ["frappe/erpnext"]
 
 
 # Each item in the list will be shown as an app in the apps page
-add_to_apps_screen = [
-    {
-        "name": "o2o_erpnext",
-        "logo": "/assets/o2o_erpnext/images/o2o_big_logo.png",
-        "title": "o2o ErpNext",
-        "route": "/o2o_erpnext",
-       # "has_permission": "o2o_erpnext.api.permission.has_app_permission"
-    }
-]
+
 # Includes in <head>
 # ------------------
 
