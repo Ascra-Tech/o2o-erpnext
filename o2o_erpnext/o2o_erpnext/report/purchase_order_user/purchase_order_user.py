@@ -24,19 +24,24 @@ def get_data(filters):
         
         # Base query with sub_branch added
         base_query = '''
-            SELECT supplier,
-                   custom_branch,
-                   custom_sub_branch,
-                   shipping_address_display,
-                   custom_order_code,
-                   name,
-                   custom_created_user,
-                   grand_total,
-                   workflow_state,
-                   transaction_date,
-                   custom_updated_at,
-                   custom__approved_at
-            FROM `tabPurchase Order`
+            SELECT 
+                po.supplier,
+                po.custom_branch,
+                po.custom_sub_branch,
+                po.shipping_address_display,
+                po.custom_order_code,
+                po.name,
+                po.custom_created_user,
+                po.workflow_state,
+                po.transaction_date,
+                po.custom_updated_at,
+                po.custom__approved_at,
+                poi.item_group,
+                poi.item_name,
+                poi.qty,
+                poi.amount
+            FROM `tabPurchase Order` po
+            LEFT JOIN `tabPurchase Order Item` poi ON poi.parent = po.name 
         '''
         
         if current_user == "Administrator":
@@ -194,6 +199,30 @@ def get_columns():
             "width": 150,
         },
         {
+            "label": _("Categories"),
+            "fieldname": "item_group",
+            "fieldtype": "data",
+            "width": 150,
+        },
+        {
+            "label": _("Product Name"),
+            "fieldname": "item_name",
+            "fieldtype": "data",
+            "width": 150,
+        },
+        {
+            "label": _("Quantity"),
+            "fieldname": "qty",
+            "fieldtype": "data",
+            "width": 150,
+        },
+        {
+            "label": _("Total Coest"),
+            "fieldname": "amount",
+            "fieldtype": "data",
+            "width": 150,
+        },
+        {
             "label": _("Order Number"),
             "fieldname": "name",
             "fieldtype": "data",
@@ -203,12 +232,6 @@ def get_columns():
             "label": _("Order Code"),
             "fieldname": "custom_order_code",
             "fieldtype": "data",
-            "width": 150,
-        },
-        {
-            "label": _("Gross Total"),
-            "fieldname": "grand_total",
-            "fieldtype": "Currency",
             "width": 150,
         },
         {
@@ -237,3 +260,5 @@ def get_columns():
         }
     ]
     return columns
+
+

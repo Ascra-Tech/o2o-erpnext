@@ -1,8 +1,7 @@
-// Copyright (c) 2025, Ascratech LLP and contributors
-// For license information, please see license.txt
+// File: your_app/public/js/purchase_order_user.js
 
 frappe.query_reports["Purchase Order User"] = {
-	"filters": [
+    "filters": [
 
-	]
+    ]
 };
