@@ -217,7 +217,7 @@ def get_columns():
             "width": 150,
         },
         {
-            "label": _("Total Coest"),
+            "label": _("Total Cost"),
             "fieldname": "amount",
             "fieldtype": "data",
             "width": 150,
