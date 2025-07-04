@@ -37,6 +37,9 @@ required_apps = ["frappe/erpnext"]
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
 
+# Add server-side validation hooks
+
+
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"Purchase Receipt" : "public/js/purchase_receipt_list.js"}
@@ -257,6 +260,13 @@ fixtures = [
     #"Workflow Action Master",
     #"Module Profile",
 ]
+
+doc_events = {
+    "Purchase Invoice": {
+        "validate": "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_validate",
+        "before_save": "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_before_save"
+    }
+}
 
 doc_events = {
     "Sales Order": {
