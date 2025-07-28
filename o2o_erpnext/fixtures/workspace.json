@@ -4113,7 +4113,7 @@
   "hide_custom": 0,
   "icon": "website",
   "indicator_color": null,
-  "is_hidden": 0,
+  "is_hidden": 1,
   "label": "Website",
   "links": [
    {
@@ -4604,7 +4604,7 @@
   "hide_custom": 0,
   "icon": "tool",
   "indicator_color": null,
-  "is_hidden": 0,
+  "is_hidden": 1,
   "label": "Tools",
   "links": [
    {
@@ -7801,7 +7801,7 @@
     "parent": "Stock",
     "parentfield": "links",
     "parenttype": "Workspace",
-    "report_ref_doctype": null,
+    "report_ref_doctype": "Serial No",
     "type": "Link"
    },
    {
@@ -11441,7 +11441,7 @@
   "hide_custom": 0,
   "icon": "setting",
   "indicator_color": null,
-  "is_hidden": 0,
+  "is_hidden": 1,
   "label": "ERPNext Settings",
   "links": [
    {
@@ -15072,7 +15072,7 @@
   "is_hidden": 0,
   "label": "P&L Dashboard",
   "links": [],
-  "modified": "2025-05-28 12:13:30.820055",
+  "modified": "2025-07-07 12:47:07.183844",
   "module": null,
   "name": "P&L Dashboard",
   "number_cards": [],
@@ -15081,12 +15081,6 @@
   "quick_lists": [],
   "restrict_to_domain": null,
   "roles": [
-   {
-    "parent": "P&L Dashboard",
-    "parentfield": "roles",
-    "parenttype": "Workspace",
-    "role": "Vendor User"
-   },
    {
     "parent": "P&L Dashboard",
     "parentfield": "roles",
