@@ -4,12 +4,46 @@ import frappe
 from frappe import _
 
 @frappe.whitelist()
+def check_vendor_access():
+    """
+    Check if current user has Vendor User or Supplier role
+    """
+    try:
+        current_user = frappe.session.user
+        user_roles = frappe.get_roles(current_user)
+        
+        allowed_roles = ['Vendor User', 'Supplier', 'System Manager']
+        has_access = any(role in user_roles for role in allowed_roles)
+        
+        return {
+            'status': 'success',
+            'has_access': has_access,
+            'user': current_user,
+            'roles': user_roles
+        }
+    except Exception as e:
+        frappe.log_error(f"Error in check_vendor_access: {str(e)}", "PO Scanner Error")
+        return {
+            'status': 'error',
+            'has_access': False,
+            'message': str(e)
+        }
+
+@frappe.whitelist()
 def get_partial_purchase_orders():
     """
     Get all Purchase Orders that are partially received
     Returns POs where some items are received and some are pending
     """
     try:
+        # Check role access first
+        access_check = check_vendor_access()
+        if not access_check.get('has_access'):
+            return {
+                'status': 'error',
+                'message': 'Access denied. You need Vendor User or Supplier role.'
+            }
+        
         # Get all POs that are not fully received
         pos = frappe.get_all(
             'Purchase Order',
@@ -97,6 +131,14 @@ def get_po_item_status(po_name):
     Get detailed item status for a specific Purchase Order
     """
     try:
+        # Check role access first
+        access_check = check_vendor_access()
+        if not access_check.get('has_access'):
+            return {
+                'status': 'error',
+                'message': 'Access denied. You need Vendor User or Supplier role.'
+            }
+            
         if not po_name:
             return {'status': 'error', 'message': 'Purchase Order name is required'}
         
@@ -187,6 +229,14 @@ def get_po_statistics():
     Get overall statistics for Purchase Orders
     """
     try:
+        # Check role access first
+        access_check = check_vendor_access()
+        if not access_check.get('has_access'):
+            return {
+                'status': 'error',
+                'message': 'Access denied. You need Vendor User or Supplier role.'
+            }
+            
         # Get all submitted POs
         all_pos = frappe.get_all(
             'Purchase Order',
