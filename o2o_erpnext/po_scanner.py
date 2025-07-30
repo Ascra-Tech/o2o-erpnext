@@ -29,11 +29,38 @@ def check_vendor_access():
             'message': str(e)
         }
 
+def get_supplier_for_current_user():
+    """
+    Get the supplier linked to the current user
+    Returns supplier name or None if not found
+    """
+    try:
+        current_user = frappe.session.user
+        
+        # Skip filtering for System Manager role
+        user_roles = frappe.get_roles(current_user)
+        if 'System Manager' in user_roles:
+            return None
+        
+        # Find supplier where custom_user matches current user
+        supplier = frappe.db.get_value(
+            'Supplier',
+            {'custom_user': current_user},
+            'name'
+        )
+        
+        return supplier
+        
+    except Exception as e:
+        frappe.log_error(f"Error in get_supplier_for_current_user: {str(e)}", "PO Scanner Error")
+        return None
+
 @frappe.whitelist()
 def get_partial_purchase_orders():
     """
     Get all Purchase Orders that are partially received
     Returns POs where some items are received and some are pending
+    Filters by supplier if user is linked to a specific supplier
     """
     try:
         # Check role access first
@@ -44,13 +71,23 @@ def get_partial_purchase_orders():
                 'message': 'Access denied. You need Vendor User or Supplier role.'
             }
         
+        # Get supplier for current user (None for System Manager)
+        current_supplier = get_supplier_for_current_user()
+        
+        # Build filters
+        filters = {
+            'status': ['in', ['To Receive', 'To Receive and Bill']],
+            'docstatus': 1
+        }
+        
+        # Add supplier filter if user is linked to a specific supplier
+        if current_supplier:
+            filters['supplier'] = current_supplier
+        
         # Get all POs that are not fully received
         pos = frappe.get_all(
             'Purchase Order',
-            filters={
-                'status': ['in', ['To Receive', 'To Receive and Bill']],
-                'docstatus': 1
-            },
+            filters=filters,
             fields=['name', 'supplier', 'transaction_date', 'grand_total', 'status', 'company'],
             order_by='transaction_date desc'
         )
@@ -111,11 +148,18 @@ def get_partial_purchase_orders():
                 
                 partial_pos.append(po_detail)
         
+        # Prepare response message
+        if current_supplier:
+            message = f'Found {len(partial_pos)} partial Purchase Orders for supplier: {current_supplier}'
+        else:
+            message = f'Found {len(partial_pos)} partial Purchase Orders (all suppliers)'
+        
         return {
             'status': 'success',
             'data': partial_pos,
             'total_partial_pos': len(partial_pos),
-            'message': f'Found {len(partial_pos)} partial Purchase Orders'
+            'filtered_supplier': current_supplier,
+            'message': message
         }
         
     except Exception as e:
@@ -129,6 +173,7 @@ def get_partial_purchase_orders():
 def get_po_item_status(po_name):
     """
     Get detailed item status for a specific Purchase Order
+    Validates that user has access to this PO (supplier check)
     """
     try:
         # Check role access first
@@ -146,8 +191,19 @@ def get_po_item_status(po_name):
         if not frappe.db.exists('Purchase Order', po_name):
             return {'status': 'error', 'message': 'Purchase Order not found'}
         
+        # Get current supplier for access control
+        current_supplier = get_supplier_for_current_user()
+        
         # Get PO details
         po = frappe.get_doc('Purchase Order', po_name)
+        
+        # Validate supplier access - if user is linked to a supplier, 
+        # they can only view POs for their supplier
+        if current_supplier and po.supplier != current_supplier:
+            return {
+                'status': 'error',
+                'message': f'Access denied. You can only view Purchase Orders for supplier: {current_supplier}'
+            }
         
         items = frappe.get_all(
             'Purchase Order Item',
@@ -227,6 +283,7 @@ def get_po_item_status(po_name):
 def get_po_statistics():
     """
     Get overall statistics for Purchase Orders
+    Filters by supplier if user is linked to a specific supplier
     """
     try:
         # Check role access first
@@ -236,11 +293,19 @@ def get_po_statistics():
                 'status': 'error',
                 'message': 'Access denied. You need Vendor User or Supplier role.'
             }
+        
+        # Get supplier for current user
+        current_supplier = get_supplier_for_current_user()
+        
+        # Build filters
+        filters = {'docstatus': 1}
+        if current_supplier:
+            filters['supplier'] = current_supplier
             
         # Get all submitted POs
         all_pos = frappe.get_all(
             'Purchase Order',
-            filters={'docstatus': 1},
+            filters=filters,
             fields=['name', 'status']
         )
         
@@ -254,13 +319,21 @@ def get_po_statistics():
         partial_result = get_partial_purchase_orders()
         partial_count = partial_result.get('total_partial_pos', 0) if partial_result.get('status') == 'success' else 0
         
+        # Prepare response message
+        if current_supplier:
+            message = f'Statistics for supplier: {current_supplier}'
+        else:
+            message = 'Statistics for all suppliers'
+        
         return {
             'status': 'success',
             'data': {
                 'total_pos': len(all_pos),
                 'partial_pos': partial_count,
                 'status_breakdown': status_counts,
-                'partial_percentage': round((partial_count / len(all_pos)) * 100, 2) if len(all_pos) > 0 else 0
+                'partial_percentage': round((partial_count / len(all_pos)) * 100, 2) if len(all_pos) > 0 else 0,
+                'filtered_supplier': current_supplier,
+                'message': message
             }
         }
         
@@ -269,4 +342,33 @@ def get_po_statistics():
         return {
             'status': 'error',
             'message': f'Error getting PO statistics: {str(e)}'
+        }
+
+@frappe.whitelist()
+def get_current_user_supplier_info():
+    """
+    Get information about the current user's supplier linkage
+    Useful for debugging and UI display
+    """
+    try:
+        current_user = frappe.session.user
+        user_roles = frappe.get_roles(current_user)
+        current_supplier = get_supplier_for_current_user()
+        
+        return {
+            'status': 'success',
+            'data': {
+                'current_user': current_user,
+                'user_roles': user_roles,
+                'linked_supplier': current_supplier,
+                'is_system_manager': 'System Manager' in user_roles,
+                'has_supplier_link': bool(current_supplier)
+            }
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Error in get_current_user_supplier_info: {str(e)}", "PO Scanner Error")
+        return {
+            'status': 'error',
+            'message': f'Error getting user supplier info: {str(e)}'
         }
