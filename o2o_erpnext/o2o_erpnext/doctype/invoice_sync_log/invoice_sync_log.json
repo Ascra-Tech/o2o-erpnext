@@ -1,0 +1,255 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-10-09 05:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "sync_direction",
+  "invoice_reference",
+  "external_invoice_id",
+  "column_break_basic",
+  "sync_status",
+  "sync_timestamp",
+  "retry_count",
+  "section_break_details",
+  "source_system",
+  "target_system",
+  "operation_type",
+  "column_break_systems",
+  "erpnext_invoice_id",
+  "procureuat_invoice_id",
+  "vendor_supplier_mapping",
+  "section_break_data",
+  "source_data",
+  "column_break_target",
+  "target_data",
+  "section_break_status",
+  "success_message",
+  "column_break_error",
+  "error_message",
+  "section_break_sync",
+  "sync_method",
+  "batch_id",
+  "column_break_batch",
+  "force_sync",
+  "skip_validation"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SYNC-LOG-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_direction",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Sync Direction",
+   "options": "ERPNext to ProcureUAT\nProcureUAT to ERPNext\nBidirectional",
+   "reqd": 1
+  },
+  {
+   "fieldname": "invoice_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Invoice Reference",
+   "reqd": 1
+  },
+  {
+   "fieldname": "external_invoice_id",
+   "fieldtype": "Int",
+   "label": "External Invoice ID"
+  },
+  {
+   "fieldname": "column_break_basic",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "sync_status",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Sync Status",
+   "options": "Pending\nIn Progress\nSuccess\nFailed\nRetry\nSkipped",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_timestamp",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Sync Timestamp"
+  },
+  {
+   "default": "0",
+   "fieldname": "retry_count",
+   "fieldtype": "Int",
+   "label": "Retry Count"
+  },
+  {
+   "fieldname": "section_break_details",
+   "fieldtype": "Section Break",
+   "label": "System Details"
+  },
+  {
+   "fieldname": "source_system",
+   "fieldtype": "Select",
+   "label": "Source System",
+   "options": "ERPNext\nProcureUAT"
+  },
+  {
+   "fieldname": "target_system",
+   "fieldtype": "Select",
+   "label": "Target System",
+   "options": "ERPNext\nProcureUAT"
+  },
+  {
+   "fieldname": "operation_type",
+   "fieldtype": "Select",
+   "label": "Operation Type",
+   "options": "Insert\nUpdate\nDelete\nUpsert"
+  },
+  {
+   "fieldname": "column_break_systems",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "erpnext_invoice_id",
+   "fieldtype": "Link",
+   "label": "ERPNext Invoice ID",
+   "options": "Purchase Invoice"
+  },
+  {
+   "fieldname": "procureuat_invoice_id",
+   "fieldtype": "Int",
+   "label": "ProcureUAT Invoice ID"
+  },
+  {
+   "fieldname": "vendor_supplier_mapping",
+   "fieldtype": "Data",
+   "label": "Vendor/Supplier Mapping"
+  },
+  {
+   "fieldname": "section_break_data",
+   "fieldtype": "Section Break",
+   "label": "Sync Data"
+  },
+  {
+   "fieldname": "source_data",
+   "fieldtype": "JSON",
+   "label": "Source Data"
+  },
+  {
+   "fieldname": "column_break_target",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "target_data",
+   "fieldtype": "JSON",
+   "label": "Target Data"
+  },
+  {
+   "fieldname": "section_break_status",
+   "fieldtype": "Section Break",
+   "label": "Messages"
+  },
+  {
+   "fieldname": "success_message",
+   "fieldtype": "Text",
+   "label": "Success Message"
+  },
+  {
+   "fieldname": "column_break_error",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "error_message",
+   "fieldtype": "Text",
+   "label": "Error Message"
+  },
+  {
+   "fieldname": "section_break_sync",
+   "fieldtype": "Section Break",
+   "label": "Sync Options"
+  },
+  {
+   "fieldname": "sync_method",
+   "fieldtype": "Select",
+   "label": "Sync Method",
+   "options": "Automatic\nManual\nScheduled\nBatch\nForced"
+  },
+  {
+   "fieldname": "batch_id",
+   "fieldtype": "Data",
+   "label": "Batch ID"
+  },
+  {
+   "fieldname": "column_break_batch",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "force_sync",
+   "fieldtype": "Check",
+   "label": "Force Sync"
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_validation",
+   "fieldtype": "Check",
+   "label": "Skip Validation"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-09 05:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "Invoice Sync Log",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,1 @@
+# Configuration module for O2O ERPNext external database connections

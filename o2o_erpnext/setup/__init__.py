@@ -1,0 +1,1 @@
+# Setup module for O2O ERPNext

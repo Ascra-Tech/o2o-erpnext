@@ -1,0 +1,181 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:connection_name",
+ "creation": "2025-10-09 03:28:23.630673",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "connection_name",
+  "display_name",
+  "database_type",
+  "column_break_ttzy",
+  "is_active",
+  "environment",
+  "section_break_sehi",
+  "host",
+  "port",
+  "database_name",
+  "column_break_zqui",
+  "host_ip",
+  "username",
+  "password",
+  "ssl_required",
+  "section_break_uzkk",
+  "last_connected",
+  "connection_status",
+  "column_break_zqlj",
+  "error_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "connection_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Connection Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "database_type",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Database Type",
+   "options": "MySQL\nPostgreSQL\nMongoDB\nSQL Server\nOracle\nSQLite",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ttzy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "environment",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "label": "Environment",
+   "options": "Production\nStaging\nDevelopment\nTesting"
+  },
+  {
+   "fieldname": "section_break_sehi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "host",
+   "fieldtype": "Data",
+   "label": "Host",
+   "reqd": 1
+  },
+  {
+   "fieldname": "port",
+   "fieldtype": "Int",
+   "label": "Port",
+   "reqd": 1
+  },
+  {
+   "fieldname": "database_name",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Database Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_zqui",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "username",
+   "fieldtype": "Data",
+   "label": "Username",
+   "reqd": 1
+  },
+  {
+   "fieldname": "password",
+   "fieldtype": "Password",
+   "label": "Password",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ssl_required",
+   "fieldtype": "Check",
+   "label": "SSL Required"
+  },
+  {
+   "fieldname": "section_break_uzkk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "last_connected",
+   "fieldtype": "Datetime",
+   "label": "Last Connected",
+   "read_only": 1
+  },
+  {
+   "fieldname": "connection_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Connection Status",
+   "options": "Unknown\nConnected\nDisconnected\nError\nTesting",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_zqlj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Text",
+   "label": "Error Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "display_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Display Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "host_ip",
+   "fieldtype": "Data",
+   "label": "Host IP"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-09 04:35:47.745620",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "Database Connection",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

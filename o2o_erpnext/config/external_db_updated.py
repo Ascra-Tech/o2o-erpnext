@@ -1,0 +1,345 @@
+"""
+Updated External Database Connection Module for ProcureUAT
+Uses actual database credentials and SSH tunnel configuration
+Based on real procureuat.sql schema analysis
+"""
+
+import frappe
+import pymysql
+from sshtunnel import SSHTunnelForwarder
+import os
+from contextlib import contextmanager
+from frappe import _
+
+# Database connection settings (from actual working connection)
+PROCUREUAT_CONFIG = {
+    'ssh_host': '65.0.222.210',
+    'ssh_port': 22,
+    'ssh_username': 'ubuntu',
+    'ssh_key_path': '/home/erpnext/frappe-bench/apps/o2o_erpnext/o2o Research/o2o-uat-lightsail.pem',
+    'db_host': '127.0.0.1',  # On remote server
+    'db_port': 3306,
+    'db_username': 'frappeo2o', 
+    'db_password': 'Reppyq-pijry0-fyktyq',
+    'db_name': 'procureuat'
+}
+
+@contextmanager
+def get_external_db_connection():
+    """
+    Get database connection to ProcureUAT via SSH tunnel
+    
+    Yields:
+        pymysql.Connection: Database connection with DictCursor
+    """
+    tunnel = None
+    connection = None
+    
+    try:
+        # Verify SSH key exists and has correct permissions
+        ssh_key_path = PROCUREUAT_CONFIG['ssh_key_path']
+        if not os.path.exists(ssh_key_path):
+            raise FileNotFoundError(f"SSH key not found: {ssh_key_path}")
+        
+        # Check file permissions
+        file_stat = os.stat(ssh_key_path)
+        if oct(file_stat.st_mode)[-3:] != '600':
+            frappe.logger().warning(f"SSH key has incorrect permissions: {ssh_key_path}")
+        
+        # Create SSH tunnel
+        tunnel = SSHTunnelForwarder(
+            (PROCUREUAT_CONFIG['ssh_host'], PROCUREUAT_CONFIG['ssh_port']),
+            ssh_username=PROCUREUAT_CONFIG['ssh_username'],
+            ssh_pkey=ssh_key_path,
+            remote_bind_address=(PROCUREUAT_CONFIG['db_host'], PROCUREUAT_CONFIG['db_port']),
+            local_bind_address=('127.0.0.1', 0)  # Use random available port
+        )
+        
+        tunnel.start()
+        local_port = tunnel.local_bind_port
+        
+        frappe.logger().info(f"SSH tunnel established on local port: {local_port}")
+        
+        # Create database connection through tunnel
+        connection = pymysql.connect(
+            host='127.0.0.1',
+            port=local_port,
+            user=PROCUREUAT_CONFIG['db_username'],
+            password=PROCUREUAT_CONFIG['db_password'],
+            database=PROCUREUAT_CONFIG['db_name'],
+            charset='utf8mb4',
+            cursorclass=pymysql.cursors.DictCursor,
+            connect_timeout=30,
+            read_timeout=30,
+            write_timeout=30,
+            autocommit=False  # We'll handle transactions manually
+        )
+        
+        # Test connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DATABASE() as db_name, USER() as user_name, VERSION() as version")
+            result = cursor.fetchone()
+            frappe.logger().info(f"Connected to ProcureUAT: {result}")
+        
+        yield connection
+        
+    except Exception as e:
+        frappe.logger().error(f"External database connection failed: {str(e)}")
+        raise
+    finally:
+        # Clean up resources
+        if connection:
+            try:
+                connection.close()
+            except:
+                pass
+        
+        if tunnel:
+            try:
+                tunnel.stop()
+            except:
+                pass
+
+def test_external_connection():
+    """
+    Test the external database connection
+    Returns tuple (success: bool, message: str, data: dict)
+    """
+    try:
+        with get_external_db_connection() as conn:
+            with conn.cursor() as cursor:
+                # Test basic connection
+                cursor.execute("SELECT VERSION() as version, DATABASE() as db_name, USER() as user_name")
+                db_info = cursor.fetchone()
+                
+                # Test table access
+                cursor.execute("SHOW TABLES LIKE 'purchase_requisitions'")
+                pr_table = cursor.fetchone()
+                
+                cursor.execute("SHOW TABLES LIKE 'purchase_order_items'")
+                poi_table = cursor.fetchone()
+                
+                cursor.execute("SHOW TABLES LIKE 'vendors'")
+                vendors_table = cursor.fetchone()
+                
+                # Get record counts
+                cursor.execute("SELECT COUNT(*) as count FROM purchase_requisitions")
+                pr_count = cursor.fetchone()['count']
+                
+                cursor.execute("SELECT COUNT(*) as count FROM purchase_order_items") 
+                poi_count = cursor.fetchone()['count']
+                
+                cursor.execute("SELECT COUNT(*) as count FROM vendors WHERE status = 'active'")
+                vendor_count = cursor.fetchone()['count']
+                
+                data = {
+                    'database_info': db_info,
+                    'tables_found': {
+                        'purchase_requisitions': bool(pr_table),
+                        'purchase_order_items': bool(poi_table),
+                        'vendors': bool(vendors_table)
+                    },
+                    'record_counts': {
+                        'purchase_requisitions': pr_count,
+                        'purchase_order_items': poi_count,
+                        'active_vendors': vendor_count
+                    }
+                }
+                
+                return True, "Connection successful", data
+                
+    except Exception as e:
+        return False, f"Connection failed: {str(e)}", {}
+
+def get_procureuat_vendors():
+    """
+    Get active vendors from ProcureUAT database
+    Returns list of vendor dictionaries
+    """
+    try:
+        with get_external_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT id, name, code, email, gstn, address, contact_number, website, status
+                    FROM vendors 
+                    WHERE status = 'active'
+                    ORDER BY name
+                """)
+                return cursor.fetchall()
+    except Exception as e:
+        frappe.logger().error(f"Error fetching vendors: {str(e)}")
+        return []
+
+def get_procureuat_purchase_requisitions(limit=10, offset=0, filters=None):
+    """
+    Get purchase requisitions from ProcureUAT database
+    
+    Args:
+        limit (int): Number of records to fetch
+        offset (int): Offset for pagination
+        filters (dict): Additional filters
+        
+    Returns:
+        list: Purchase requisitions data
+    """
+    try:
+        with get_external_db_connection() as conn:
+            with conn.cursor() as cursor:
+                # Build query
+                where_conditions = ["1=1"]
+                params = []
+                
+                if filters:
+                    if filters.get('order_status'):
+                        where_conditions.append("order_status = %s")
+                        params.append(filters['order_status'])
+                    
+                    if filters.get('entity'):
+                        where_conditions.append("entity = %s")
+                        params.append(filters['entity'])
+                    
+                    if filters.get('invoice_generated'):
+                        where_conditions.append("invoice_generated = %s")
+                        params.append(filters['invoice_generated'])
+                
+                where_clause = " AND ".join(where_conditions)
+                
+                query = f"""
+                    SELECT id, entity, order_name, delivery_date, invoice_number, 
+                           order_status, gst_percentage, created_at, invoice_generated,
+                           invoice_generated_at, remark, acknowledgement
+                    FROM purchase_requisitions 
+                    WHERE {where_clause}
+                    ORDER BY created_at DESC
+                    LIMIT %s OFFSET %s
+                """
+                
+                params.extend([limit, offset])
+                cursor.execute(query, params)
+                return cursor.fetchall()
+                
+    except Exception as e:
+        frappe.logger().error(f"Error fetching purchase requisitions: {str(e)}")
+        return []
+
+def get_procureuat_purchase_order_items(purchase_order_id):
+    """
+    Get purchase order items for a specific purchase requisition
+    
+    Args:
+        purchase_order_id (int): Purchase requisition ID
+        
+    Returns:
+        list: Purchase order items data
+    """
+    try:
+        with get_external_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT id, purchase_order_id, category_id, subcategory_id, product_id,
+                           vendor_id, quantity, unit_rate, uom, total_amt, gst_amt, cost,
+                           status, created_at
+                    FROM purchase_order_items 
+                    WHERE purchase_order_id = %s
+                    ORDER BY id
+                """, (purchase_order_id,))
+                return cursor.fetchall()
+                
+    except Exception as e:
+        frappe.logger().error(f"Error fetching purchase order items: {str(e)}")
+        return []
+
+def execute_procureuat_query(query, params=None, fetch_all=True):
+    """
+    Execute a custom query on ProcureUAT database
+    
+    Args:
+        query (str): SQL query to execute
+        params (tuple): Query parameters
+        fetch_all (bool): Whether to fetch all results or just one
+        
+    Returns:
+        list/dict: Query results
+    """
+    try:
+        with get_external_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, params or ())
+                
+                if fetch_all:
+                    return cursor.fetchall()
+                else:
+                    return cursor.fetchone()
+                    
+    except Exception as e:
+        frappe.logger().error(f"Error executing query: {str(e)}")
+        return [] if fetch_all else None
+
+
+def get_external_orders_for_sync(limit=50):
+    """
+    Get orders from ProcureUAT system that can be synced to ERPNext
+    
+    Args:
+        limit (int): Maximum number of orders to retrieve
+        
+    Returns:
+        dict: Success status and list of orders
+    """
+    try:
+        with get_external_db_connection() as conn:
+            with conn.cursor() as cursor:
+                # Get recent purchase requisitions with their items
+                query = """
+                SELECT DISTINCT
+                    pr.id as requisition_id,
+                    pr.order_code,
+                    pr.vendor_id,
+                    pr.entity_id,
+                    pr.created_at,
+                    pr.status,
+                    pr.total_amount,
+                    v.name as vendor_name,
+                    COUNT(poi.id) as item_count,
+                    SUM(poi.total_amount) as total_value
+                FROM purchase_requisitions pr
+                LEFT JOIN purchase_order_items poi ON pr.id = poi.purchase_requisition_id
+                LEFT JOIN vendors v ON pr.vendor_id = v.id
+                WHERE pr.status IN ('pending', 'approved', 'completed')
+                GROUP BY pr.id
+                ORDER BY pr.created_at DESC
+                LIMIT %s
+                """
+                
+                cursor.execute(query, (limit,))
+                orders = cursor.fetchall()
+                
+                # Convert to list of dictionaries with proper data types
+                order_list = []
+                for order in orders:
+                    order_dict = {
+                        'requisition_id': order['requisition_id'],
+                        'order_code': order['order_code'],
+                        'vendor_id': order['vendor_id'],
+                        'entity_id': order['entity_id'],
+                        'created_at': order['created_at'].strftime('%Y-%m-%d %H:%M:%S') if order['created_at'] else None,
+                        'status': order['status'],
+                        'total_amount': float(order['total_amount']) if order['total_amount'] else 0.0,
+                        'vendor_name': order['vendor_name'],
+                        'item_count': order['item_count'] or 0,
+                        'total_value': float(order['total_value']) if order['total_value'] else 0.0
+                    }
+                    order_list.append(order_dict)
+                
+                return {
+                    'success': True,
+                    'orders': order_list,
+                    'count': len(order_list)
+                }
+                
+    except Exception as e:
+        return {
+            'success': False,
+            'error': f"Failed to get external orders: {str(e)}",
+            'details': str(e)
+        }

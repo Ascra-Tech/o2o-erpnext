@@ -42,7 +42,12 @@ required_apps = ["frappe/erpnext"]
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"Purchase Receipt" : "public/js/purchase_receipt_list.js"}
+
+# Remove global include since we're using doctype_js now
+# app_include_js = [
+# 	"/assets/o2o_erpnext/js/purchase_invoice_sync.js",
+# ]
+
 
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -147,24 +152,21 @@ required_apps = ["frappe/erpnext"]
 # Scheduled Tasks
 # ---------------
 
+# Scheduled Tasks
+# ---------------
+
 scheduler_events = {
-# 	"all": [
-# 		"o2o_erpnext.tasks.all"
-# 	],
-# 	"daily": [
-# 		"o2o_erpnext.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"o2o_erpnext.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"o2o_erpnext.tasks.weekly"
-# 	],
- 	"monthly": [
- 		"o2o_erpnext.branch_update.update_all_branch_budgets",
+    "hourly": [
+        "o2o_erpnext.sync.sync_utils.scheduled_sync_from_external"
+    ],
+    "weekly": [
+        "o2o_erpnext.sync.sync_utils.scheduled_cleanup_logs"
+    ],
+    "monthly": [
+        "o2o_erpnext.branch_update.update_all_branch_budgets",
         "o2o_erpnext.branch_update.update_all_sub_branch_budgets"
- 	],
- }
+    ],
+}
 
 # Testing
 # -------
@@ -261,56 +263,39 @@ fixtures = [
     #"Module Profile",
 ]
 
+# Document Events - Consolidated
+# ---------------
+# Hook on document methods and events
+
 doc_events = {
     "Purchase Invoice": {
         "validate": "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_validate",
-        "before_save": "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_before_save"
-    }
-}
-
-doc_events = {
+        "before_save": "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_before_save",
+        "get_permission_query_conditions": "o2o_erpnext.api.purchase_invoice.get_permission_query_conditions",
+        "has_permission": "o2o_erpnext.api.purchase_invoice.has_permission",
+        # Bidirectional Sync Events
+        "after_insert": "o2o_erpnext.sync.erpnext_to_external.sync_invoice_to_external",
+        "on_submit": "o2o_erpnext.sync.erpnext_to_external.sync_invoice_to_external", 
+        "on_update_after_submit": "o2o_erpnext.sync.erpnext_to_external.sync_invoice_to_external",
+        "on_cancel": "o2o_erpnext.sync.erpnext_to_external.handle_invoice_cancellation"
+    },
     "Sales Order": {
         "validate": "o2o_erpnext.custom_sales_order.CustomSalesOrder.validate_delivery_date"
-    }
-}
-
-
-# In /home/frappe/frappe-bench-1/apps/o2o_erpnext/o2o_erpnext/hooks.py
-
-doc_events = {
+    },
     "Purchase Order": {
         "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order",
-        "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order"
-    }
-}
-
-
-doc_events = {
-    "Purchase Order": {
+        "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order",
         "has_permission": "o2o_erpnext.api.purchase_order.has_permission"
-    }
-}
-
-doc_events = {
+    },
     "Purchase Receipt": {
         "get_permission_query_conditions": "o2o_erpnext.api.purchase_receipt.get_permission_query_conditions",
         "has_permission": "o2o_erpnext.api.purchase_receipt.has_permission"
     },
-    "Purchase Invoice": {
-        "get_permission_query_conditions": "o2o_erpnext.api.purchase_invoice.get_permission_query_conditions",
-        "has_permission": "o2o_erpnext.api.purchase_invoice.has_permission"
-    }
-}
-
-doc_events = {
     "Sub Branch": {
         "get_permission_query_conditions": "o2o_erpnext.o2o_erpnext.doctype.sub_branch.sub_branch.get_permission_query_conditions",
         "has_permission": "o2o_erpnext.o2o_erpnext.doctype.sub_branch.sub_branch.has_permission",
         "get_list": "o2o_erpnext.o2o_erpnext.doctype.sub_branch.sub_branch.get_list"
-    }
-}
-
-doc_events = {
+    },
     "Supplier": {
         "after_insert": "o2o_erpnext.supplier_hooks.create_party_specific_item",
         # "before_delete": "o2o_erpnext.supplier_hooks.delete_party_specific_items"
@@ -325,12 +310,16 @@ permission_query_conditions = {
 
 doctype_js = {
     "Branch": "o2o_erpnext/doctype/branch/branch.js",
-    "Sub Branch": "o2o_erpnext/doctype/sub_branch/sub_branch.js"
+    "Sub Branch": "o2o_erpnext/doctype/sub_branch/sub_branch.js",
+    "Purchase Order": "o2o_erpnext/o2o_erpnext/purchase_order.js",
+    
 }
 
-doctype_js = {
-    "Purchase Order": "o2o_erpnext/o2o_erpnext/purchase_order.js"
-}
+# Commands
+# --------
+commands = [
+    "o2o_erpnext.commands.test_connection"
+]
 
 # Reports
 # -------
