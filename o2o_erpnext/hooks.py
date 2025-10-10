@@ -258,7 +258,7 @@ fixtures = [
 doc_events = {
     "Purchase Invoice": {
         "validate": [
-            "o2o_erpnext.api.purchase_invoice_controller.CustomPurchaseInvoiceController.validate_remote_duplicate_on_submit"
+            "o2o_erpnext.api.purchase_invoice_controller.validate_remote_duplicate_on_submit"
         ],
         "get_permission_query_conditions": "o2o_erpnext.api.purchase_invoice.get_permission_query_conditions",
         "has_permission": "o2o_erpnext.api.purchase_invoice.has_permission",

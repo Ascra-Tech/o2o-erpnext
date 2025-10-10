@@ -5,124 +5,118 @@ import json
 from frappe import _
 from frappe.model.document import Document
 
-class CustomPurchaseInvoiceController:
+def validate_remote_duplicate_on_submit(doc, method=None):
     """
-    Custom controller to handle Purchase Invoice validations and restrictions
+    Validate Purchase Invoice against remote database duplicates before submission
+
+    This function checks the remote ProcureUAT database for existing purchase_requisitions
+    with matching invoice_number or order_code to prevent duplicate submissions.
+
+    Args:
+        doc: Purchase Invoice document being submitted
+        method: Hook method (on_submit)
     """
-    
-    @staticmethod
-    def validate_remote_duplicate_on_submit(doc, method=None):
-        """
-        Validate Purchase Invoice against remote database duplicates before submission
+    # Only validate on submission (docstatus = 1)
+    if doc.docstatus != 1:
+        return
         
-        This function checks the remote ProcureUAT database for existing purchase_requisitions
-        with matching invoice_number or order_code to prevent duplicate submissions.
+    try:
+        # Import here to avoid circular imports
+        from o2o_erpnext.config.external_db_updated import get_external_db_connection
         
-        Args:
-            doc: Purchase Invoice document being submitted
-            method: Hook method (on_submit)
-        """
-        # Only validate on submission (docstatus = 1)
-        if doc.docstatus != 1:
-            return
-            
-        try:
-            # Import here to avoid circular imports
-            from o2o_erpnext.config.external_db_updated import get_external_db_connection
-            
-            # Get Purchase Invoice details for checking
-            invoice_name = doc.name  # ERPNext invoice number (e.g., CINV-24-00001)
-            supplier_invoice = doc.bill_no  # Supplier invoice number
-            
-            frappe.logger().info(f"🔍 Checking remote duplicates for Invoice: {invoice_name}, Supplier Invoice: {supplier_invoice}")
-            
-            with get_external_db_connection() as conn:
-                with conn.cursor() as cursor:
-                    # Check for duplicates by order_code (ERPNext invoice number)
+        # Get Purchase Invoice details for checking
+        invoice_name = doc.name  # ERPNext invoice number (e.g., CINV-24-00001)
+        supplier_invoice = doc.bill_no  # Supplier invoice number
+        
+        frappe.logger().info(f"🔍 Checking remote duplicates for Invoice: {invoice_name}, Supplier Invoice: {supplier_invoice}")
+        
+        with get_external_db_connection() as conn:
+            with conn.cursor() as cursor:
+                # Check for duplicates by order_code (ERPNext invoice number)
+                cursor.execute("""
+                    SELECT id, order_code, invoice_number, order_name, created_at 
+                    FROM purchase_requisitions 
+                    WHERE order_code = %s AND is_delete = 0
+                    LIMIT 1
+                """, (invoice_name,))
+                
+                order_code_duplicate = cursor.fetchone()
+                
+                # Check for duplicates by invoice_number (supplier invoice number)
+                invoice_number_duplicate = None
+                if supplier_invoice:
                     cursor.execute("""
                         SELECT id, order_code, invoice_number, order_name, created_at 
                         FROM purchase_requisitions 
-                        WHERE order_code = %s AND is_delete = 0
+                        WHERE invoice_number = %s AND is_delete = 0
                         LIMIT 1
-                    """, (invoice_name,))
+                    """, (supplier_invoice,))
                     
-                    order_code_duplicate = cursor.fetchone()
+                    invoice_number_duplicate = cursor.fetchone()
+                
+                # If any duplicates found, block submission
+                if order_code_duplicate or invoice_number_duplicate:
+                    error_messages = []
                     
-                    # Check for duplicates by invoice_number (supplier invoice number)
-                    invoice_number_duplicate = None
-                    if supplier_invoice:
-                        cursor.execute("""
-                            SELECT id, order_code, invoice_number, order_name, created_at 
-                            FROM purchase_requisitions 
-                            WHERE invoice_number = %s AND is_delete = 0
-                            LIMIT 1
-                        """, (supplier_invoice,))
-                        
-                        invoice_number_duplicate = cursor.fetchone()
-                    
-                    # If any duplicates found, block submission
-                    if order_code_duplicate or invoice_number_duplicate:
-                        error_messages = []
-                        
-                        if order_code_duplicate:
-                            dup = order_code_duplicate
-                            created_date = dup['created_at'].strftime('%Y-%m-%d %H:%M') if dup['created_at'] else 'Unknown'
-                            error_messages.append(
-                                f"📋 <strong>ERPNext Invoice Number</strong> '{invoice_name}' already exists in portal<br>"
-                                f"&nbsp;&nbsp;&nbsp;&nbsp;Portal ID: {dup['id']}<br>"
-                                f"&nbsp;&nbsp;&nbsp;&nbsp;Order Name: {dup['order_name'] or 'N/A'}<br>"
-                                f"&nbsp;&nbsp;&nbsp;&nbsp;Created: {created_date}"
-                            )
-                        
-                        if invoice_number_duplicate:
-                            dup = invoice_number_duplicate
-                            created_date = dup['created_at'].strftime('%Y-%m-%d %H:%M') if dup['created_at'] else 'Unknown'
-                            error_messages.append(
-                                f"🧾 <strong>Supplier Invoice Number</strong> '{supplier_invoice}' already exists in portal<br>"
-                                f"&nbsp;&nbsp;&nbsp;&nbsp;Portal ID: {dup['id']}<br>"
-                                f"&nbsp;&nbsp;&nbsp;&nbsp;Order Code: {dup['order_code'] or 'N/A'}<br>"
-                                f"&nbsp;&nbsp;&nbsp;&nbsp;Created: {created_date}"
-                            )
-                        
-                        # Create user-friendly error message
-                        main_message = (
-                            f"🚫 <strong>Duplicate Invoice Detected!</strong><br><br>"
-                            f"Cannot submit Purchase Invoice because duplicate record(s) found in portal:<br><br>"
-                            f"{'<br><br>'.join(error_messages)}<br><br>"
-                            f"<strong>🔧 How to Fix:</strong><br>"
-                            f"1. Change the Invoice ID (currently: <code>{invoice_name}</code>)<br>"
-                            f"2. Or update the Supplier Invoice Number (currently: <code>{supplier_invoice or 'Not Set'}</code>)<br>"
-                            f"3. Then try submitting again<br><br>"
-                            f"<em>This validation ensures no duplicate invoices are created in the portal system.</em>"
-                        )
-                        
-                        frappe.throw(
-                            _(main_message),
-                            title=_("🔍 Duplicate Check Failed"),
-                            exc=frappe.DuplicateEntryError
+                    if order_code_duplicate:
+                        dup = order_code_duplicate
+                        created_date = dup['created_at'].strftime('%Y-%m-%d %H:%M') if dup['created_at'] else 'Unknown'
+                        error_messages.append(
+                            f"📋 <strong>ERPNext Invoice Number</strong> '{invoice_name}' already exists in portal<br>"
+                            f"&nbsp;&nbsp;&nbsp;&nbsp;Portal ID: {dup['id']}<br>"
+                            f"&nbsp;&nbsp;&nbsp;&nbsp;Order Name: {dup['order_name'] or 'N/A'}<br>"
+                            f"&nbsp;&nbsp;&nbsp;&nbsp;Created: {created_date}"
                         )
                     
-                    else:
-                        # No duplicates found - log success
-                        frappe.logger().info(f"✅ No duplicates found for {invoice_name} - submission allowed")
-                        
-        except Exception as e:
-            # Log the error but don't block submission for database connectivity issues
-            error_msg = str(e)
-            frappe.logger().error(f"❌ Remote duplicate check failed for {doc.name}: {error_msg}")
-            
-            # Only block if it's a duplicate error we threw intentionally
-            if isinstance(e, frappe.DuplicateEntryError):
-                raise e
-            
-            # For other errors (connectivity, etc.), show warning but allow submission
-            frappe.msgprint(
-                _(f"⚠️ <strong>Warning:</strong> Could not verify duplicates in portal database.<br><br>"
-                  f"<strong>Error:</strong> {error_msg}<br><br>"
-                  f"<em>Invoice submission will proceed, but please manually verify no duplicates exist in the portal.</em>"),
-                title=_("🔗 Portal Connection Warning"),
-                indicator="orange"
-            )
+                    if invoice_number_duplicate:
+                        dup = invoice_number_duplicate
+                        created_date = dup['created_at'].strftime('%Y-%m-%d %H:%M') if dup['created_at'] else 'Unknown'
+                        error_messages.append(
+                            f"🧾 <strong>Supplier Invoice Number</strong> '{supplier_invoice}' already exists in portal<br>"
+                            f"&nbsp;&nbsp;&nbsp;&nbsp;Portal ID: {dup['id']}<br>"
+                            f"&nbsp;&nbsp;&nbsp;&nbsp;Order Code: {dup['order_code'] or 'N/A'}<br>"
+                            f"&nbsp;&nbsp;&nbsp;&nbsp;Created: {created_date}"
+                        )
+                    
+                    # Create user-friendly error message
+                    main_message = (
+                        f"🚫 <strong>Duplicate Invoice Detected!</strong><br><br>"
+                        f"Cannot submit Purchase Invoice because duplicate record(s) found in portal:<br><br>"
+                        f"{'<br><br>'.join(error_messages)}<br><br>"
+                        f"<strong>🔧 How to Fix:</strong><br>"
+                        f"1. Change the Invoice ID (currently: <code>{invoice_name}</code>)<br>"
+                        f"2. Or update the Supplier Invoice Number (currently: <code>{supplier_invoice or 'Not Set'}</code>)<br>"
+                        f"3. Then try submitting again<br><br>"
+                        f"<em>This validation ensures no duplicate invoices are created in the portal system.</em>"
+                    )
+                    
+                    frappe.throw(
+                        _(main_message),
+                        title=_("🔍 Duplicate Check Failed"),
+                        exc=frappe.DuplicateEntryError
+                    )
+                
+                else:
+                    # No duplicates found - log success
+                    frappe.logger().info(f"✅ No duplicates found for {invoice_name} - submission allowed")
+    
+    except Exception as e:
+        # Log the error but don't block submission for database connectivity issues
+        error_msg = str(e)
+        frappe.logger().error(f"❌ Remote duplicate check failed for {doc.name}: {error_msg}")
+        
+        # Only block if it's a duplicate error we threw intentionally
+        if isinstance(e, frappe.DuplicateEntryError):
+            raise e
+        
+        # For other errors (connectivity, etc.), show warning but allow submission
+        frappe.msgprint(
+            _(f"⚠️ <strong>Warning:</strong> Could not verify duplicates in portal database.<br><br>"
+              f"<strong>Error:</strong> {error_msg}<br><br>"
+              f"<em>Invoice submission will proceed, but please manually verify no duplicates exist in the portal.</em>"),
+            title=_("🔗 Portal Connection Warning"),
+            indicator="orange"
+        )
     
     @staticmethod
     def validate_vendor_user_permissions(doc, method=None):
@@ -192,6 +186,62 @@ class CustomPurchaseInvoiceController:
                     message=f"Error validating Purchase Invoice: {str(e)}"
                 )
 
+
+# Class definition moved here
+class CustomPurchaseInvoiceController:
+    """
+    Custom controller to handle Purchase Invoice validations and restrictions
+    """
+    
+    @staticmethod
+    def validate_vendor_user_permissions(doc, method=None):
+        """
+        Validate that Vendor Users cannot modify items in Draft Purchase Invoices
+        """
+        try:
+            if not frappe.session.user:
+                return
+                
+            # Check if current user is a Vendor User
+            if "Vendor User" not in frappe.get_roles():
+                return
+                
+            # Get original items for comparison
+            original_doc = frappe.get_doc("Purchase Invoice", doc.name)
+            
+            # Check if items have been modified
+            for idx, item in enumerate(doc.items):
+                if idx < len(original_doc.items):
+                    original_item = original_doc.items[idx]
+                    
+                    # Check critical fields
+                    if item.item_code != original_item.item_code:
+                        frappe.throw(
+                            _("Vendor Users cannot modify item codes when Purchase Invoice is in Draft status."),
+                            title=_("Access Restricted")
+                        )
+                    
+                    if float(item.qty or 0) != float(original_item.qty or 0):
+                        frappe.throw(
+                            _("Vendor Users cannot modify quantities when Purchase Invoice is in Draft status."),
+                            title=_("Access Restricted")
+                        )
+                    
+                    if float(item.rate or 0) != float(original_item.rate or 0):
+                        frappe.throw(
+                            _("Vendor Users cannot modify rates when Purchase Invoice is in Draft status."),
+                            title=_("Access Restricted")
+                        )
+                        
+        except Exception as e:
+            frappe.log_error(
+                message=f"Vendor validation error: {str(e)}",
+                title="Vendor Validation Error"
+            )
+            frappe.throw(
+                _("Error validating vendor permissions. Please contact your system administrator."),
+                title=_("Validation Error")
+            )
 
 # Hook function to be called from hooks.py
 def validate_purchase_invoice_for_vendor(doc, method):
