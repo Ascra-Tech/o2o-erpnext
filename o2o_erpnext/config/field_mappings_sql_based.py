@@ -260,7 +260,7 @@ VENDOR_DATA = {
         'code': 'CRE001',
         'email': 'Info@micebugs.com',
         'gstn': '27AAQCM6888DIZS',
-        'address': '218, Goldcrest Buiness Park opposite shreyas cinema ghatkopar west 400086',
+        'address': '218, Goldcrest Business Park opposite shreyas cinema ghatkopar west 400086',
         'website': 'www.micebugs.com',
         'contact_number': 9885687452,
         'status': 'active'
@@ -287,7 +287,7 @@ def get_vendor_id_from_supplier(supplier_name):
                 return supplier_doc.custom_external_vendor_id
         
         # If not found, try to lookup in external database
-        from o2o_erpnext.config.external_db import get_external_db_connection
+        from o2o_erpnext.config.external_db_updated import get_external_db_connection
         
         with get_external_db_connection() as conn:
             with conn.cursor() as cursor:

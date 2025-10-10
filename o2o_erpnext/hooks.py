@@ -21,7 +21,6 @@ required_apps = ["frappe/erpnext"]
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/o2o_erpnext/css/o2o_erpnext.css"
-# app_include_js = "/assets/o2o_erpnext/js/o2o_erpnext.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/o2o_erpnext/css/o2o_erpnext.css"
@@ -269,14 +268,16 @@ fixtures = [
 
 doc_events = {
     "Purchase Invoice": {
-        "validate": "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_validate",
+        "validate": [
+            "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_validate",
+            "o2o_erpnext.api.purchase_invoice_controller.CustomPurchaseInvoiceController.validate_remote_duplicate_on_submit"
+        ],
         "before_save": "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_before_save",
         "get_permission_query_conditions": "o2o_erpnext.api.purchase_invoice.get_permission_query_conditions",
         "has_permission": "o2o_erpnext.api.purchase_invoice.has_permission",
-        # Bidirectional Sync Events
-        "after_insert": "o2o_erpnext.sync.erpnext_to_external.sync_invoice_to_external",
-        "on_submit": "o2o_erpnext.sync.erpnext_to_external.sync_invoice_to_external", 
-        "on_update_after_submit": "o2o_erpnext.sync.erpnext_to_external.sync_invoice_to_external",
+        # Automatic Push to Portal on Submit
+        "on_submit": "o2o_erpnext.sync.erpnext_to_external_updated.auto_push_invoice_on_submit", 
+        "on_update_after_submit": "o2o_erpnext.sync.erpnext_to_external_updated.auto_push_invoice_on_submit",
         "on_cancel": "o2o_erpnext.sync.erpnext_to_external.handle_invoice_cancellation"
     },
     "Sales Order": {
@@ -312,7 +313,13 @@ doctype_js = {
     "Branch": "o2o_erpnext/doctype/branch/branch.js",
     "Sub Branch": "o2o_erpnext/doctype/sub_branch/sub_branch.js",
     "Purchase Order": "o2o_erpnext/o2o_erpnext/purchase_order.js",
-    
+}
+
+doctype_list_js = {
+    "Purchase Invoice": [
+        "public/js/purchase_invoice_list.js",
+        "public/js/purchase_invoice_filters.js"
+    ]
 }
 
 # Commands

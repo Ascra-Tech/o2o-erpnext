@@ -16,7 +16,7 @@ PROCUREUAT_CONFIG = {
     'ssh_host': '65.0.222.210',
     'ssh_port': 22,
     'ssh_username': 'ubuntu',
-    'ssh_key_path': '/home/erpnext/frappe-bench/apps/o2o_erpnext/o2o Research/o2o-uat-lightsail.pem',
+    'ssh_key_path': '/home/erpnext/frappe-bench/apps/o2o_erpnext/o2o-Research/o2o-uat-lightsail.pem',
     'db_host': '127.0.0.1',  # On remote server
     'db_port': 3306,
     'db_username': 'frappeo2o', 
@@ -186,7 +186,7 @@ def get_procureuat_purchase_requisitions(limit=10, offset=0, filters=None):
         with get_external_db_connection() as conn:
             with conn.cursor() as cursor:
                 # Build query
-                where_conditions = ["1=1"]
+                where_conditions = ["pr.is_delete = 0"]
                 params = []
                 
                 if filters:
@@ -205,12 +205,20 @@ def get_procureuat_purchase_requisitions(limit=10, offset=0, filters=None):
                 where_clause = " AND ".join(where_conditions)
                 
                 query = f"""
-                    SELECT id, entity, order_name, delivery_date, invoice_number, 
-                           order_status, gst_percentage, created_at, invoice_generated,
-                           invoice_generated_at, remark, acknowledgement
-                    FROM purchase_requisitions 
+                    SELECT pr.id, pr.invoice_number, pr.entity, pr.subentity_id, pr.order_name, 
+                           pr.challan_number, pr.status, pr.created_at, pr.approved_at,
+                           pr.invoice_generated, pr.acknowledgement, pr.order_status,
+                           e.name as entity_name, e.code as entity_code,
+                           GROUP_CONCAT(DISTINCT s.name ORDER BY s.id SEPARATOR ', ') as subentity_names
+                    FROM purchase_requisitions pr
+                    LEFT JOIN entitys e ON pr.entity = e.id
+                    LEFT JOIN subentitys s ON FIND_IN_SET(s.id, pr.subentity_id) > 0
                     WHERE {where_clause}
-                    ORDER BY created_at DESC
+                    GROUP BY pr.id, pr.invoice_number, pr.entity, pr.subentity_id, pr.order_name, 
+                             pr.challan_number, pr.status, pr.created_at, pr.approved_at,
+                             pr.invoice_generated, pr.acknowledgement, pr.order_status,
+                             e.name, e.code
+                    ORDER BY pr.created_at DESC, pr.id DESC
                     LIMIT %s OFFSET %s
                 """
                 

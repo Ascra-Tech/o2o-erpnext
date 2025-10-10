@@ -6,9 +6,9 @@ Provides utility functions for manual sync operations, testing, and maintenance
 import frappe
 from frappe.utils import now_datetime, add_days, nowdate, get_datetime
 import json
-from o2o_erpnext.config.external_db import test_external_connection, close_all_tunnels
-from o2o_erpnext.sync.erpnext_to_external import force_sync_invoice, bulk_sync_invoices
-from o2o_erpnext.sync.external_to_erpnext import sync_invoices_from_external, force_sync_external_invoice
+from o2o_erpnext.config.external_db_updated import test_external_connection, get_external_db_connection
+from o2o_erpnext.sync.erpnext_to_external_updated import sync_invoice_to_procureuat, sync_multiple_invoices
+from o2o_erpnext.sync.external_to_erpnext_updated import sync_order_from_procureuat, sync_orders_from_procureuat
 
 # Connection Testing Functions
 
@@ -50,7 +50,7 @@ def get_external_database_info(connection_name="ProcureUAT"):
         dict: Database information
     """
     try:
-        from o2o_erpnext.config.external_db import get_external_db_connection
+        from o2o_erpnext.config.external_db_updated import get_external_db_connection
         
         with get_external_db_connection(connection_name) as conn:
             with conn.cursor() as cursor:
@@ -124,7 +124,7 @@ def manual_sync_invoice_to_external(invoice_name):
                 'message': 'Insufficient permissions to sync invoices'
             }
         
-        result = force_sync_invoice(invoice_name)
+        result = sync_invoice_to_procureuat(invoice_name)
         
         # Log the manual sync
         frappe.logger().info(f"Manual sync of invoice {invoice_name}: {result['status']}")
@@ -155,7 +155,7 @@ def manual_sync_from_external(external_invoice_id):
                 'message': 'Insufficient permissions to create invoices'
             }
         
-        result = force_sync_external_invoice(external_invoice_id)
+        result = sync_order_from_procureuat(external_invoice_id)
         
         # Log the manual sync
         frappe.logger().info(f"Manual sync of external invoice {external_invoice_id}: {result['status']}")
@@ -188,7 +188,7 @@ def bulk_sync_from_external(from_date=None, to_date=None, limit=50):
                 'message': 'Insufficient permissions to create invoices'
             }
         
-        result = sync_invoices_from_external(from_date, to_date, int(limit))
+        result = sync_orders_from_procureuat(limit=int(limit), filters={'from_date': from_date, 'to_date': to_date})
         
         # Log the bulk sync
         frappe.logger().info(f"Bulk sync from external: {result['status']}")
@@ -223,7 +223,7 @@ def bulk_sync_to_external(filters=None, limit=50):
         if filters:
             filters = json.loads(filters)
         
-        result = bulk_sync_invoices(filters, int(limit))
+        result = sync_multiple_invoices(json.dumps(filters))
         
         # Log the bulk sync
         frappe.logger().info(f"Bulk sync to external: {result['status']}")
@@ -359,12 +359,12 @@ def retry_failed_syncs(max_retries=3):
             try:
                 if log_data.sync_direction == "ERPNext to ProcureUAT":
                     if log_data.erpnext_invoice_id:
-                        result = force_sync_invoice(log_data.erpnext_invoice_id)
+                        result = sync_invoice_to_procureuat(log_data.erpnext_invoice_id)
                     else:
                         continue
                 elif log_data.sync_direction == "ProcureUAT to ERPNext":
                     if log_data.procureuat_invoice_id:
-                        result = force_sync_external_invoice(log_data.procureuat_invoice_id)
+                        result = sync_order_from_procureuat(log_data.procureuat_invoice_id)
                     else:
                         continue
                 else:
@@ -476,8 +476,8 @@ def reset_sync_tunnels():
         dict: Reset results
     """
     try:
-        # Close all existing tunnels
-        close_all_tunnels()
+        # Close all existing tunnels - function not available
+        # close_all_tunnels()
         
         # Test connection (this will create new tunnel)
         connection_test = test_external_connection()
@@ -507,7 +507,7 @@ def sync_vendor_supplier_mappings():
         dict: Mapping sync results
     """
     try:
-        from o2o_erpnext.config.external_db import get_external_db_connection
+        from o2o_erpnext.config.external_db_updated import get_external_db_connection
         
         with get_external_db_connection() as conn:
             with conn.cursor() as cursor:
@@ -610,7 +610,7 @@ def scheduled_sync_from_external():
         # Get last sync timestamp from system settings or default to 24 hours ago
         from_date = add_days(nowdate(), -1)  # Last 24 hours
         
-        result = sync_invoices_from_external(from_date=from_date, limit=50)
+        result = sync_orders_from_procureuat(limit=50)
         
         frappe.logger().info(f"Scheduled external sync: {result['message']}")
         

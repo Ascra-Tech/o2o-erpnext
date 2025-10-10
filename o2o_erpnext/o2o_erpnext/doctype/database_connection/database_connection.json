@@ -12,6 +12,16 @@
   "column_break_ttzy",
   "is_active",
   "environment",
+  "connection_link",
+  "section_break_nikv",
+  "authentication_security_column",
+  "secure_key",
+  "ssh_tunnel",
+  "vpn_connection",
+  "sync_settings_column",
+  "full_duplex_sync",
+  "frappe_to_external",
+  "3rd_party_to_frappe",
   "section_break_sehi",
   "host",
   "port",
@@ -100,8 +110,7 @@
   {
    "fieldname": "password",
    "fieldtype": "Password",
-   "label": "Password",
-   "reqd": 1
+   "label": "Password"
   },
   {
    "default": "0",
@@ -149,12 +158,67 @@
    "fieldname": "host_ip",
    "fieldtype": "Data",
    "label": "Host IP"
+  },
+  {
+   "fieldname": "connection_link",
+   "fieldtype": "Color",
+   "in_list_view": 1,
+   "label": "Connection Link"
+  },
+  {
+   "fieldname": "section_break_nikv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "authentication_security_column",
+   "fieldtype": "Column Break",
+   "label": "Authentication Security"
+  },
+  {
+   "fieldname": "secure_key",
+   "fieldtype": "Attach",
+   "label": "Secure Key"
+  },
+  {
+   "default": "0",
+   "fieldname": "ssh_tunnel",
+   "fieldtype": "Check",
+   "label": "SSH Tunnel"
+  },
+  {
+   "default": "0",
+   "fieldname": "vpn_connection",
+   "fieldtype": "Check",
+   "label": "VPN Connection"
+  },
+  {
+   "fieldname": "sync_settings_column",
+   "fieldtype": "Column Break",
+   "label": "Sync Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "full_duplex_sync",
+   "fieldtype": "Check",
+   "label": "Full Duplex Sync ( 2-Way Link )"
+  },
+  {
+   "default": "0",
+   "fieldname": "frappe_to_external",
+   "fieldtype": "Check",
+   "label": "Frappe to External "
+  },
+  {
+   "default": "0",
+   "fieldname": "3rd_party_to_frappe",
+   "fieldtype": "Check",
+   "label": "3rd Party to Frappe"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-09 04:35:47.745620",
+ "modified": "2025-10-10 06:21:42.068101",
  "modified_by": "Administrator",
  "module": "o2o ErpNext",
  "name": "Database Connection",
