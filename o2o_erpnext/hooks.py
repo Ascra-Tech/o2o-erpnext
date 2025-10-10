@@ -154,18 +154,7 @@ required_apps = ["frappe/erpnext"]
 # Scheduled Tasks
 # ---------------
 
-scheduler_events = {
-    "hourly": [
-        # "o2o_erpnext.sync.sync_utils.scheduled_sync_from_external"
-    ],
-    "weekly": [
-        # "o2o_erpnext.sync.sync_utils.scheduled_cleanup_logs"
-    ],
-    "monthly": [
-        "o2o_erpnext.branch_update.update_all_branch_budgets",
-        "o2o_erpnext.branch_update.update_all_sub_branch_budgets"
-    ],
-}
+
 
 # Testing
 # -------
@@ -269,10 +258,8 @@ fixtures = [
 doc_events = {
     "Purchase Invoice": {
         "validate": [
-            "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_validate",
             "o2o_erpnext.api.purchase_invoice_controller.CustomPurchaseInvoiceController.validate_remote_duplicate_on_submit"
         ],
-        "before_save": "o2o_erpnext.api.purchase_invoice_controller.purchase_invoice_before_save",
         "get_permission_query_conditions": "o2o_erpnext.api.purchase_invoice.get_permission_query_conditions",
         "has_permission": "o2o_erpnext.api.purchase_invoice.has_permission",
         # Automatic Push to Portal on Submit
