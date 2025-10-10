@@ -156,10 +156,10 @@ required_apps = ["frappe/erpnext"]
 
 scheduler_events = {
     "hourly": [
-        "o2o_erpnext.sync.sync_utils.scheduled_sync_from_external"
+        # "o2o_erpnext.sync.sync_utils.scheduled_sync_from_external"
     ],
     "weekly": [
-        "o2o_erpnext.sync.sync_utils.scheduled_cleanup_logs"
+        # "o2o_erpnext.sync.sync_utils.scheduled_cleanup_logs"
     ],
     "monthly": [
         "o2o_erpnext.branch_update.update_all_branch_budgets",
