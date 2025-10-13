@@ -86,7 +86,7 @@ required_apps = ["frappe/erpnext"]
 # ------------
 
 # before_install = "o2o_erpnext.install.before_install"
-#all_budget_updates"
+after_install = "o2o_erpnext.install.after_install"
 
 # Uninstallation
 # ------------

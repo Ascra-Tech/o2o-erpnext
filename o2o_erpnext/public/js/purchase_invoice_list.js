@@ -5,9 +5,15 @@
 // Using doctype_list_js pattern
 // ========================================
 
+// Store listview reference globally for use in other functions
+window.purchase_invoice_listview = null;
+
 frappe.listview_settings['Purchase Invoice'] = {
     onload: function(listview) {
         console.log("Purchase Invoice List View onload called");
+        
+        // Store listview reference globally
+        window.purchase_invoice_listview = listview;
         
         // Add Portal Sync Tools dropdown
         setTimeout(function() {
