@@ -275,7 +275,7 @@ doc_events = {
     },
     "Purchase Order": {
         "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order",
-        "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order",
+        # "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order",  # Commented out - function doesn't exist
         "has_permission": "o2o_erpnext.api.purchase_order.has_permission"
     },
     "Purchase Receipt": {
