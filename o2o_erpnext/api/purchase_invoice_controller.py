@@ -117,6 +117,77 @@ def validate_remote_duplicate_on_submit(doc, method=None):
             title=_("🔗 Portal Connection Warning"),
             indicator="orange"
         )
+
+def create_remote_invoice_on_submit(doc, method=None):
+    """
+    Create invoice in remote ProcureUAT database on Purchase Invoice submit
+    
+    Args:
+        doc: Purchase Invoice document
+        method: Hook method (on_submit)
+    """
+    # Only process on submit
+    if doc.docstatus != 1:
+        return
+    
+    # Skip if external sync is disabled
+    if doc.get('custom_skip_external_sync'):
+        frappe.msgprint(
+            _("⚠️ External sync skipped as requested. Invoice will not be created in portal."),
+            title=_("🔗 Portal Sync Skipped"),
+            indicator="yellow"
+        )
+        return
+    
+    try:
+        frappe.logger().info(f"🚀 Creating remote invoice for {doc.name}")
+        
+        # Import here to avoid circular imports
+        from o2o_erpnext.api.remote_invoice_creator import create_remote_invoice
+        
+        # Create remote invoice
+        success, remote_invoice_code, message = create_remote_invoice(doc)
+        
+        if success:
+            # Update ERPNext document with remote details
+            doc.custom_portal_sync_id = remote_invoice_code
+            doc.custom_sync_status = "Synced"
+            doc.save(ignore_permissions=True)
+            
+            frappe.msgprint(
+                _(f"✅ <strong>Invoice Created Successfully!</strong><br><br>"
+                  f"<strong>Remote Invoice Code:</strong> {remote_invoice_code}<br>"
+                  f"<strong>Message:</strong> {message}<br><br>"
+                  f"<em>Invoice has been created in the portal database.</em>"),
+                title=_("🎉 Portal Sync Success"),
+                indicator="green"
+            )
+            
+        else:
+            # Log error but don't block submission
+            doc.custom_sync_status = "Failed"
+            doc.save(ignore_permissions=True)
+            
+            frappe.msgprint(
+                _(f"⚠️ <strong>Warning:</strong> Invoice submitted successfully but portal sync failed.<br><br>"
+                  f"<strong>Error:</strong> {message}<br><br>"
+                  f"<em>Please contact administrator to manually sync this invoice.</em>"),
+                title=_("🔗 Portal Sync Warning"),
+                indicator="orange"
+            )
+            
+    except Exception as e:
+        error_msg = str(e)
+        frappe.logger().error(f"❌ Remote invoice creation failed for {doc.name}: {error_msg}")
+        
+        # Don't block submission for sync errors
+        frappe.msgprint(
+            _(f"⚠️ <strong>Warning:</strong> Invoice submitted but portal creation failed.<br><br>"
+              f"<strong>Error:</strong> {error_msg}<br><br>"
+              f"<em>Invoice submission completed. Please retry sync manually.</em>"),
+            title=_("🔗 Portal Creation Failed"),
+            indicator="red"
+        )
     
     @staticmethod
     def validate_vendor_user_permissions(doc, method=None):

@@ -132,9 +132,9 @@ after_install = "o2o_erpnext.install.after_install"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+    "Purchase Invoice": "o2o_erpnext.overrides.purchase_invoice.CustomPurchaseInvoice"
+}
 
 # Document Events
 # ---------------
@@ -263,9 +263,12 @@ doc_events = {
         "get_permission_query_conditions": "o2o_erpnext.api.purchase_invoice.get_permission_query_conditions",
         "has_permission": "o2o_erpnext.api.purchase_invoice.has_permission",
         # Automatic Push to Portal on Submit
-        "on_submit": "o2o_erpnext.sync.erpnext_to_external_updated.auto_push_invoice_on_submit", 
-        "on_update_after_submit": "o2o_erpnext.sync.erpnext_to_external_updated.auto_push_invoice_on_submit",
-        "on_cancel": "o2o_erpnext.sync.erpnext_to_external.handle_invoice_cancellation"
+        "on_submit": [
+            "o2o_erpnext.api.purchase_invoice_controller.validate_remote_duplicate_on_submit",
+            "o2o_erpnext.api.purchase_invoice_controller.create_remote_invoice_on_submit"
+        ],
+        "on_update_after_submit": "o2o_erpnext.sync.erpnext_to_external_updated.auto_push_invoice_on_submit"
+        # "on_cancel": "o2o_erpnext.sync.erpnext_to_external_updated.handle_invoice_cancellation"  # Function not implemented yet
     },
     "Sales Order": {
         "validate": "o2o_erpnext.custom_sales_order.CustomSalesOrder.validate_delivery_date"
