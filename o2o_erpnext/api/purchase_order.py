@@ -847,10 +847,15 @@ def validate_purchase_order(doc_name=None, doc_json=None):
             validation_results["capex_total"] = capex_total
             validation_results["opex_total"] = opex_total
             
-            # Validate order value and budgets
+            # Validate order value and budget dates (always)
             validation_results["validations"]["order_value"] = validate_order_value(doc)
             validation_results["validations"]["budget_dates"] = validate_budget_dates(doc)
-            validation_results["validations"]["budgets"] = validate_budgets(doc, capex_total, opex_total)
+            
+            # ONLY validate budgets for NEW documents (doc_json means new document)
+            if doc_json:  # New document passed as JSON
+                validation_results["validations"]["budgets"] = validate_budgets(doc, capex_total, opex_total)
+            else:  # Existing document passed as doc_name - skip budget validation
+                validation_results["validations"]["budgets"] = {"status": "success", "message": "Budget validation skipped for existing document"}
         
         # Check if any validation failed
         for key, result in validation_results["validations"].items():
