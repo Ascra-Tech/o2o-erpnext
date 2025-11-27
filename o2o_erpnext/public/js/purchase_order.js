@@ -417,6 +417,12 @@ frappe.ui.form.on('Purchase Order', {
 // Child table event handlers
 frappe.ui.form.on('Purchase Order Item', {
     items_add: function(frm, cdt, cdn) {
+        // Set schedule_date for newly added item from parent PO schedule_date
+        let item = frappe.get_doc(cdt, cdn);
+        if (frm.doc.schedule_date && !item.schedule_date) {
+            frappe.model.set_value(cdt, cdn, 'schedule_date', frm.doc.schedule_date);
+        }
+        
         // Only validate for new documents
         if (frm.doc.__islocal) {
             validate_purchase_order(frm);
@@ -767,6 +773,14 @@ function set_schedule_date(frm) {
         if(frm.doc.schedule_date != formatted_date) {
             frm.set_value('schedule_date', formatted_date);
             frappe.show_alert(__('Schedule Date set to {0} (Transaction Date + 20 days)', [formatted_date]));
+            
+            // Also update schedule_date for all items
+            if(frm.doc.items && frm.doc.items.length > 0) {
+                frm.doc.items.forEach(function(item) {
+                    frappe.model.set_value(item.doctype, item.name, 'schedule_date', formatted_date);
+                });
+                frm.refresh_field('items');
+            }
         }
     }
 }
