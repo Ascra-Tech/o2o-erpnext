@@ -813,19 +813,40 @@ def get_hierarchy_data(branch=None, sub_branch=None):
     
     return result
 
+def validate_purchase_order_hook(doc, method):
+    """Hook wrapper for Frappe's validate event"""
+    # Convert doc to dict for validation
+    doc_dict = doc.as_dict()
+    
+    # Check if this is a new document (no name means new)
+    is_new_document = not bool(doc.name)
+    
+    # Call the main validation function
+    result = validate_purchase_order_internal(doc_dict, is_new_document)
+    
+    # If validation fails, throw error to stop save
+    if result.get("status") == "error":
+        error_message = result.get("message", "Validation failed")
+        frappe.throw(error_message)
+
 @frappe.whitelist()
 def validate_purchase_order(doc_name=None, doc_json=None):
+    """Client-side validation function"""
+    if doc_name:
+        doc = frappe.get_doc("Purchase Order", doc_name)
+        doc_dict = doc.as_dict()
+        is_new_document = False
+    elif doc_json:
+        doc_dict = json.loads(doc_json)
+        is_new_document = True
+    else:
+        return {"status": "error", "message": "Either doc_name or doc_json must be provided"}
+    
+    return validate_purchase_order_internal(doc_dict, is_new_document)
+
+def validate_purchase_order_internal(doc, is_new_document=True):
     """Validate Purchase Order - comprehensive validation function"""
     try:
-        if doc_name:
-            doc = frappe.get_doc("Purchase Order", doc_name)
-        elif doc_json:
-            doc = json.loads(doc_json)
-        else:
-            return {
-                "status": "error",
-                "message": "Either doc_name or doc_json must be provided"
-            }
         
         validation_results = {
             "status": "success",
@@ -851,16 +872,17 @@ def validate_purchase_order(doc_name=None, doc_json=None):
             validation_results["validations"]["order_value"] = validate_order_value(doc)
             validation_results["validations"]["budget_dates"] = validate_budget_dates(doc)
             
-            # ONLY validate budgets for NEW documents (doc_json means new document)
-            if doc_json:  # New document passed as JSON
+            # ONLY validate budgets for NEW documents
+            if is_new_document:  # New document
                 validation_results["validations"]["budgets"] = validate_budgets(doc, capex_total, opex_total)
-            else:  # Existing document passed as doc_name - skip budget validation
+            else:  # Existing document - skip budget validation
                 validation_results["validations"]["budgets"] = {"status": "success", "message": "Budget validation skipped for existing document"}
         
         # Check if any validation failed
         for key, result in validation_results["validations"].items():
             if result.get("status") == "error":
                 validation_results["status"] = "error"
+                validation_results["message"] = result.get("message", f"{key} validation failed")
                 break
                 
         return validation_results

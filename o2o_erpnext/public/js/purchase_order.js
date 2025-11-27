@@ -503,13 +503,7 @@ function validate_purchase_order(frm) {
                 if (r.message) {
                     if (r.message.status === 'error') {
                         if (r.message.message) {
-                            frappe.show_alert({
-                                title: __('Validation Error'),
-                                message: __(r.message.message),
-                                indicator: 'red'
-                            });
-                            frappe.validated = false;
-                            return false;
+                            frappe.throw(__(r.message.message));
                         }
                     }
                     
@@ -518,13 +512,7 @@ function validate_purchase_order(frm) {
                         for (const key in r.message.validations) {
                             const validation = r.message.validations[key];
                             if (validation.status === 'error') {
-                                frappe.show_alert({
-                                    title: __('Validation Error'),
-                                    message: __(validation.message),
-                                    indicator: 'red'
-                                });
-                                frappe.validated = false;
-                                return false;
+                                frappe.throw(__(validation.message));
                             }
                         }
                     }
@@ -547,13 +535,7 @@ function validate_purchase_order(frm) {
                 if (r.message) {
                     if (r.message.status === 'error') {
                         if (r.message.message) {
-                            frappe.show_alert({
-                                title: __('Validation Error'),
-                                message: __(r.message.message),
-                                indicator: 'red'
-                            });
-                            frappe.validated = false;
-                            return false;
+                            frappe.throw(__(r.message.message));
                         }
                     }
                     
@@ -562,13 +544,7 @@ function validate_purchase_order(frm) {
                         for (const key in r.message.validations) {
                             const validation = r.message.validations[key];
                             if (validation.status === 'error') {
-                                frappe.show_alert({
-                                    title: __('Validation Error'),
-                                    message: __(validation.message),
-                                    indicator: 'red'
-                                });
-                                frappe.validated = false;
-                                return false;
+                                frappe.throw(__(validation.message));
                             }
                         }
                     }

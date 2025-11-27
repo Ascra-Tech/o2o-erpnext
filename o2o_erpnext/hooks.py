@@ -274,7 +274,7 @@ doc_events = {
         "validate": "o2o_erpnext.custom_sales_order.CustomSalesOrder.validate_delivery_date"
     },
     "Purchase Order": {
-        "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order",
+        "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order_hook",
         # "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order",  # Commented out - function doesn't exist
         "has_permission": "o2o_erpnext.api.purchase_order.has_permission"
     },
