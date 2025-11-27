@@ -1152,17 +1152,27 @@ def validate_budgets(doc, capex_total, opex_total):
             
             # Validate CAPEX
             if capex_total > 0:
-                # Branch
+                # Branch - Check for zero/null budget first
                 branch_capex = flt(hierarchy_data['branch'].get('custom_capex_budget'))
-                if branch_capex > 0 and capex_total > branch_capex:
+                if branch_capex <= 0:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot create Purchase Order: Branch CAPEX budget is not allocated or is zero (Current: {branch_capex})"
+                    }
+                if capex_total > branch_capex:
                     return {
                         "status": "error",
                         "message": f"Total Capex amount ({capex_total}) exceeds Branch Capex budget ({branch_capex})"
                     }
                 
-                # Supplier
+                # Supplier - Check for zero/null budget first
                 supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
-                if supplier_capex > 0 and capex_total > supplier_capex:
+                if supplier_capex <= 0:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot create Purchase Order: Supplier CAPEX budget is not allocated or is zero (Current: {supplier_capex})"
+                    }
+                if capex_total > supplier_capex:
                     return {
                         "status": "error",
                         "message": f"Total Capex amount ({capex_total}) exceeds Supplier Capex budget ({supplier_capex})"
@@ -1170,17 +1180,27 @@ def validate_budgets(doc, capex_total, opex_total):
             
             # Validate OPEX
             if opex_total > 0:
-                # Branch
+                # Branch - Check for zero/null budget first
                 branch_opex = flt(hierarchy_data['branch'].get('custom_opex_budget'))
-                if branch_opex > 0 and opex_total > branch_opex:
+                if branch_opex <= 0:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot create Purchase Order: Branch OPEX budget is not allocated or is zero (Current: {branch_opex})"
+                    }
+                if opex_total > branch_opex:
                     return {
                         "status": "error",
                         "message": f"Total Opex amount ({opex_total}) exceeds Branch Opex budget ({branch_opex})"
                     }
                 
-                # Supplier
+                # Supplier - Check for zero/null budget first
                 supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
-                if supplier_opex > 0 and opex_total > supplier_opex:
+                if supplier_opex <= 0:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot create Purchase Order: Supplier OPEX budget is not allocated or is zero (Current: {supplier_opex})"
+                    }
+                if opex_total > supplier_opex:
                     return {
                         "status": "error",
                         "message": f"Total Opex amount ({opex_total}) exceeds Supplier Opex budget ({supplier_opex})"
@@ -1196,17 +1216,27 @@ def validate_budgets(doc, capex_total, opex_total):
             
             # Validate CAPEX
             if capex_total > 0:
-                # Sub-Branch
+                # Sub-Branch - Check for zero/null budget first
                 sub_branch_capex = flt(hierarchy_data['sub_branch'].get('capex_budget'))
-                if sub_branch_capex > 0 and capex_total > sub_branch_capex:
+                if sub_branch_capex <= 0:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot create Purchase Order: Sub-branch CAPEX budget is not allocated or is zero (Current: {sub_branch_capex})"
+                    }
+                if capex_total > sub_branch_capex:
                     return {
                         "status": "error",
                         "message": f"Total Capex amount ({capex_total}) exceeds Sub-branch Capex budget ({sub_branch_capex})"
                     }
                 
-                # Supplier
+                # Supplier - Check for zero/null budget first
                 supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
-                if supplier_capex > 0 and capex_total > supplier_capex:
+                if supplier_capex <= 0:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot create Purchase Order: Supplier CAPEX budget is not allocated or is zero (Current: {supplier_capex})"
+                    }
+                if capex_total > supplier_capex:
                     return {
                         "status": "error",
                         "message": f"Total Capex amount ({capex_total}) exceeds Supplier Capex budget ({supplier_capex})"
@@ -1214,17 +1244,27 @@ def validate_budgets(doc, capex_total, opex_total):
             
             # Validate OPEX
             if opex_total > 0:
-                # Sub-branch
+                # Sub-branch - Check for zero/null budget first
                 sub_branch_opex = flt(hierarchy_data['sub_branch'].get('opex_budget'))
-                if sub_branch_opex > 0 and opex_total > sub_branch_opex:
+                if sub_branch_opex <= 0:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot create Purchase Order: Sub-branch OPEX budget is not allocated or is zero (Current: {sub_branch_opex})"
+                    }
+                if opex_total > sub_branch_opex:
                     return {
                         "status": "error",
                         "message": f"Total Opex amount ({opex_total}) exceeds Sub-branch Opex budget ({sub_branch_opex})"
                     }
                 
-                # Supplier
+                # Supplier - Check for zero/null budget first
                 supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
-                if supplier_opex > 0 and opex_total > supplier_opex:
+                if supplier_opex <= 0:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot create Purchase Order: Supplier OPEX budget is not allocated or is zero (Current: {supplier_opex})"
+                    }
+                if opex_total > supplier_opex:
                     return {
                         "status": "error",
                         "message": f"Total Opex amount ({opex_total}) exceeds Supplier Opex budget ({supplier_opex})"
