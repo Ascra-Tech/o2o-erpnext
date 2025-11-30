@@ -240,7 +240,7 @@ fixtures = [
     #"Tax Category",
     "Workspace",
     #"Custom HTML Block",
-    #Custom DocPerm",
+    "Custom DocPerm",
     #"Workflow",
     #"Workflow State",
     #"Workflow Action",
@@ -309,6 +309,9 @@ doctype_list_js = {
     "Purchase Invoice": [
         "public/js/purchase_invoice_list.js",
         "public/js/purchase_invoice_filters.js"
+    ],
+    "Purchase Order": [
+        "public/js/purchase_order_list.js"
     ]
 }
 

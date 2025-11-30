@@ -15,12 +15,22 @@ frappe.listview_settings['Purchase Invoice'] = {
         // Store listview reference globally
         window.purchase_invoice_listview = listview;
         
+        // Set default filter to show Draft invoices
+        frappe.route_options = {
+            "status": ["=", "Draft"]
+        };
+        
         // Add Portal Sync Tools dropdown
         setTimeout(function() {
             add_portal_sync_dropdown(listview);
         }, 500);
         
-        console.log("Portal Sync Tools dropdown setup complete");
+        // Add Print functionality buttons
+        setTimeout(function() {
+            add_print_buttons(listview);
+        }, 600);
+        
+        console.log("Portal Sync Tools dropdown and Print buttons setup complete");
     }
 };
 
@@ -74,6 +84,245 @@ function add_portal_sync_dropdown(listview) {
     // Add to page actions using the exact same method as living_dna_manager
     $(listview.page.page_actions).prepend(dropdown_html);
     console.log("✅ Portal Sync Tools dropdown added successfully");
+}
+
+// ========================================
+// PRINT FUNCTIONALITY - Enhanced with better error handling
+// ========================================
+
+function add_print_buttons(listview) {
+    console.log("🖨️ Adding Print functionality dropdown");
+    
+    if (!listview || !listview.page) {
+        console.error("❌ Invalid listview for print buttons");
+        return;
+    }
+    
+    // Remove existing print buttons if any
+    $(listview.page.page_actions).find('.print-dropdown-container').remove();
+    
+    // Create print dropdown HTML
+    let print_dropdown_html = `
+        <div class="print-dropdown-container btn-group" style="display: inline-block; margin-left: 10px;">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-print"></i> Print Options
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li class="dropdown-header">
+                    <i class="fa fa-file-pdf-o"></i> Print Formats
+                </li>
+                <li><a href="#" onclick="handle_print_pi_po(window.purchase_invoice_listview); return false;">
+                    <i class="fa fa-files-o text-primary"></i> Print PI & PO (Combined)
+                </a></li>
+                <li class="divider"></li>
+                <li><a href="#" onclick="handle_print_with_header(window.purchase_invoice_listview); return false;">
+                    <i class="fa fa-file-text text-success"></i> Print with Header
+                </a></li>
+                <li><a href="#" onclick="handle_print_without_header(window.purchase_invoice_listview); return false;">
+                    <i class="fa fa-file-o text-info"></i> Print without Header
+                </a></li>
+            </ul>
+        </div>
+    `;
+    
+    // Add to page actions
+    $(listview.page.page_actions).append(print_dropdown_html);
+    
+    console.log("✅ Print dropdown added successfully");
+}
+
+// Enhanced Print PI & PO function with better error handling - Make globally accessible
+window.handle_print_pi_po = function(listview) {
+    const selected_docs = listview.get_checked_items();
+    
+    if (selected_docs.length === 0) {
+        frappe.show_alert({
+            message: __('Please select a Purchase Invoice'),
+            indicator: 'yellow'
+        }, 3);
+        return;
+    }
+    
+    if (selected_docs.length > 1) {
+        frappe.show_alert({
+            message: __('Please select only one Purchase Invoice for PI & PO print'),
+            indicator: 'yellow'
+        }, 3);
+        return;
+    }
+    
+    // Show loading indicator
+    frappe.show_alert({
+        message: __('Preparing PDF, please wait...'),
+        indicator: 'blue'
+    }, 3);
+    
+    // Use frappe.call for better error handling
+    frappe.call({
+        method: 'o2o_erpnext.api.merge_pdf.merge_invoice_and_po_pdfs',
+        args: {
+            invoice_name: selected_docs[0].name
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                // If API returns a URL, open it
+                if (r.message.download_url) {
+                    window.open(r.message.download_url);
+                } else {
+                    // Fallback to direct URL construction
+                    const download_url = frappe.urllib.get_full_url(
+                        '/api/method/o2o_erpnext.api.merge_pdf.merge_invoice_and_po_pdfs?' +
+                        'invoice_name=' + encodeURIComponent(selected_docs[0].name)
+                    );
+                    window.open(download_url);
+                }
+                
+                frappe.show_alert({
+                    message: __('PDF download initiated'),
+                    indicator: 'green'
+                }, 3);
+            } else {
+                frappe.show_alert({
+                    message: __(r.message ? r.message.message : 'Failed to generate PDF'),
+                    indicator: 'red'
+                }, 5);
+            }
+        },
+        error: function(r) {
+            frappe.show_alert({
+                message: __('Failed to generate PDF. Please try again.'),
+                indicator: 'red'
+            }, 5);
+        }
+    });
+}
+
+// Enhanced batch printing with Promise-based approach - Make globally accessible
+window.handle_print_with_header = async function(listview) {
+    await handle_batch_print(listview, 'With Header Purchase Invoice', false);
+};
+
+window.handle_print_without_header = async function(listview) {
+    await handle_batch_print(listview, 'Without Header Purchase Invoice', true);
+};
+
+async function handle_batch_print(listview, format_name, no_letterhead) {
+    const selected_docs = listview.get_checked_items();
+    
+    if (selected_docs.length === 0) {
+        frappe.show_alert({
+            message: __('Please select at least one Purchase Invoice'),
+            indicator: 'yellow'
+        }, 3);
+        return;
+    }
+    
+    // Confirm for large batches
+    if (selected_docs.length > 10) {
+        const proceed = await new Promise(resolve => {
+            frappe.confirm(
+                __('You are about to print {0} invoices. This may take some time. Continue?', [selected_docs.length]),
+                () => resolve(true),
+                () => resolve(false)
+            );
+        });
+        
+        if (!proceed) return;
+    }
+    
+    let successful_prints = 0;
+    let failed_prints = 0;
+    
+    // Show progress dialog for large batches
+    let progress_dialog = null;
+    if (selected_docs.length > 3) {
+        progress_dialog = new frappe.ui.Dialog({
+            title: __('Printing Progress'),
+            size: 'small',
+            fields: [{
+                fieldtype: 'HTML',
+                fieldname: 'progress_html',
+                options: `
+                    <div style="text-align: center; padding: 20px;">
+                        <div class="progress" style="height: 20px; margin-bottom: 15px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                 role="progressbar" style="width: 0%" id="print-progress-bar">
+                            </div>
+                        </div>
+                        <div><strong id="print-progress-text">Starting print job...</strong></div>
+                        <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                            <span id="print-progress-details">Preparing to print ${selected_docs.length} invoices...</span>
+                        </div>
+                    </div>
+                `
+            }]
+        });
+        progress_dialog.show();
+    }
+    
+    // Process each document with proper error handling
+    for (let i = 0; i < selected_docs.length; i++) {
+        const doc = selected_docs[i];
+        
+        try {
+            // Update progress
+            if (progress_dialog) {
+                const progress = ((i + 1) / selected_docs.length) * 100;
+                progress_dialog.$wrapper.find('#print-progress-bar').css('width', progress + '%');
+                progress_dialog.$wrapper.find('#print-progress-text').text(`Printing ${i + 1} of ${selected_docs.length}`);
+                progress_dialog.$wrapper.find('#print-progress-details').text(`Processing: ${doc.name}`);
+            }
+            
+            // Validate print format exists
+            const print_url = frappe.urllib.get_full_url(
+                '/api/method/frappe.utils.print_format.download_pdf?' +
+                'doctype=' + encodeURIComponent('Purchase Invoice') +
+                '&name=' + encodeURIComponent(doc.name) +
+                '&format=' + encodeURIComponent(format_name) +
+                '&no_letterhead=' + (no_letterhead ? '1' : '0') +
+                '&_lang=en'
+            );
+            
+            // Open print window with error detection
+            const print_window = window.open(print_url);
+            
+            if (print_window) {
+                successful_prints++;
+                
+                // Add a small delay between prints to avoid overwhelming the browser
+                if (i < selected_docs.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            } else {
+                failed_prints++;
+                console.error(`Failed to open print window for ${doc.name}`);
+            }
+            
+        } catch (error) {
+            failed_prints++;
+            console.error(`Error printing ${doc.name}:`, error);
+        }
+    }
+    
+    // Close progress dialog
+    if (progress_dialog) {
+        progress_dialog.hide();
+    }
+    
+    // Show final results
+    if (successful_prints > 0) {
+        frappe.show_alert({
+            message: __('Successfully initiated print for {0} invoice(s)', [successful_prints]) + 
+                    (failed_prints > 0 ? __('. {0} failed.', [failed_prints]) : ''),
+            indicator: successful_prints === selected_docs.length ? 'green' : 'orange'
+        }, 5);
+    } else {
+        frappe.show_alert({
+            message: __('Failed to print invoices. Please enable pop-ups and try again.'),
+            indicator: 'red'
+        }, 5);
+    }
 }
 
 // ========================================

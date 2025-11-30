@@ -223,7 +223,7 @@ frappe.ui.form.on('Purchase Order', {
             
         }
         
-        return validate_purchase_order(frm);
+        return validate_purchase_order(frm, true);
     },
 
     before_save: function(frm) {
@@ -487,76 +487,16 @@ function call_check_and_apply_branch_addresses(frm, async_false = false) {
     });
 }
 
-// Helper function to validate purchase order
-// Budget validation only runs for NEW documents (__islocal = true)
-// Existing documents skip budget validation to allow quantity changes
-function validate_purchase_order(frm) {
-    if (frm.doc.__islocal) {
-        // For NEW documents, validate client-side INCLUDING BUDGET
-        frappe.call({
-            method: 'o2o_erpnext.api.purchase_order.validate_purchase_order',
-            args: {
-                doc_json: JSON.stringify(frm.doc)
-            },
-            async: false,
-            callback: function(r) {
-                if (r.message) {
-                    if (r.message.status === 'error') {
-                        if (r.message.message) {
-                            frappe.throw(__(r.message.message));
-                        }
-                    }
-                    
-                    // Check individual validations
-                    if (r.message.validations) {
-                        for (const key in r.message.validations) {
-                            const validation = r.message.validations[key];
-                            if (validation.status === 'error') {
-                                frappe.throw(__(validation.message));
-                            }
-                        }
-                    }
-                    
-                    // Store CAPEX/OPEX totals for budget updates
-                    storedCapexTotal = r.message.capex_total || 0;
-                    storedOpexTotal = r.message.opex_total || 0;
-                }
-            }
-        });
-    } else {
-        // For EXISTING documents, validate on server WITHOUT BUDGET CHECK
-        frappe.call({
-            method: 'o2o_erpnext.api.purchase_order.validate_purchase_order',
-            args: {
-                doc_name: frm.doc.name
-            },
-            async: false,
-            callback: function(r) {
-                if (r.message) {
-                    if (r.message.status === 'error') {
-                        if (r.message.message) {
-                            frappe.throw(__(r.message.message));
-                        }
-                    }
-                    
-                    // Check individual validations
-                    if (r.message.validations) {
-                        for (const key in r.message.validations) {
-                            const validation = r.message.validations[key];
-                            if (validation.status === 'error') {
-                                frappe.throw(__(validation.message));
-                            }
-                        }
-                    }
-                    
-                    // Store CAPEX/OPEX totals for budget updates
-                    storedCapexTotal = r.message.capex_total || 0;
-                    storedOpexTotal = r.message.opex_total || 0;
-                }
-            }
-        });
+// Simplified helper function - only for field change calculations
+// All validation is now handled server-side in the validate hook
+function validate_purchase_order(frm, is_save_attempt = false) {
+    // Only show soft alerts during save attempts, not field changes
+    if (!is_save_attempt) {
+        return true; // Skip client-side validation for field changes
     }
     
+    // For save attempts, let server-side validation handle everything
+    // The validate hook will show proper error messages
     return true;
 }
 

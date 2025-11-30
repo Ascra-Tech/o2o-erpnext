@@ -814,20 +814,33 @@ def get_hierarchy_data(branch=None, sub_branch=None):
     return result
 
 def validate_purchase_order_hook(doc, method):
-    """Hook wrapper for Frappe's validate event"""
+    """Hook wrapper for Frappe's validate event - handles all validation server-side"""
     # Convert doc to dict for validation
     doc_dict = doc.as_dict()
     
-    # Check if this is a new document (no name means new)
-    is_new_document = not bool(doc.name)
+    # Determine if this is a new document by checking if it exists in database
+    is_new_document = True
+    if doc.name and not doc.name.startswith('new-'):
+        try:
+            # Try to get the document from database (not from current transaction)
+            existing_doc = frappe.db.get_value("Purchase Order", doc.name, "name")
+            if existing_doc:
+                is_new_document = False
+        except:
+            is_new_document = True
     
     # Call the main validation function
     result = validate_purchase_order_internal(doc_dict, is_new_document)
     
-    # If validation fails, throw error to stop save
+    # If validation fails, throw error with specific message (no wrapping)
     if result.get("status") == "error":
         error_message = result.get("message", "Validation failed")
-        frappe.throw(error_message)
+        frappe.msgprint(
+            msg=error_message,
+            title="There's an Issue with your Purchase Order",
+            indicator="red",
+            raise_exception=True
+        )
 
 @frappe.whitelist()
 def validate_purchase_order(doc_name=None, doc_json=None):
@@ -838,7 +851,16 @@ def validate_purchase_order(doc_name=None, doc_json=None):
         is_new_document = False
     elif doc_json:
         doc_dict = json.loads(doc_json)
-        is_new_document = True
+        # Better detection: check if document exists in database
+        doc_name_from_json = doc_dict.get('name')
+        if doc_name_from_json:
+            try:
+                frappe.get_doc("Purchase Order", doc_name_from_json)
+                is_new_document = False  # Document exists in database
+            except frappe.DoesNotExistError:
+                is_new_document = True   # Document doesn't exist yet
+        else:
+            is_new_document = True       # No name means definitely new
     else:
         return {"status": "error", "message": "Either doc_name or doc_json must be provided"}
     
@@ -872,11 +894,11 @@ def validate_purchase_order_internal(doc, is_new_document=True):
             validation_results["validations"]["order_value"] = validate_order_value(doc)
             validation_results["validations"]["budget_dates"] = validate_budget_dates(doc)
             
-            # ONLY validate budgets for NEW documents
-            if is_new_document:  # New document
+            # Budget validation for both NEW and EXISTING documents
+            if is_new_document:  # New document - full budget validation
                 validation_results["validations"]["budgets"] = validate_budgets(doc, capex_total, opex_total)
-            else:  # Existing document - skip budget validation
-                validation_results["validations"]["budgets"] = {"status": "success", "message": "Budget validation skipped for existing document"}
+            else:  # Existing document - incremental budget validation
+                validation_results["validations"]["budgets"] = validate_incremental_budgets(doc, capex_total, opex_total)
         
         # Check if any validation failed
         for key, result in validation_results["validations"].items():
@@ -1021,7 +1043,7 @@ def validate_order_value(doc):
             if branch_min > 0 and total < branch_min:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must be at least {branch_min}"
+                    "message": f"Total order value ({total}) must be at least Branch's Minimum Order Value {branch_min}"
                 }
             
             # Branch maximum check
@@ -1029,7 +1051,7 @@ def validate_order_value(doc):
             if branch_max > 0 and total > branch_max:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must not exceed {branch_max}"
+                    "message": f"Total order value ({total}) must not exceed Branch's Maximum Order Value {branch_max}"
                 }
             
             # Supplier minimum check
@@ -1037,7 +1059,7 @@ def validate_order_value(doc):
             if supplier_min > 0 and total < supplier_min:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must be at least {supplier_min}"
+                    "message": f"Total order value ({total}) must be at least Supplier's Minimum Order Value {supplier_min}"
                 }
             
             # Supplier maximum check
@@ -1045,7 +1067,7 @@ def validate_order_value(doc):
             if supplier_max > 0 and total > supplier_max:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must not exceed {supplier_max}"
+                    "message": f"Total order value ({total}) must not exceed Supplier's Maximum Order Value {supplier_max}"
                 }
         
         # For sub-branch users
@@ -1061,7 +1083,7 @@ def validate_order_value(doc):
             if sub_branch_min > 0 and total < sub_branch_min:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must be at least {sub_branch_min}"
+                    "message": f"Total order value ({total}) must be at least Sub-Branch's Minimum Order Value {sub_branch_min}"
                 }
             
             # Sub-Branch maximum check
@@ -1069,7 +1091,7 @@ def validate_order_value(doc):
             if sub_branch_max > 0 and total > sub_branch_max:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must not exceed {sub_branch_max}"
+                    "message": f"Total order value ({total}) must not exceed Sub-Branch's Maximum Order Value {sub_branch_max}"
                 }
             
             # Supplier minimum check
@@ -1077,7 +1099,7 @@ def validate_order_value(doc):
             if supplier_min > 0 and total < supplier_min:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must be at least {supplier_min}"
+                    "message": f"Total order value ({total}) must be at least Supplier's Minimum Order Value {supplier_min}"
                 }
             
             # Supplier maximum check
@@ -1085,7 +1107,7 @@ def validate_order_value(doc):
             if supplier_max > 0 and total > supplier_max:
                 return {
                     "status": "error",
-                    "message": f"Total order value ({total}) must not exceed {supplier_max}"
+                    "message": f"Total order value ({total}) must not exceed Supplier's Maximum Order Value {supplier_max}"
                 }
         
         return {"status": "success"}
@@ -1297,8 +1319,130 @@ def validate_budgets(doc, capex_total, opex_total):
     except Exception as e:
         frappe.log_error(f"Error validating budgets: {str(e)}", "Budget Validation Error")
         return {
-            "status": "error",
-            "message": f"Error validating budgets: {str(e)}"
+            "status": "error", 
+            "message": f"Budget validation error: {str(e)}"
+        }
+
+def validate_incremental_budgets(doc, capex_total, opex_total):
+    """Validate budget changes for existing Purchase Orders - only allow increases if sufficient budget remains"""
+    try:
+        if not doc.get('items') or len(doc.get('items')) == 0:
+            return {"status": "success"}
+        
+        # Check if document has a valid name (required for incremental validation)
+        doc_name = doc.get('name')
+        if not doc_name or doc_name.startswith('new-'):
+            # This is actually a new document, use full budget validation instead
+            return validate_budgets(doc, capex_total, opex_total)
+        
+        # Get the original PO totals from database using direct DB query (more reliable)
+        try:
+            # Use database query instead of get_doc to avoid transaction issues
+            existing_po = frappe.db.get_value("Purchase Order", doc_name, "name")
+            if not existing_po:
+                # Document doesn't exist in database yet, treat as new document
+                return validate_budgets(doc, capex_total, opex_total)
+                
+            original_doc = frappe.get_doc("Purchase Order", doc_name)
+            original_capex, original_opex = calculate_capex_opex_totals(original_doc.as_dict())
+        except Exception as e:
+            # Any error fetching original document, treat as new document
+            frappe.log_error(f"Could not fetch original PO {doc_name}: {str(e)}", "Incremental Validation Fallback")
+            return validate_budgets(doc, capex_total, opex_total)
+        
+        # Calculate the change (delta)
+        capex_change = capex_total - original_capex
+        opex_change = opex_total - original_opex
+        
+        # If both changes are negative or zero, allow (decreasing or same)
+        if capex_change <= 0 and opex_change <= 0:
+            return {"status": "success", "message": "Budget decrease/same - allowed"}
+        
+        # If there's an increase, check if sufficient budget remains
+        hierarchy_data = get_hierarchy_data(
+            branch=doc.get('custom_branch'),
+            sub_branch=doc.get('custom_sub_branch')
+        )
+        
+        if not hierarchy_data['supplier']:
+            return {
+                "status": "error",
+                "message": "Could not fetch supplier details for budget validation"
+            }
+        
+        # Check CAPEX increase
+        if capex_change > 0:
+            if is_branch_level_user():
+                # Branch level - check branch and supplier budgets
+                branch_capex = flt(hierarchy_data['branch'].get('custom_capex_budget'))
+                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
+                
+                if capex_change > branch_capex:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot increase CAPEX by ₹{capex_change}: Insufficient branch CAPEX budget (Available: ₹{branch_capex})"
+                    }
+                if capex_change > supplier_capex:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot increase CAPEX by ₹{capex_change}: Insufficient supplier CAPEX budget (Available: ₹{supplier_capex})"
+                    }
+            else:
+                # Sub-branch level - check sub-branch budget
+                sub_branch_capex = flt(hierarchy_data['sub_branch'].get('capex_budget'))
+                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
+                
+                if capex_change > sub_branch_capex:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot increase CAPEX by ₹{capex_change}: Insufficient sub-branch CAPEX budget (Available: ₹{sub_branch_capex})"
+                    }
+                if capex_change > supplier_capex:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot increase CAPEX by ₹{capex_change}: Insufficient supplier CAPEX budget (Available: ₹{supplier_capex})"
+                    }
+        
+        # Check OPEX increase
+        if opex_change > 0:
+            if is_branch_level_user():
+                # Branch level - check branch and supplier budgets
+                branch_opex = flt(hierarchy_data['branch'].get('custom_opex_budget'))
+                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
+                
+                if opex_change > branch_opex:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot increase OPEX by ₹{opex_change}: Insufficient branch OPEX budget (Available: ₹{branch_opex})"
+                    }
+                if opex_change > supplier_opex:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot increase OPEX by ₹{opex_change}: Insufficient supplier OPEX budget (Available: ₹{supplier_opex})"
+                    }
+            else:
+                # Sub-branch level - check sub-branch budget
+                sub_branch_opex = flt(hierarchy_data['sub_branch'].get('opex_budget'))
+                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
+                
+                if opex_change > sub_branch_opex:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot increase OPEX by ₹{opex_change}: Insufficient sub-branch OPEX budget (Available: ₹{sub_branch_opex})"
+                    }
+                if opex_change > supplier_opex:
+                    return {
+                        "status": "error",
+                        "message": f"Cannot increase OPEX by ₹{opex_change}: Insufficient supplier OPEX budget (Available: ₹{supplier_opex})"
+                    }
+        
+        return {"status": "success", "message": "Budget increase allowed - sufficient budget available"}
+    
+    except Exception as e:
+        frappe.log_error(f"Error validating incremental budgets: {str(e)}", "Incremental Budget Validation Error")
+        return {
+            "status": "error", 
+            "message": f"Incremental budget validation error: {str(e)}"
         }
 
 @frappe.whitelist()
