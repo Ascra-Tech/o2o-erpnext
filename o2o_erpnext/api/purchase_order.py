@@ -767,8 +767,11 @@ def get_hierarchy_data(branch=None, sub_branch=None):
         'is_branch_user': is_branch_level_user()
     }
     
-    # For branch-level users, only get branch and supplier
-    if result['is_branch_user']:
+    # Check if this is a branch-level PO (no sub-branch provided)
+    is_branch_level_po = branch and not sub_branch
+    
+    # For branch-level users OR branch-level POs, only get branch and supplier
+    if result['is_branch_user'] or is_branch_level_po:
         if branch:
             branch_data = frappe.get_value('Branch', branch,
                 ['custom_supplier', 'custom_capex_budget', 'custom_opex_budget', 
@@ -784,8 +787,12 @@ def get_hierarchy_data(branch=None, sub_branch=None):
                     as_dict=1
                 )
                 result['supplier'] = supplier_data
+        
+        # For branch-level POs, mark as branch user to use branch validations
+        if is_branch_level_po:
+            result['is_branch_user'] = True
     
-    # For sub-branch users, get the full hierarchy
+    # For sub-branch users with sub-branch provided, get the full hierarchy
     else:
         if sub_branch:
             sub_branch_data = frappe.get_value('Sub Branch', sub_branch,
@@ -818,16 +825,13 @@ def validate_purchase_order_hook(doc, method):
     # Convert doc to dict for validation
     doc_dict = doc.as_dict()
     
-    # Determine if this is a new document by checking if it exists in database
-    is_new_document = True
-    if doc.name and not doc.name.startswith('new-'):
-        try:
-            # Try to get the document from database (not from current transaction)
-            existing_doc = frappe.db.get_value("Purchase Order", doc.name, "name")
-            if existing_doc:
-                is_new_document = False
-        except:
-            is_new_document = True
+    # Determine if this is a new document using Frappe's built-in property
+    # doc.is_new() returns True for new documents, False for existing ones
+    is_new_document = doc.is_new()
+    
+    # Additional check: if document has docstatus > 0, it's definitely existing
+    if doc.docstatus > 0:
+        is_new_document = False
     
     # Call the main validation function
     result = validate_purchase_order_internal(doc_dict, is_new_document)
@@ -879,9 +883,15 @@ def validate_purchase_order_internal(doc, is_new_document=True):
         
         # Basic validations
         validation_results["validations"]["branch"] = validate_branch_mandatory(doc)
-        validation_results["validations"]["sub_branch"] = validate_sub_branch_mandatory(doc)
-        validation_results["validations"]["transaction_date"] = validate_transaction_date_mandatory(doc)
+        
+        # Sub-branch validation based on PO structure and user roles
+        # COMMENTED OUT - Not using this validation as of now
+        # validation_results["validations"]["sub_branch"] = validate_sub_branch_mandatory(doc, is_new_document)
+        validation_results["validations"]["sub_branch"] = {"status": "success"}  # Always pass
+        
         validation_results["validations"]["hierarchy"] = validate_hierarchy(doc)
+            
+        validation_results["validations"]["transaction_date"] = validate_transaction_date_mandatory(doc)
         
         # If we have items, do more validations
         if doc.get('items') and len(doc.get('items')) > 0:
@@ -926,18 +936,71 @@ def validate_branch_mandatory(doc):
         }
     return {"status": "success"}
 
-def validate_sub_branch_mandatory(doc):
-    """Validate that sub-branch is provided (for non-branch users)"""
-    # Skip for branch-level users
-    if is_branch_level_user():
+def validate_sub_branch_mandatory(doc, is_new_document=True):
+    """Validate that sub-branch is provided based on user roles and workflow"""
+    # Get current user info
+    current_user = frappe.session.user
+    user_roles = frappe.get_roles(current_user)
+    has_branch_role = 'Person Raising Request Branch' in user_roles
+    has_request_role = 'Person Raising Request' in user_roles
+    has_po_approver_role = 'PO Approver' in user_roles
+    has_requisition_approver_role = 'Requisition Approver' in user_roles
+    
+    # Check PO structure
+    has_branch = bool(doc.get('custom_branch'))
+    has_sub_branch = bool(doc.get('custom_sub_branch'))
+    is_branch_level_po = has_branch and not has_sub_branch
+    
+    # DEBUG: Log the validation details
+    frappe.log_error(
+        f"Sub-branch validation:\n"
+        f"User: {current_user}\n"
+        f"Roles: {user_roles}\n"
+        f"Is New Document: {is_new_document}\n"
+        f"Branch: {doc.get('custom_branch')}\n"
+        f"Sub-branch: {doc.get('custom_sub_branch')}\n"
+        f"Is Branch Level PO: {is_branch_level_po}\n"
+        f"Has Branch Role: {has_branch_role}\n"
+        f"Has PO Approver Role: {has_po_approver_role}\n"
+        f"Has Requisition Approver Role: {has_requisition_approver_role}",
+        "Sub-Branch Validation Debug"
+    )
+    
+    # CASE 1: For existing documents (editing/submitting), always allow
+    # PO Approvers and Requisition Approvers only work with existing POs
+    if not is_new_document:
+        frappe.log_error("Existing document - validation passed", "Sub-Branch Validation")
         return {"status": "success"}
     
-    # For regular users, sub-branch is mandatory
-    if not doc.get('custom_sub_branch'):
-        return {
-            "status": "error",
-            "message": "Sub-branch is mandatory for Purchase Order"
-        }
+    # CASE 2: For new documents (creation), only request raisers can create
+    if is_new_document:
+        # Only Person Raising Request roles can create new POs
+        if not (has_branch_role or has_request_role):
+            frappe.log_error("User cannot create new POs", "Sub-Branch Validation")
+            return {
+                "status": "error",
+                "message": "Only request raisers can create new Purchase Orders"
+            }
+        
+        # Person Raising Request Branch can create branch-level POs (no sub-branch required)
+        if has_branch_role and is_branch_level_po:
+            frappe.log_error("Branch user creating branch-level PO - allowed", "Sub-Branch Validation")
+            return {"status": "success"}
+        
+        # Person Raising Request must provide sub-branch
+        if has_request_role and not has_sub_branch:
+            frappe.log_error("Request user must provide sub-branch", "Sub-Branch Validation")
+            return {
+                "status": "error",
+                "message": "Sub-branch is mandatory for Purchase Order"
+            }
+        
+        # If sub-branch is provided, always allow
+        if has_sub_branch:
+            frappe.log_error("Sub-branch provided - allowed", "Sub-Branch Validation")
+            return {"status": "success"}
+    
+    frappe.log_error("Default success", "Sub-Branch Validation")
     return {"status": "success"}
 
 def validate_transaction_date_mandatory(doc):
