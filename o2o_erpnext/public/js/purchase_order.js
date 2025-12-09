@@ -46,21 +46,25 @@ frappe.ui.form.on('Purchase Order', {
             call_check_and_apply_branch_addresses(frm);
         }
 
-        // Only run defaults for new documents
-        if (!frm.doc.__islocal) {
-            // Set form fields based on role
+        // For NEW documents: Role-based sub-branch requirement
+        if (frm.doc.__islocal) {
             frappe.call({
                 method: 'o2o_erpnext.api.purchase_order.is_branch_level_user',
                 callback: function(r) {
                     const isBranchUser = r.message;
                     
                     if (isBranchUser) {
+                        // Person Raising Request Branch - sub-branch optional
                         frm.set_df_property('custom_sub_branch', 'reqd', 0);
                     } else {
+                        // Person Raising Request - sub-branch mandatory
                         frm.set_df_property('custom_sub_branch', 'reqd', 1);
                     }
                 }
             });
+        } else {
+            // For EXISTING documents: Always optional (server handles validation)
+            frm.set_df_property('custom_sub_branch', 'reqd', 0);
             
             // Add budget display section for existing documents
             try {

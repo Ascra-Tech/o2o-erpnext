@@ -822,29 +822,64 @@ def get_hierarchy_data(branch=None, sub_branch=None):
 
 def validate_purchase_order_hook(doc, method):
     """Hook wrapper for Frappe's validate event - handles all validation server-side"""
-    # Convert doc to dict for validation
-    doc_dict = doc.as_dict()
+    # Skip during migrations only
+    if frappe.flags.in_migrate:
+        return
     
-    # Determine if this is a new document using Frappe's built-in property
-    # doc.is_new() returns True for new documents, False for existing ones
-    is_new_document = doc.is_new()
-    
-    # Additional check: if document has docstatus > 0, it's definitely existing
-    if doc.docstatus > 0:
-        is_new_document = False
-    
-    # Call the main validation function
-    result = validate_purchase_order_internal(doc_dict, is_new_document)
-    
-    # If validation fails, throw error with specific message (no wrapping)
-    if result.get("status") == "error":
-        error_message = result.get("message", "Validation failed")
-        frappe.msgprint(
-            msg=error_message,
-            title="There's an Issue with your Purchase Order",
-            indicator="red",
-            raise_exception=True
-        )
+    # Skip validation if document is being auto-saved or if it's a field update
+    if not doc.get('items') or len(doc.get('items')) == 0:
+        return  # No items, no validation needed
+        
+    # Skip validation for documents that are just being created/updated without explicit save
+    if hasattr(doc, 'flags') and (doc.flags.ignore_validate or doc.flags.ignore_permissions):
+        return
+        
+    try:
+        # Convert doc to dict for validation
+        doc_dict = doc.as_dict()
+        
+        # Improved document detection logic
+        is_new_document = True
+        
+        # Check if document exists in database
+        if doc.name and not doc.name.startswith("new-"):
+            if frappe.db.exists("Purchase Order", doc.name):
+                is_new_document = False
+        
+        # Additional check: if document has docstatus > 0, it's definitely existing
+        if doc.docstatus > 0:
+            is_new_document = False
+        
+        # Call the main validation function
+        result = validate_purchase_order_internal(doc_dict, is_new_document)
+        
+        # If validation fails, throw error with specific message (no wrapping)
+        if result.get("status") == "error":
+            error_message = result.get("message", "Validation failed")
+            # Only throw validation errors, don't break document creation for system errors
+            frappe.throw(error_message)
+            
+    except frappe.ValidationError:
+        # Re-raise validation errors (these are intentional)
+        raise
+    except Exception as e:
+        # Log system errors but don't break the document creation
+        frappe.log_error(f"PO Validation System Error: {str(e)}", "PO Validation System Error")
+        # Don't re-raise system exceptions to allow document creation
+
+def on_submit_purchase_order(doc, method):
+    """Hook for Purchase Order submission - update budgets"""
+    try:
+        # Calculate CAPEX and OPEX totals
+        capex_total, opex_total = calculate_capex_opex_totals(doc.as_dict())
+        
+        # Update budgets
+        update_budgets(doc.name, capex_total, opex_total)
+        
+        frappe.log_error(f"Budget updated for PO {doc.name}: CAPEX={capex_total}, OPEX={opex_total}", "PO Budget Update")
+        
+    except Exception as e:
+        frappe.log_error(f"Error updating budgets for PO {doc.name}: {str(e)}", "PO Budget Update Error")
 
 @frappe.whitelist()
 def validate_purchase_order(doc_name=None, doc_json=None):
@@ -884,11 +919,10 @@ def validate_purchase_order_internal(doc, is_new_document=True):
         # Basic validations
         validation_results["validations"]["branch"] = validate_branch_mandatory(doc)
         
-        # Sub-branch validation based on PO structure and user roles
-        # COMMENTED OUT - Not using this validation as of now
-        # validation_results["validations"]["sub_branch"] = validate_sub_branch_mandatory(doc, is_new_document)
-        validation_results["validations"]["sub_branch"] = {"status": "success"}  # Always pass
+        # Sub-branch validation - role-based for new docs, structure-based for existing
+        validation_results["validations"]["sub_branch"] = validate_sub_branch_mandatory(doc, is_new_document)
         
+        # Hierarchy validation - always validate the relationship
         validation_results["validations"]["hierarchy"] = validate_hierarchy(doc)
             
         validation_results["validations"]["transaction_date"] = validate_transaction_date_mandatory(doc)
@@ -951,32 +985,17 @@ def validate_sub_branch_mandatory(doc, is_new_document=True):
     has_sub_branch = bool(doc.get('custom_sub_branch'))
     is_branch_level_po = has_branch and not has_sub_branch
     
-    # DEBUG: Log the validation details
-    frappe.log_error(
-        f"Sub-branch validation:\n"
-        f"User: {current_user}\n"
-        f"Roles: {user_roles}\n"
-        f"Is New Document: {is_new_document}\n"
-        f"Branch: {doc.get('custom_branch')}\n"
-        f"Sub-branch: {doc.get('custom_sub_branch')}\n"
-        f"Is Branch Level PO: {is_branch_level_po}\n"
-        f"Has Branch Role: {has_branch_role}\n"
-        f"Has PO Approver Role: {has_po_approver_role}\n"
-        f"Has Requisition Approver Role: {has_requisition_approver_role}",
-        "Sub-Branch Validation Debug"
-    )
+    # Validation logic continues below
     
     # CASE 1: For existing documents (editing/submitting), always allow
     # PO Approvers and Requisition Approvers only work with existing POs
     if not is_new_document:
-        frappe.log_error("Existing document - validation passed", "Sub-Branch Validation")
         return {"status": "success"}
     
     # CASE 2: For new documents (creation), only request raisers can create
     if is_new_document:
         # Only Person Raising Request roles can create new POs
         if not (has_branch_role or has_request_role):
-            frappe.log_error("User cannot create new POs", "Sub-Branch Validation")
             return {
                 "status": "error",
                 "message": "Only request raisers can create new Purchase Orders"
@@ -984,12 +1003,10 @@ def validate_sub_branch_mandatory(doc, is_new_document=True):
         
         # Person Raising Request Branch can create branch-level POs (no sub-branch required)
         if has_branch_role and is_branch_level_po:
-            frappe.log_error("Branch user creating branch-level PO - allowed", "Sub-Branch Validation")
             return {"status": "success"}
         
         # Person Raising Request must provide sub-branch
         if has_request_role and not has_sub_branch:
-            frappe.log_error("Request user must provide sub-branch", "Sub-Branch Validation")
             return {
                 "status": "error",
                 "message": "Sub-branch is mandatory for Purchase Order"
@@ -997,10 +1014,7 @@ def validate_sub_branch_mandatory(doc, is_new_document=True):
         
         # If sub-branch is provided, always allow
         if has_sub_branch:
-            frappe.log_error("Sub-branch provided - allowed", "Sub-Branch Validation")
             return {"status": "success"}
-    
-    frappe.log_error("Default success", "Sub-Branch Validation")
     return {"status": "success"}
 
 def validate_transaction_date_mandatory(doc):
@@ -1021,8 +1035,11 @@ def validate_hierarchy(doc):
             sub_branch=doc.get('custom_sub_branch')
         )
         
-        # For branch-level users, just check if branch exists
-        if hierarchy_data['is_branch_user']:
+        # Determine validation level based on PO structure (not user role)
+        has_sub_branch = bool(doc.get('custom_sub_branch'))
+        
+        if not has_sub_branch:
+            # Branch-level PO (no sub-branch) - validate against branch only
             if not hierarchy_data['branch']:
                 return {
                     "status": "error",
@@ -1030,12 +1047,12 @@ def validate_hierarchy(doc):
                 }
             return {"status": "success"}
         
-        # For sub-branch users, check the full hierarchy
+        # Sub-branch level PO (has sub-branch) - check the full hierarchy
         else:
             if not hierarchy_data['sub_branch']:
                 return {
                     "status": "error",
-                    "message": "Could not fetch sub-branch details"
+                    "message": f"Could not fetch sub-branch details for '{doc.get('custom_sub_branch')}'. Please check if the sub-branch exists and is properly configured."
                 }
             
             if hierarchy_data['sub_branch'].get('branch') != doc.get('custom_branch'):
@@ -1093,8 +1110,11 @@ def validate_order_value(doc):
                 "message": "Could not fetch supplier details"
             }
         
-        # For branch-level users
-        if hierarchy_data['is_branch_user']:
+        # Determine validation level based on PO structure (not user role)
+        has_sub_branch = bool(doc.get('custom_sub_branch'))
+        
+        if not has_sub_branch:
+            # Branch-level PO (no sub-branch) - validate against branch limits
             if not hierarchy_data['branch']:
                 return {
                     "status": "error",
@@ -1133,12 +1153,12 @@ def validate_order_value(doc):
                     "message": f"Total order value ({total}) must not exceed Supplier's Maximum Order Value {supplier_max}"
                 }
         
-        # For sub-branch users
+        # Sub-branch level PO (has sub-branch) - validate against sub-branch limits
         else:
             if not hierarchy_data['sub_branch']:
                 return {
                     "status": "error",
-                    "message": "Could not fetch sub-branch details"
+                    "message": f"Could not fetch sub-branch details for '{doc.get('custom_sub_branch')}'. Please check if the sub-branch exists and is properly configured."
                 }
             
             # Sub-Branch minimum check
@@ -1249,8 +1269,11 @@ def validate_budgets(doc, capex_total, opex_total):
                 "message": "Could not fetch supplier details"
             }
         
-        # For branch-level users
-        if hierarchy_data['is_branch_user']:
+        # Determine validation level based on PO structure (not user role)
+        has_sub_branch = bool(doc.get('custom_sub_branch'))
+        
+        if not has_sub_branch:
+            # Branch-level PO (no sub-branch) - validate against branch budgets
             if not hierarchy_data['branch']:
                 return {
                     "status": "error",
@@ -1313,12 +1336,12 @@ def validate_budgets(doc, capex_total, opex_total):
                         "message": f"Total Opex amount ({opex_total}) exceeds Supplier Opex budget ({supplier_opex})"
                     }
         
-        # For sub-branch users
+        # Sub-branch level PO (has sub-branch) - validate against sub-branch budgets
         else:
             if not hierarchy_data['sub_branch']:
                 return {
                     "status": "error",
-                    "message": "Could not fetch sub-branch details"
+                    "message": f"Could not fetch sub-branch details for '{doc.get('custom_sub_branch')}'. Please check if the sub-branch exists and is properly configured."
                 }
             
             # Validate CAPEX
@@ -1427,6 +1450,7 @@ def validate_incremental_budgets(doc, capex_total, opex_total):
             sub_branch=doc.get('custom_sub_branch')
         )
         
+        
         if not hierarchy_data['supplier']:
             return {
                 "status": "error",
@@ -1435,10 +1459,19 @@ def validate_incremental_budgets(doc, capex_total, opex_total):
         
         # Check CAPEX increase
         if capex_change > 0:
-            if is_branch_level_user():
-                # Branch level - check branch and supplier budgets
-                branch_capex = flt(hierarchy_data['branch'].get('custom_capex_budget'))
-                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
+            # Determine validation level based on PO structure (not user role)
+            has_sub_branch = bool(doc.get('custom_sub_branch'))
+            
+            if not has_sub_branch:
+                # Branch-level PO (no sub-branch) - validate against branch budgets
+                if not hierarchy_data.get('branch'):
+                    return {
+                        "status": "error",
+                        "message": "Could not fetch branch details for budget validation"
+                    }
+                
+                branch_capex = flt(hierarchy_data['branch'].get('custom_capex_budget', 0))
+                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget', 0))
                 
                 if capex_change > branch_capex:
                     return {
@@ -1451,9 +1484,15 @@ def validate_incremental_budgets(doc, capex_total, opex_total):
                         "message": f"Cannot increase CAPEX by ₹{capex_change}: Insufficient supplier CAPEX budget (Available: ₹{supplier_capex})"
                     }
             else:
-                # Sub-branch level - check sub-branch budget
-                sub_branch_capex = flt(hierarchy_data['sub_branch'].get('capex_budget'))
-                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget'))
+                # Sub-branch level PO (has sub-branch) - validate against sub-branch budgets
+                if not hierarchy_data.get('sub_branch'):
+                    return {
+                        "status": "error",
+                        "message": f"Could not fetch sub-branch details for '{doc.get('custom_sub_branch')}'. Please check if the sub-branch exists and is properly configured."
+                    }
+                
+                sub_branch_capex = flt(hierarchy_data['sub_branch'].get('capex_budget', 0))
+                supplier_capex = flt(hierarchy_data['supplier'].get('custom_capex_budget', 0))
                 
                 if capex_change > sub_branch_capex:
                     return {
@@ -1468,10 +1507,19 @@ def validate_incremental_budgets(doc, capex_total, opex_total):
         
         # Check OPEX increase
         if opex_change > 0:
-            if is_branch_level_user():
-                # Branch level - check branch and supplier budgets
-                branch_opex = flt(hierarchy_data['branch'].get('custom_opex_budget'))
-                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
+            # Determine validation level based on PO structure (not user role)
+            has_sub_branch = bool(doc.get('custom_sub_branch'))
+            
+            if not has_sub_branch:
+                # Branch-level PO (no sub-branch) - validate against branch budgets
+                if not hierarchy_data.get('branch'):
+                    return {
+                        "status": "error",
+                        "message": "Could not fetch branch details for budget validation"
+                    }
+                
+                branch_opex = flt(hierarchy_data['branch'].get('custom_opex_budget', 0))
+                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget', 0))
                 
                 if opex_change > branch_opex:
                     return {
@@ -1484,9 +1532,15 @@ def validate_incremental_budgets(doc, capex_total, opex_total):
                         "message": f"Cannot increase OPEX by ₹{opex_change}: Insufficient supplier OPEX budget (Available: ₹{supplier_opex})"
                     }
             else:
-                # Sub-branch level - check sub-branch budget
-                sub_branch_opex = flt(hierarchy_data['sub_branch'].get('opex_budget'))
-                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget'))
+                # Sub-branch level PO (has sub-branch) - validate against sub-branch budgets
+                if not hierarchy_data.get('sub_branch'):
+                    return {
+                        "status": "error",
+                        "message": f"Could not fetch sub-branch details for '{doc.get('custom_sub_branch')}'. Please check if the sub-branch exists and is properly configured."
+                    }
+                
+                sub_branch_opex = flt(hierarchy_data['sub_branch'].get('opex_budget', 0))
+                supplier_opex = flt(hierarchy_data['supplier'].get('custom_opex_budget', 0))
                 
                 if opex_change > sub_branch_opex:
                     return {
@@ -1519,7 +1573,6 @@ def update_budgets(doc_name, capex_total=0, opex_total=0):
             return {"status": "success", "message": "No budget updates needed"}
         
         doc = frappe.get_doc("Purchase Order", doc_name)
-        is_branch_user = is_branch_level_user()
         
         # Get hierarchy data
         hierarchy_data = get_hierarchy_data(
@@ -1535,8 +1588,11 @@ def update_budgets(doc_name, capex_total=0, opex_total=0):
         
         updates = []
         
-        # For branch-level users
-        if is_branch_user:
+        # Determine update level based on PO structure (not user role)
+        has_sub_branch = bool(doc.custom_sub_branch)
+        
+        # For branch-level POs (no sub-branch)
+        if not has_sub_branch:
             if not hierarchy_data['branch']:
                 return {
                     "status": "error",
@@ -1575,12 +1631,12 @@ def update_budgets(doc_name, capex_total=0, opex_total=0):
                     frappe.db.set_value('Supplier', hierarchy_data['branch'].get('custom_supplier'), 'custom_opex_budget', new_supplier_opex)
                     updates.append(f"Supplier Opex budget updated to {new_supplier_opex}")
         
-        # For sub-branch users
+        # For sub-branch level POs (has sub-branch)
         else:
             if not hierarchy_data['sub_branch']:
                 return {
                     "status": "error",
-                    "message": "Could not fetch sub-branch details"
+                    "message": f"Could not fetch sub-branch details for '{doc.custom_sub_branch}'. Please check if the sub-branch exists and is properly configured."
                 }
             
             # Update CAPEX Budget for Sub-Branch
@@ -1689,10 +1745,12 @@ def update_budgets_for_po(doc_name, is_new=False):
         
         updates = []
         transactions = []
-        is_branch_user = is_branch_level_user()
         
-        # For branch-level users
-        if is_branch_user:
+        # Determine update level based on PO structure (not user role)
+        has_sub_branch = bool(current_po.custom_sub_branch)
+        
+        # For branch-level POs (no sub-branch)
+        if not has_sub_branch:
             if not hierarchy_data['branch']:
                 return {
                     "status": "error",
@@ -1807,12 +1865,12 @@ def update_budgets_for_po(doc_name, is_new=False):
                         
                     updates.append(f"Supplier Opex budget {action} to {current_supplier_opex}")
         
-        # For sub-branch users
+        # For sub-branch level POs (has sub-branch)
         else:
             if not hierarchy_data['sub_branch']:
                 return {
                     "status": "error",
-                    "message": "Could not fetch sub-branch details"
+                    "message": f"Could not fetch sub-branch details for '{current_po.custom_sub_branch}'. Please check if the sub-branch exists and is properly configured."
                 }
             
             # Update CAPEX Budget for Sub-Branch
