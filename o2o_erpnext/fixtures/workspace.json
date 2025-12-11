@@ -4113,7 +4113,7 @@
   "hide_custom": 0,
   "icon": "website",
   "indicator_color": null,
-  "is_hidden": 1,
+  "is_hidden": 0,
   "label": "Website",
   "links": [
    {
@@ -4604,7 +4604,7 @@
   "hide_custom": 0,
   "icon": "tool",
   "indicator_color": null,
-  "is_hidden": 1,
+  "is_hidden": 0,
   "label": "Tools",
   "links": [
    {
@@ -11441,7 +11441,7 @@
   "hide_custom": 0,
   "icon": "setting",
   "indicator_color": null,
-  "is_hidden": 1,
+  "is_hidden": 0,
   "label": "ERPNext Settings",
   "links": [
    {
@@ -14593,7 +14593,7 @@
   "is_hidden": 0,
   "label": "Reports",
   "links": [],
-  "modified": "2025-04-29 18:10:49.048953",
+  "modified": "2025-12-10 11:27:51.362505",
   "module": null,
   "name": "Reports",
   "number_cards": [],
@@ -14625,6 +14625,12 @@
     "parentfield": "roles",
     "parenttype": "Workspace",
     "role": "Person Raising Request"
+   },
+   {
+    "parent": "Reports",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Person Raising Request Branch"
    }
   ],
   "sequence_id": 34.0,
@@ -14840,7 +14846,7 @@
   "is_hidden": 0,
   "label": "ERP Data Import",
   "links": [],
-  "modified": "2025-03-13 19:26:22.654626",
+  "modified": "2025-12-10 10:25:24.998414",
   "module": null,
   "name": "ERP Data Import",
   "number_cards": [
@@ -14869,6 +14875,12 @@
     "parentfield": "roles",
     "parenttype": "Workspace",
     "role": "Purchase Manager"
+   },
+   {
+    "parent": "ERP Data Import",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
+    "role": "Supplier"
    }
   ],
   "sequence_id": 39.0,
