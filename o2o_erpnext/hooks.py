@@ -133,7 +133,8 @@ after_install = "o2o_erpnext.install.after_install"
 # Override standard doctype classes
 
 override_doctype_class = {
-    "Purchase Invoice": "o2o_erpnext.overrides.purchase_invoice.CustomPurchaseInvoice"
+    "Purchase Invoice": "o2o_erpnext.overrides.purchase_invoice.CustomPurchaseInvoice",
+    "Purchase Receipt": "o2o_erpnext.overrides.purchase_receipt.CustomPurchaseReceipt"
 }
 
 # Document Events
