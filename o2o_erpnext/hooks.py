@@ -236,7 +236,7 @@ override_doctype_class = {
 fixtures = [
     #"Role",
     #"Role Profile",
-    #"Client Script",
+    "Client Script",
     #"Server Script",
     #"Tax Category",
     "Workspace",
@@ -245,7 +245,8 @@ fixtures = [
     #"Workflow",
     #"Workflow State",
     #"Workflow Action",
-    #"Print Format",
+    "Print Format",
+    "Notification",
     #"Number Card",
     #"Report",
     #"Workflow Action Master",
