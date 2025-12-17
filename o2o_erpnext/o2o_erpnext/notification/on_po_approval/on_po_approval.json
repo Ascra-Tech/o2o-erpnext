@@ -1,0 +1,34 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.workflow_state == \"PO Approved\"",
+ "creation": "2025-11-03 14:46:44.580636",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Purchase Order",
+ "enabled": 1,
+ "event": "Save",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "Dear Sir/Madam,<br>\nThis is to inform you that your {{ doc.name }} , {{ doc.transaction_date }} , {{ doc.grand_total }} has been approved by the concerned authorities and the same will be process shortly.<br>\nThank you for placing the order.",
+ "message_type": "Markdown",
+ "modified": "2025-12-17 14:56:11.821392",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "On PO approval",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "receiver_by_document_field": "custom_requisition_approver_email"
+  },
+  {
+   "receiver_by_document_field": "custom_created_user"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "sender": "",
+ "sender_email": "",
+ "subject": "On PO approval"
+}

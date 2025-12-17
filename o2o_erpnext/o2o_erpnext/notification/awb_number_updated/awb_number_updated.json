@@ -1,0 +1,31 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.custom_awb_number and doc.custom_awb_number != \"\"",
+ "creation": "2025-12-17 13:43:08.083780",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Purchase Receipt",
+ "enabled": 1,
+ "event": "Save",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "Dear Sir/Madam,<br>\nPlease be informed the following purchase requisition has beedn updated by AWB number & shipping details.<br>\nTo raise a fresh request please check https://new.o2op2p.ind.in/app<br>\n<table border=2 >\n    <tr align=\"center\">\n        <th>Sr. No.</th>\n        <th>PR No</th>\n        <th>AWB Number</th>\n        <th>Remark</th>\n    </tr>\n    <tr align=\"center\">\n        <td>1</td>\n        <td>{{ doc.items[0].purchase_order if doc.items else \"\" }}</td>\n        <td>{{ doc.custom_awb_number }}</td>\n        <td>{{ doc.remarks }}</td>\n    </tr>\n</table>",
+ "message_type": "Markdown",
+ "modified": "2025-12-17 14:55:49.891467",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "AWB Number Updated",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "receiver_by_document_field": "custom_created_by"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "sender": "",
+ "sender_email": "",
+ "subject": "AWB Number Updated"
+}

@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "creation": "2025-12-17 13:31:23.028602",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Purchase Receipt",
+ "enabled": 1,
+ "event": "Submit",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "Dear Sir/Madam,<br><br>\nPlease be informed that the following purchase receipt has been approved and the consignment will be delivered shortly.<br><br>\n\n<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%;\">\n    <tr style=\"background-color: #f0f0f0; text-align: center; font-weight: bold;\">\n        <th>Sr. No.</th>\n        <th>Date</th>\n        <th>PR Number</th>\n    </tr>\n    <tr style=\"text-align: center;\">\n        <td>1</td>\n        <td>{{ doc.get_formatted(\"posting_date\") }}</td>\n        <td>{{ doc.items[0].purchase_order if doc.items else \"\" }}</td>\n    </tr>\n</table>\n\n<br>Thank you for your attention.<br><br>\nBest regards,<br>\n{{ doc.company }}",
+ "message_type": "Markdown",
+ "modified": "2025-12-17 14:55:39.064632",
+ "modified_by": "Administrator",
+ "module": "o2o ErpNext",
+ "name": "PR Approved",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "receiver_by_document_field": "custom_created_by"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "sender": "",
+ "sender_email": "",
+ "subject": "PR Approved"
+}
