@@ -313,6 +313,9 @@ doctype_list_js = {
     ],
     "Purchase Order": [
         "public/js/purchase_order_list.js"
+    ],
+    "Item": [
+        "public/js/item_list.js"
     ]
 }
 
