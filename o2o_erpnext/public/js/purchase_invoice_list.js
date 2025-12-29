@@ -761,7 +761,75 @@ window.fetch_single_invoice = function() {
                                 primary_action_label: __('Search Again'),
                                 primary_action: function() {
                                     suggestionDialog.hide();
-                                    window.fetch_single_invoice();
+                                    frappe.call({
+                                        method: 'o2o_erpnext.api.php_portal_invoices.fetch_single_invoice',
+                                        args: values,
+                                        callback: function(r) {
+                                            fetch_progress_dialog.hide();
+                                            
+                                            if (r.message && r.message.success && r.message.invoice_details) {
+                                                show_invoice_details_dialog(r.message);
+                                            } else if (r.message && r.message.success) {
+                                                frappe.msgprint({
+                                                    title: __('Fetch Successful'),
+                                                    message: __(r.message.message + '<br><br>Invoice Name: {0}', [r.message.invoice_name]),
+                                                    indicator: 'green'
+                                                });
+                                            } else if (r.message && r.message.suggestions) {
+                                                // Handle suggestions for similar invoices
+                                                let suggestion_message = r.message.message + '<br><br><strong>Suggestions:</strong><br>';
+                                                r.message.suggestions.forEach(function(suggestion) {
+                                                    suggestion_message += '• ' + suggestion + '<br>';
+                                                });
+                                                
+                                                frappe.msgprint({
+                                                    title: __('Fetch Failed - Suggestions Available'),
+                                                    message: suggestion_message,
+                                                    indicator: 'orange'
+                                                });
+                                                
+                                                // Show dialog with suggested invoices
+                                                frappe.prompt([
+                                                    {
+                                                        'fieldname': 'suggested_invoice',
+                                                        'label': 'Try one of these invoices',
+                                                        'fieldtype': 'Select',
+                                                        'options': r.message.suggestions.join('\n'),
+                                                        'reqd': 1
+                                                    }
+                                                ], function(newValues) {
+                                                    // Re-call the fetch function with suggested invoice
+                                                    frappe.call({
+                                                        method: 'o2o_erpnext.api.php_portal_invoices.fetch_single_invoice',
+                                                        args: newValues,
+                                                        callback: function(newR) {
+                                                            if (newR.message && newR.message.success && newR.message.invoice_details) {
+                                                                show_invoice_details_dialog(newR.message);
+                                                            } else if (newR.message && newR.message.success) {
+                                                                frappe.msgprint({
+                                                                    title: __('Fetch Successful'),
+                                                                    message: __(newR.message.message + '<br><br>Invoice Name: {0}', [newR.message.invoice_name]),
+                                                                    indicator: 'green'
+                                                                });
+                                                            } else {
+                                                                frappe.msgprint({
+                                                                    title: __('Fetch Failed'),
+                                                                    message: newR.message ? newR.message.message : __('Could not fetch invoice'),
+                                                                    indicator: 'red'
+                                                                });
+                                                            }
+                                                        }
+                                                    });
+                                                }, 'Select Invoice to Fetch');
+                                            } else {
+                                                frappe.msgprint({
+                                                    title: __('Fetch Failed'),
+                                                    message: r.message ? r.message.message : __('Could not fetch invoice'),
+                                                    indicator: 'red'
+                                                });
+                                            }
+                                        },
+                                    });
                                 }
                             });
                             
@@ -793,22 +861,19 @@ window.fetch_single_invoice = function() {
                                         method: 'o2o_erpnext.api.php_portal_invoices.fetch_single_invoice',
                                         args: newValues,
                                         callback: function(newR) {
-                                            if (newR.message && newR.message.success) {
-                                                frappe.show_alert({
-                                                    message: __('Successfully processed invoice {0}', [newValues.invoice_number]),
+                                            if (newR.message && newR.message.success && newR.message.invoice_details) {
+                                                show_invoice_details_dialog(newR.message);
+                                            } else if (newR.message && newR.message.success) {
+                                                frappe.msgprint({
+                                                    title: __('Fetch Successful'),
+                                                    message: __(newR.message.message + '<br><br>Invoice Name: {0}', [newR.message.invoice_name]),
                                                     indicator: 'green'
-                                                }, 5);
-                                                
-                                                if (newR.message.invoice_name) {
-                                                    frappe.set_route('Form', 'Purchase Invoice', newR.message.invoice_name);
-                                                }
-                                                
-                                                if (cur_list) cur_list.refresh();
+                                                });
                                             } else {
                                                 frappe.msgprint({
                                                     title: __('Fetch Failed'),
-                                                    message: newR.message ? newR.message.message : __('Invoice not found in portal'),
-                                                    indicator: 'orange'
+                                                    message: newR.message ? newR.message.message : __('Could not fetch invoice'),
+                                                    indicator: 'red'
                                                 });
                                             }
                                         }
@@ -1016,9 +1081,19 @@ window.test_procureuat_connection = function() {
         method: 'o2o_erpnext.api.php_portal_invoices.test_portal_connection',
         callback: function(r) {
             if (r.message && r.message.success) {
+                // Enhanced connection info display
+                let connectionInfo = '';
+                if (r.message.connection_info) {
+                    connectionInfo = `<br><br><strong>Connection Details:</strong><br>
+                        • Active Connection: ${r.message.connection_info.active_connection}<br>
+                        • Database: ${r.message.connection_info.database_name}<br>
+                        • Username: ${r.message.connection_info.username}<br>
+                        • Type: ${r.message.connection_info.connection_type}`;
+                }
+                
                 frappe.msgprint({
                     title: __('Connection Successful'),
-                    message: __('Successfully connected to ProcureUAT database.<br><br>Statistics:<br>• Purchase Requisitions: {0}<br>• Purchase Order Items: {1}<br>• Active Vendors: {2}', 
+                    message: __(r.message.message + '<br><br><strong>Statistics:</strong><br>• Purchase Requisitions: {0}<br>• Purchase Order Items: {1}<br>• Active Vendors: {2}' + connectionInfo, 
                               [r.message.statistics.purchase_requisitions, 
                                r.message.statistics.purchase_order_items, 
                                r.message.statistics.active_vendors]),
@@ -1044,6 +1119,110 @@ window.test_procureuat_connection = function() {
 
 function test_procureuat_connection() {
     window.test_procureuat_connection();
+}
+
+// Function to display comprehensive invoice details
+function show_invoice_details_dialog(response) {
+    const details = response.invoice_details;
+    
+    // Create HTML for invoice details
+    let html = `
+        <div style="max-height: 600px; overflow-y: auto;">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fa fa-info-circle"></i> Basic Information</h5>
+                    <table class="table table-bordered table-sm">
+                        <tr><td><strong>Invoice ID:</strong></td><td>${details.basic_info.id}</td></tr>
+                        <tr><td><strong>Invoice Number:</strong></td><td>${details.basic_info.invoice_number || 'N/A'}</td></tr>
+                        <tr><td><strong>Order Code:</strong></td><td>${details.basic_info.order_code || 'N/A'}</td></tr>
+                        <tr><td><strong>Order Name:</strong></td><td>${details.basic_info.order_name || 'N/A'}</td></tr>
+                        <tr><td><strong>Status:</strong></td><td><span class="badge badge-info">${details.basic_info.status}</span></td></tr>
+                        <tr><td><strong>Created:</strong></td><td>${details.basic_info.created_at}</td></tr>
+                        <tr><td><strong>Updated:</strong></td><td>${details.basic_info.updated_at}</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fa fa-building"></i> Entity Information</h5>
+                    <table class="table table-bordered table-sm">
+                        <tr><td><strong>Entity:</strong></td><td>${details.entity_info.entity || 'N/A'}</td></tr>
+                        <tr><td><strong>Entity Name:</strong></td><td>${details.entity_info.entity_name || 'N/A'}</td></tr>
+                        <tr><td><strong>Sub-entity ID:</strong></td><td>${details.entity_info.subentity_id || 'N/A'}</td></tr>
+                        <tr><td><strong>Sub-entity Name:</strong></td><td>${details.entity_info.subentity_name || 'N/A'}</td></tr>
+                        <tr><td><strong>Address:</strong></td><td>${details.entity_info.address || 'N/A'}</td></tr>
+                        <tr><td><strong>Remark:</strong></td><td>${details.entity_info.remark || 'N/A'}</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fa fa-money-bill"></i> Financial Summary</h5>
+                    <table class="table table-bordered table-sm">
+                        <tr><td><strong>Total Items:</strong></td><td>${details.financial_info.total_items}</td></tr>
+                        <tr><td><strong>Total Amount:</strong></td><td>₹${details.financial_info.total_amount.toFixed(2)}</td></tr>
+                        <tr><td><strong>Total GST:</strong></td><td>₹${details.financial_info.total_gst.toFixed(2)}</td></tr>
+                        <tr><td><strong>Vendors:</strong></td><td>${details.financial_info.vendor_names}</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fa fa-chart-bar"></i> Calculated Summary</h5>
+                    <table class="table table-bordered table-sm">
+                        <tr><td><strong>Line Items:</strong></td><td>${details.summary.total_line_items}</td></tr>
+                        <tr><td><strong>Unique Vendors:</strong></td><td>${details.summary.unique_vendors}</td></tr>
+                        <tr><td><strong>Total Quantity:</strong></td><td>${details.summary.total_quantity}</td></tr>
+                        <tr><td><strong>Calculated Total:</strong></td><td>₹${details.summary.calculated_total.toFixed(2)}</td></tr>
+                        <tr><td><strong>Calculated GST:</strong></td><td>₹${details.summary.calculated_gst.toFixed(2)}</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <h5><i class="fa fa-list"></i> Item Details (${details.items.length} items)</h5>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Rate</th>
+                                    <th>UOM</th>
+                                    <th>Total</th>
+                                    <th>GST</th>
+                                    <th>Vendor</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+    
+    details.items.forEach(item => {
+        html += `
+                                <tr>
+                                    <td>${item.id}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>₹${item.unit_rate.toFixed(2)}</td>
+                                    <td>${item.uom || 'N/A'}</td>
+                                    <td>₹${item.total_amt.toFixed(2)}</td>
+                                    <td>₹${item.gst_amt.toFixed(2)}</td>
+                                    <td>${item.vendor_name || 'N/A'}</td>
+                                </tr>`;
+    });
+    
+    html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Show the dialog
+    frappe.msgprint({
+        title: __('Invoice Details: {0}', [details.basic_info.invoice_number || details.basic_info.order_code]),
+        message: html,
+        indicator: 'blue',
+        wide: true
+    });
 }
 
 window.test_purchase_requisitions = function() {

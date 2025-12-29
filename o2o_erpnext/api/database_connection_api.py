@@ -316,3 +316,258 @@ def restart_ssh_tunnel(connection_name):
             'message': str(e)
         }
 
+
+@frappe.whitelist()
+def get_connection_details(connection_name):
+    """
+    Get detailed information about a database connection
+    
+    Args:
+        connection_name (str): Name of the Database Connection
+        
+    Returns:
+        dict: Connection details
+    """
+    try:
+        if not frappe.db.exists("Database Connection", connection_name):
+            return {
+                'success': False,
+                'message': f'Database Connection "{connection_name}" not found'
+            }
+        
+        conn_doc = frappe.get_doc("Database Connection", connection_name)
+        
+        # Get tunnel status if SSH is enabled
+        tunnel_status = None
+        if conn_doc.ssh_tunnel:
+            tunnel_status = SSHTunnelManager.get_tunnel_status(connection_name)
+        
+        return {
+            'success': True,
+            'connection': {
+                'name': conn_doc.name,
+                'display_name': conn_doc.display_name,
+                'database_type': conn_doc.database_type,
+                'host': conn_doc.host,
+                'port': conn_doc.port,
+                'database_name': conn_doc.database_name,
+                'username': conn_doc.username,
+                'ssh_tunnel': conn_doc.ssh_tunnel,
+                'ssh_host': conn_doc.ssh_host if conn_doc.ssh_tunnel else None,
+                'ssh_port': conn_doc.ssh_port if conn_doc.ssh_tunnel else None,
+                'ssh_username': conn_doc.ssh_username if conn_doc.ssh_tunnel else None,
+                'connection_status': conn_doc.connection_status,
+                'environment': conn_doc.environment,
+                'is_active': conn_doc.is_active,
+                'tunnel_status': tunnel_status
+            }
+        }
+        
+    except Exception as e:
+        frappe.log_error(
+            message=f"Get Connection Details Error: {str(e)}\n{traceback.format_exc()}",
+            title=f"Get Connection Details Failed - {connection_name}"
+        )
+        return {
+            'success': False,
+            'message': str(e)
+        }
+
+
+@frappe.whitelist()
+def enhanced_test_connection(connection_name, database_name=None, port=None, test_tables=True, test_write_access=False):
+    """
+    Enhanced database connection test with customizable options
+    
+    Args:
+        connection_name (str): Name of the Database Connection
+        database_name (str): Optional database name override
+        port (int): Optional port override
+        test_tables (bool): Whether to test table access
+        test_write_access (bool): Whether to test write access
+        
+    Returns:
+        dict: Detailed connection test results
+    """
+    import time
+    
+    try:
+        if not frappe.db.exists("Database Connection", connection_name):
+            return {
+                'success': False,
+                'message': f'Database Connection "{connection_name}" not found'
+            }
+        
+        conn_doc = frappe.get_doc("Database Connection", connection_name)
+        
+        # Use provided values or defaults from connection
+        db_name = database_name or conn_doc.database_name
+        db_port = int(port) if port else conn_doc.port
+        db_host = conn_doc.host
+        db_user = conn_doc.username
+        db_password = conn_doc.get_password('password')
+        
+        # For SSH connections, use tunnel
+        if conn_doc.ssh_tunnel:
+            tunnel_status = SSHTunnelManager.get_tunnel_status(connection_name)
+            if tunnel_status['is_connected']:
+                db_host = '127.0.0.1'
+                db_port = tunnel_status['local_port']
+            else:
+                return {
+                    'success': False,
+                    'message': 'SSH tunnel is not active. Please start the tunnel first.'
+                }
+        
+        # Test connection
+        connection = None
+        start_time = time.time()
+        
+        # Debug logging
+        password_length = len(db_password) if db_password else 0
+        frappe.log_error(
+            message=f"Connection attempt with: host={db_host}, port={db_port}, user={db_user}, database={db_name}, ssl_required={conn_doc.ssl_required}, password_length={password_length}",
+            title=f"Debug Connection Parameters - {connection_name}"
+        )
+        
+        # Test the exact same connection that works directly
+        if db_host == 'o2oproddb.cwjwq8yhqpn1.ap-south-1.rds.amazonaws.com' and db_user == 'o2oapp':
+            frappe.log_error(
+                message=f"Testing with hardcoded password for comparison",
+                title=f"Debug Password Test - {connection_name}"
+            )
+            # Try with hardcoded password that we know works
+            test_password = 'o2oapp4321'
+            try:
+                test_conn = pymysql.connect(
+                    host=db_host,
+                    port=db_port,
+                    user=db_user,
+                    password=test_password,
+                    database=db_name,
+                    charset='utf8mb4',
+                    connect_timeout=10,
+                    ssl_disabled=True
+                )
+                test_conn.close()
+                frappe.log_error(
+                    message=f"Hardcoded password test: SUCCESS",
+                    title=f"Debug Password Test - {connection_name}"
+                )
+            except Exception as test_e:
+                frappe.log_error(
+                    message=f"Hardcoded password test: FAILED - {test_e}",
+                    title=f"Debug Password Test - {connection_name}"
+                )
+        
+        try:
+            # Build connection parameters
+            conn_params = {
+                'host': db_host,
+                'port': db_port,
+                'user': db_user,
+                'password': db_password,
+                'database': db_name,
+                'charset': 'utf8mb4',
+                'cursorclass': pymysql.cursors.DictCursor,
+                'connect_timeout': 10
+            }
+            
+            # Only add SSL parameters if SSL is required
+            if conn_doc.ssl_required:
+                conn_params['ssl'] = {'ssl_disabled': False}
+            else:
+                conn_params['ssl_disabled'] = True
+            
+            connection = pymysql.connect(**conn_params)
+            
+            connection_time = int((time.time() - start_time) * 1000)
+            
+            with connection.cursor() as cursor:
+                # Get database info
+                cursor.execute("SELECT VERSION() as version, DATABASE() as db_name, USER() as user_name")
+                db_info = cursor.fetchone()
+                
+                # Get table count and sample tables
+                table_count = 0
+                sample_tables = []
+                
+                if test_tables:
+                    cursor.execute("SHOW TABLES")
+                    tables = cursor.fetchall()
+                    table_count = len(tables)
+                    sample_tables = [list(t.values())[0] for t in tables[:10]]
+                
+                # Test write access
+                write_test = False
+                if test_write_access:
+                    try:
+                        cursor.execute("CREATE TABLE IF NOT EXISTS _test_write_access (id INT)")
+                        cursor.execute("DROP TABLE _test_write_access")
+                        write_test = True
+                    except:
+                        write_test = False
+            
+            # Update connection status
+            frappe.db.set_value(
+                'Database Connection',
+                connection_name,
+                {
+                    'connection_status': 'Connected',
+                    'last_connected': frappe.utils.now_datetime(),
+                    'error_log': None
+                },
+                update_modified=False
+            )
+            frappe.db.commit()
+            
+            return {
+                'success': True,
+                'message': 'Database connection successful',
+                'details': {
+                    'version': db_info.get('version'),
+                    'database': db_info.get('db_name'),
+                    'user': db_info.get('user_name'),
+                    'host': db_host,
+                    'port': db_port,
+                    'table_count': table_count,
+                    'sample_tables': sample_tables,
+                    'connection_time': connection_time,
+                    'write_test': write_test,
+                    'local_port': db_port if conn_doc.ssh_tunnel else None
+                }
+            }
+            
+        except Exception as db_error:
+            error_msg = str(db_error)
+            
+            frappe.db.set_value(
+                'Database Connection',
+                connection_name,
+                {
+                    'connection_status': 'Error',
+                    'error_log': error_msg
+                },
+                update_modified=False
+            )
+            frappe.db.commit()
+            
+            return {
+                'success': False,
+                'message': f'Database connection failed: {error_msg}'
+            }
+            
+        finally:
+            if connection:
+                connection.close()
+        
+    except Exception as e:
+        frappe.log_error(
+            message=f"Enhanced Test Connection Error: {str(e)}\n{traceback.format_exc()}",
+            title=f"Enhanced Test Failed - {connection_name}"
+        )
+        return {
+            'success': False,
+            'message': str(e)
+        }
+

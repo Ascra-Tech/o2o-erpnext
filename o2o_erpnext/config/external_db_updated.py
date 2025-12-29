@@ -24,10 +24,74 @@ PROCUREUAT_CONFIG = {
     'db_name': 'procureuat'
 }
 
+def get_active_database_connection():
+    """
+    Get the active Database Connection from ERPNext
+    
+    Returns:
+        dict: Active database connection configuration
+    """
+    try:
+        # Get active database connection
+        active_conn = frappe.get_all(
+            'Database Connection',
+            filters={'is_active': 1},
+            fields=['name', 'display_name', 'database_type', 'host', 'port', 'database_name', 
+                   'username', 'ssh_tunnel', 'ssh_host', 'ssh_port', 'ssh_username', 'ssh_key_file'],
+            limit=1
+        )
+        
+        if not active_conn:
+            raise frappe.ValidationError("No active Database Connection found. Please activate a connection in Database Connection list.")
+        
+        conn_doc = frappe.get_doc('Database Connection', active_conn[0]['name'])
+        password = conn_doc.get_password('password')
+        
+        config = {
+            'name': conn_doc.name,
+            'display_name': conn_doc.display_name,
+            'database_type': conn_doc.database_type,
+            'host': conn_doc.host,
+            'port': conn_doc.port,
+            'database_name': conn_doc.database_name,
+            'username': conn_doc.username,
+            'password': password,
+            'ssh_tunnel': conn_doc.ssh_tunnel,
+            'ssh_host': conn_doc.ssh_host if conn_doc.ssh_tunnel else None,
+            'ssh_port': conn_doc.ssh_port if conn_doc.ssh_tunnel else None,
+            'ssh_username': conn_doc.ssh_username if conn_doc.ssh_tunnel else None,
+            'ssh_key_file': conn_doc.ssh_key_file if conn_doc.ssh_tunnel else None,
+            'ssl_required': conn_doc.ssl_required
+        }
+        
+        frappe.logger().info(f"Using active database connection: {config['display_name']} ({config['name']})")
+        return config
+        
+    except Exception as e:
+        frappe.logger().error(f"Failed to get active database connection: {str(e)}")
+        # Fallback to hardcoded config for backward compatibility
+        frappe.logger().warning("Falling back to hardcoded PROCUREUAT_CONFIG")
+        return {
+            'name': 'Legacy_Config',
+            'display_name': 'Legacy ProcureUAT Config',
+            'database_type': 'MySQL',
+            'host': PROCUREUAT_CONFIG['db_host'],
+            'port': PROCUREUAT_CONFIG['db_port'],
+            'database_name': PROCUREUAT_CONFIG['db_name'],
+            'username': PROCUREUAT_CONFIG['db_username'],
+            'password': PROCUREUAT_CONFIG['db_password'],
+            'ssh_tunnel': 1,
+            'ssh_host': PROCUREUAT_CONFIG['ssh_host'],
+            'ssh_port': PROCUREUAT_CONFIG['ssh_port'],
+            'ssh_username': PROCUREUAT_CONFIG['ssh_username'],
+            'ssh_key_file': PROCUREUAT_CONFIG['ssh_key_path'],
+            'ssl_required': 0
+        }
+
 @contextmanager
 def get_external_db_connection():
     """
-    Get database connection to ProcureUAT via SSH tunnel
+    Get database connection to ProcureUAT using active Database Connection configuration
     
     Yields:
         pymysql.Connection: Database connection with DictCursor
@@ -36,50 +100,77 @@ def get_external_db_connection():
     connection = None
     
     try:
-        # Verify SSH key exists and has correct permissions
-        ssh_key_path = PROCUREUAT_CONFIG['ssh_key_path']
-        if not os.path.exists(ssh_key_path):
-            raise FileNotFoundError(f"SSH key not found: {ssh_key_path}")
+        # Get active database connection configuration
+        config = get_active_database_connection()
         
-        # Check file permissions
-        file_stat = os.stat(ssh_key_path)
-        if oct(file_stat.st_mode)[-3:] != '600':
-            frappe.logger().warning(f"SSH key has incorrect permissions: {ssh_key_path}")
-        
-        # Create SSH tunnel
-        tunnel = SSHTunnelForwarder(
-            (PROCUREUAT_CONFIG['ssh_host'], PROCUREUAT_CONFIG['ssh_port']),
-            ssh_username=PROCUREUAT_CONFIG['ssh_username'],
-            ssh_pkey=ssh_key_path,
-            remote_bind_address=(PROCUREUAT_CONFIG['db_host'], PROCUREUAT_CONFIG['db_port']),
-            local_bind_address=('127.0.0.1', 0)  # Use random available port
-        )
-        
-        tunnel.start()
-        local_port = tunnel.local_bind_port
-        
-        frappe.logger().info(f"SSH tunnel established on local port: {local_port}")
-        
-        # Create database connection through tunnel
-        connection = pymysql.connect(
-            host='127.0.0.1',
-            port=local_port,
-            user=PROCUREUAT_CONFIG['db_username'],
-            password=PROCUREUAT_CONFIG['db_password'],
-            database=PROCUREUAT_CONFIG['db_name'],
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor,
-            connect_timeout=30,
-            read_timeout=30,
-            write_timeout=30,
-            autocommit=False  # We'll handle transactions manually
-        )
+        if config['ssh_tunnel']:
+            # SSH tunnel connection
+            ssh_key_path = config['ssh_key_file']
+            if not os.path.exists(ssh_key_path):
+                raise FileNotFoundError(f"SSH key not found: {ssh_key_path}")
+            
+            # Check file permissions
+            file_stat = os.stat(ssh_key_path)
+            if oct(file_stat.st_mode)[-3:] != '600':
+                frappe.logger().warning(f"SSH key has incorrect permissions: {ssh_key_path}")
+            
+            # Create SSH tunnel
+            tunnel = SSHTunnelForwarder(
+                (config['ssh_host'], config['ssh_port']),
+                ssh_username=config['ssh_username'],
+                ssh_pkey=ssh_key_path,
+                remote_bind_address=('127.0.0.1', 3306),  # Remote MySQL port
+                local_bind_address=('127.0.0.1', 0)  # Use random available port
+            )
+            
+            tunnel.start()
+            local_port = tunnel.local_bind_port
+            
+            frappe.logger().info(f"SSH tunnel established on local port: {local_port}")
+            
+            # Create database connection through tunnel
+            connection = pymysql.connect(
+                host='127.0.0.1',
+                port=local_port,
+                user=config['username'],
+                password=config['password'],
+                database=config['database_name'],
+                charset='utf8mb4',
+                cursorclass=pymysql.cursors.DictCursor,
+                connect_timeout=30,
+                read_timeout=30,
+                write_timeout=30,
+                autocommit=False
+            )
+        else:
+            # Direct connection
+            conn_params = {
+                'host': config['host'],
+                'port': config['port'],
+                'user': config['username'],
+                'password': config['password'],
+                'database': config['database_name'],
+                'charset': 'utf8mb4',
+                'cursorclass': pymysql.cursors.DictCursor,
+                'connect_timeout': 30,
+                'read_timeout': 30,
+                'write_timeout': 30,
+                'autocommit': False
+            }
+            
+            # Add SSL parameters if required
+            if config.get('ssl_required'):
+                conn_params['ssl'] = {'ssl_disabled': False}
+            else:
+                conn_params['ssl_disabled'] = True
+            
+            connection = pymysql.connect(**conn_params)
         
         # Test connection
         with connection.cursor() as cursor:
             cursor.execute("SELECT DATABASE() as db_name, USER() as user_name, VERSION() as version")
             result = cursor.fetchone()
-            frappe.logger().info(f"Connected to ProcureUAT: {result}")
+            frappe.logger().info(f"Connected to {config['display_name']}: {result}")
         
         yield connection
         

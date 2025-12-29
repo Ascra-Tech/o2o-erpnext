@@ -49,6 +49,11 @@ def validate_invoice_prerequisites(invoice_data):
     Returns:
         dict: Validation results with missing entities and suggestions
     """
+    # Debug logging
+    invoice_ref = invoice_data.get('invoice_number', invoice_data.get('order_code', 'Unknown'))
+    frappe.logger().info(f"🔍 Validating prerequisites for invoice: {invoice_ref}")
+    frappe.logger().info(f"📋 Invoice data keys: {list(invoice_data.keys())}")
+    
     validation_result = {
         'success': True,
         'errors': [],
@@ -67,12 +72,15 @@ def validate_invoice_prerequisites(invoice_data):
     customer_email = invoice_data.get('customer_email')
     customer_gstn = invoice_data.get('customer_gstn')
     
+    frappe.logger().info(f"👤 Customer validation - Name: {customer_name}, Email: {customer_email}")
+    
     if customer_name:
         # Check if customer exists in ERPNext
         existing_customer = frappe.get_all('Customer', 
                                          filters={'customer_name': customer_name},
                                          limit=1)
         if not existing_customer:
+            frappe.logger().info(f"❌ Customer '{customer_name}' not found in ERPNext")
             validation_result['missing_entities']['customers'].append({
                 'name': customer_name,
                 'email': customer_email,
@@ -82,19 +90,26 @@ def validate_invoice_prerequisites(invoice_data):
             validation_result['suggestions'].append(
                 f"Create Customer: '{customer_name}' with email '{customer_email}' and GSTN '{customer_gstn}'"
             )
+        else:
+            frappe.logger().info(f"✅ Customer '{customer_name}' found in ERPNext")
     else:
+        frappe.logger().info(f"❌ Customer name is missing from invoice data")
         validation_result['errors'].append("Customer name is missing from invoice data")
     
     # 2. Check Supplier (entity = supplier in this context)
     entity_code = invoice_data.get('entity_code')
     branch_name = invoice_data.get('branch_name')
+    vendor_names = invoice_data.get('vendor_names', '')
     
-    if entity_code or branch_name:
-        supplier_name = branch_name or entity_code
+    frappe.logger().info(f"🏢 Supplier validation - Entity: {entity_code}, Branch: {branch_name}, Vendors: {vendor_names}")
+    
+    if entity_code or branch_name or vendor_names:
+        supplier_name = branch_name or entity_code or vendor_names
         existing_supplier = frappe.get_all('Supplier', 
                                          filters={'supplier_name': supplier_name},
                                          limit=1)
         if not existing_supplier:
+            frappe.logger().info(f"❌ Supplier '{supplier_name}' not found in ERPNext")
             validation_result['missing_entities']['suppliers'].append({
                 'name': supplier_name,
                 'code': entity_code
@@ -102,8 +117,11 @@ def validate_invoice_prerequisites(invoice_data):
             validation_result['suggestions'].append(
                 f"Create Supplier: '{supplier_name}' (Entity Code: {entity_code})"
             )
+        else:
+            frappe.logger().info(f"✅ Supplier '{supplier_name}' found in ERPNext")
     else:
-        validation_result['errors'].append("Entity/Branch information is missing")
+        frappe.logger().info(f"❌ Entity/Branch/Vendor information is missing")
+        validation_result['errors'].append("Entity/Branch/Vendor information is missing")
     
     # 3. Check Branch (Company in ERPNext)
     if branch_name:
@@ -171,6 +189,12 @@ def validate_invoice_prerequisites(invoice_data):
     # Set overall success status
     if validation_result['errors'] or validation_result['missing_entities']['customers'] or validation_result['missing_entities']['suppliers']:
         validation_result['success'] = False
+        frappe.logger().info(f"❌ Validation FAILED for {invoice_ref}:")
+        frappe.logger().info(f"   Errors: {validation_result['errors']}")
+        frappe.logger().info(f"   Missing customers: {len(validation_result['missing_entities']['customers'])}")
+        frappe.logger().info(f"   Missing suppliers: {len(validation_result['missing_entities']['suppliers'])}")
+    else:
+        frappe.logger().info(f"✅ Validation PASSED for {invoice_ref}")
     
     return validation_result
 
@@ -1159,8 +1183,19 @@ def test_portal_connection():
         dict: Connection test results
     """
     try:
+        # Import here to get the updated function
+        from o2o_erpnext.config.external_db_updated import get_active_database_connection
+        
+        # Get active connection info for debugging
+        active_config = get_active_database_connection()
+        frappe.logger().info(f"Portal Sync Tools using connection: {active_config['display_name']} ({active_config['name']})")
+        
         with get_external_db_connection() as conn:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                # Get database info for debugging
+                cursor.execute("SELECT DATABASE() as db_name, USER() as user_name")
+                db_info = cursor.fetchone()
+                
                 # Test basic queries
                 cursor.execute("SELECT COUNT(*) as total FROM purchase_requisitions WHERE is_delete = 0")
                 req_count = cursor.fetchone()['total']
@@ -1173,11 +1208,17 @@ def test_portal_connection():
                 
                 return {
                     'success': True,
-                    'message': 'Portal database connection successful',
+                    'message': f'Successfully connected to {active_config["display_name"]} database: {db_info["db_name"]} as {db_info["user_name"]}',
                     'statistics': {
                         'purchase_requisitions': req_count,
                         'purchase_order_items': item_count,
                         'active_vendors': vendor_count
+                    },
+                    'connection_info': {
+                        'active_connection': active_config['display_name'],
+                        'database_name': db_info['db_name'],
+                        'username': db_info['user_name'],
+                        'connection_type': 'SSH Tunnel' if active_config['ssh_tunnel'] else 'Direct Connection'
                     }
                 }
                 
@@ -1342,7 +1383,7 @@ def batch_import_invoices(batch_size=50, total_limit=500, date_from=None, date_t
         }
 
 @frappe.whitelist()
-def fetch_single_invoice(invoice_number, create_if_not_exists=1, update_if_exists=0):
+def fetch_single_invoice(invoice_number, create_if_not_exists=0, update_if_exists=0, show_details_only=1):
     """
     Fetch a single invoice by number from portal
     
@@ -1350,9 +1391,10 @@ def fetch_single_invoice(invoice_number, create_if_not_exists=1, update_if_exist
         invoice_number (str): Invoice number to fetch
         create_if_not_exists (bool): Create if not found locally
         update_if_exists (bool): Update if found locally
+        show_details_only (bool): Only show invoice details without creating
         
     Returns:
-        dict: Operation result
+        dict: Operation result with invoice details
     """
     try:
         # Enhanced logging for debugging
@@ -1430,7 +1472,8 @@ def fetch_single_invoice(invoice_number, create_if_not_exists=1, update_if_exist
                             'success': False,
                             'message': f'Invoice {invoice_number} not found in portal. Did you mean: {", ".join(similar_list)}?',
                             'invoice_name': None,
-                            'suggestions': similar_list
+                            'suggestions': similar_list,
+                            'similar_invoices': similar_invoices
                         }
                     else:
                         return {
@@ -1441,6 +1484,10 @@ def fetch_single_invoice(invoice_number, create_if_not_exists=1, update_if_exist
                 
                 # Log successful discovery for debugging
                 frappe.logger().info(f"Found invoice {invoice_number} in portal: ID {portal_invoice.get('id')}, Invoice Number: {portal_invoice.get('invoice_number')}")
+                
+                # If show_details_only is True, return comprehensive invoice details
+                if show_details_only:
+                    return display_invoice_details(portal_invoice, cursor)
                 
                 # Check if invoice exists locally 
                 # Search by:
@@ -1491,13 +1538,31 @@ def fetch_single_invoice(invoice_number, create_if_not_exists=1, update_if_exist
                     if create_if_not_exists:
                         # Create new
                         formatted_invoice = format_portal_invoice_data(portal_invoice)
-                        doc = create_purchase_invoice_from_portal(formatted_invoice)
+                        doc_result = create_purchase_invoice_from_portal(formatted_invoice)
                         
-                        if doc:
+                        # Check if creation was successful
+                        if isinstance(doc_result, dict):
+                            # If it's a dict, it contains error details or success info
+                            if doc_result.get('success'):
+                                return {
+                                    'success': True,
+                                    'message': f'Invoice {invoice_number} created successfully',
+                                    'invoice_name': doc_result.get('invoice_name')
+                                }
+                            else:
+                                return {
+                                    'success': False,
+                                    'message': doc_result.get('message', f'Failed to create invoice {invoice_number}'),
+                                    'invoice_name': None,
+                                    'errors': doc_result.get('errors', []),
+                                    'warnings': doc_result.get('warnings', [])
+                                }
+                        elif hasattr(doc_result, 'name'):
+                            # If it's a document object
                             return {
                                 'success': True,
                                 'message': f'Invoice {invoice_number} created successfully',
-                                'invoice_name': doc.name
+                                'invoice_name': doc_result.name
                             }
                         else:
                             return {
@@ -1518,6 +1583,101 @@ def fetch_single_invoice(invoice_number, create_if_not_exists=1, update_if_exist
             'success': False,
             'message': f'Error: {str(e)}',
             'invoice_name': None
+        }
+
+def display_invoice_details(portal_invoice, cursor):
+    """
+    Display comprehensive invoice details from portal
+    
+    Args:
+        portal_invoice (dict): Invoice data from portal
+        cursor: Database cursor for additional queries
+        
+    Returns:
+        dict: Formatted invoice details for display
+    """
+    try:
+        invoice_id = portal_invoice.get('id')
+        
+        # Get detailed items for this invoice
+        cursor.execute("""
+            SELECT poi.*, 
+                   v.name as vendor_name,
+                   v.code as vendor_code,
+                   v.email as vendor_email,
+                   v.gstn as vendor_gstn
+            FROM purchase_order_items poi
+            LEFT JOIN vendors v ON poi.vendor_id = v.id
+            WHERE poi.purchase_order_id = %s
+            ORDER BY poi.id
+        """, (invoice_id,))
+        
+        items = cursor.fetchall()
+        
+        # Format the invoice details
+        details = {
+            'success': True,
+            'message': f'Invoice {portal_invoice.get("invoice_number", portal_invoice.get("order_code"))} found in portal',
+            'invoice_details': {
+                'basic_info': {
+                    'id': portal_invoice.get('id'),
+                    'invoice_number': portal_invoice.get('invoice_number'),
+                    'order_code': portal_invoice.get('order_code'),
+                    'order_name': portal_invoice.get('order_name'),
+                    'status': portal_invoice.get('status'),
+                    'created_at': safe_date_format(portal_invoice.get('created_at')),
+                    'updated_at': safe_date_format(portal_invoice.get('updated_at')),
+                    'delivery_date': safe_date_format(portal_invoice.get('delivery_date')),
+                    'validity_date': safe_date_format(portal_invoice.get('validity_date'))
+                },
+                'entity_info': {
+                    'entity': portal_invoice.get('entity'),
+                    'entity_name': portal_invoice.get('entity_name'),
+                    'subentity_id': portal_invoice.get('subentity_id'),
+                    'subentity_name': portal_invoice.get('subentity_name'),
+                    'address': portal_invoice.get('address'),
+                    'remark': portal_invoice.get('remark')
+                },
+                'financial_info': {
+                    'total_items': portal_invoice.get('total_items', 0),
+                    'total_amount': float(portal_invoice.get('total_amount', 0)),
+                    'total_gst': float(portal_invoice.get('total_gst', 0)),
+                    'vendor_names': portal_invoice.get('vendor_names', 'No Vendors')
+                },
+                'items': [{
+                    'id': item.get('id'),
+                    'category_id': item.get('category_id'),
+                    'subcategory_id': item.get('subcategory_id'),
+                    'product_id': item.get('product_id'),
+                    'quantity': item.get('quantity'),
+                    'unit_rate': float(item.get('unit_rate', 0)),
+                    'uom': item.get('uom'),
+                    'total_amt': float(item.get('total_amt', 0)),
+                    'gst_amt': float(item.get('gst_amt', 0)),
+                    'cost': float(item.get('cost', 0)),
+                    'vendor_name': item.get('vendor_name'),
+                    'vendor_code': item.get('vendor_code'),
+                    'vendor_email': item.get('vendor_email'),
+                    'vendor_gstn': item.get('vendor_gstn')
+                } for item in items],
+                'summary': {
+                    'total_line_items': len(items),
+                    'unique_vendors': len(set(item.get('vendor_name') for item in items if item.get('vendor_name'))),
+                    'total_quantity': sum(float(item.get('quantity', 0)) for item in items),
+                    'calculated_total': sum(float(item.get('total_amt', 0)) for item in items),
+                    'calculated_gst': sum(float(item.get('gst_amt', 0)) for item in items)
+                }
+            }
+        }
+        
+        return details
+        
+    except Exception as e:
+        frappe.logger().error(f"Error displaying invoice details: {str(e)}")
+        return {
+            'success': False,
+            'message': f'Error retrieving invoice details: {str(e)}',
+            'invoice_details': None
         }
 
 @frappe.whitelist()
