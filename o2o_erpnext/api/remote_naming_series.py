@@ -20,10 +20,10 @@ def get_next_invoice_number_from_remote(prefix='AGO2O', financial_year='25-26'):
     try:
         with get_external_db_connection() as conn:
             with conn.cursor() as cursor:
-                # Use erpnext_invoice_counter table (single counter system)
+                # Use invoice_counter table (single counter system)
                 # Check if counter table exists, create if not
                 cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS erpnext_invoice_counter (
+                    CREATE TABLE IF NOT EXISTS invoice_counter (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         prefix VARCHAR(20) NOT NULL DEFAULT 'AGO2O',
                         financial_year VARCHAR(10) NOT NULL,
@@ -36,7 +36,7 @@ def get_next_invoice_number_from_remote(prefix='AGO2O', financial_year='25-26'):
                 
                 # Initialize counter if not exists
                 cursor.execute("""
-                    INSERT IGNORE INTO erpnext_invoice_counter (prefix, financial_year, last_number)
+                    INSERT IGNORE INTO invoice_counter (prefix, financial_year, last_number)
                     SELECT %s, %s, COALESCE(MAX(CAST(SUBSTRING_INDEX(invoice_number, '/', -1) AS UNSIGNED)), 0)
                     FROM purchase_requisitions 
                     WHERE invoice_number LIKE %s
@@ -44,7 +44,7 @@ def get_next_invoice_number_from_remote(prefix='AGO2O', financial_year='25-26'):
                 
                 # Atomic increment using MySQL session variable
                 cursor.execute("""
-                    UPDATE erpnext_invoice_counter 
+                    UPDATE invoice_counter 
                     SET last_number = (@cur_value := last_number) + 1 
                     WHERE prefix = %s AND financial_year = %s
                 """, (prefix, financial_year))
@@ -52,7 +52,7 @@ def get_next_invoice_number_from_remote(prefix='AGO2O', financial_year='25-26'):
                 if cursor.rowcount == 0:
                     # Initialize if somehow missed
                     cursor.execute("""
-                        INSERT INTO erpnext_invoice_counter (prefix, financial_year, last_number)
+                        INSERT INTO invoice_counter (prefix, financial_year, last_number)
                         VALUES (%s, %s, 1)
                     """, (prefix, financial_year))
                     next_number = 1
