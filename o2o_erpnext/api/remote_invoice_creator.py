@@ -24,9 +24,10 @@ class RemoteInvoiceCreator:
                 conn.autocommit(True)
                 
                 with conn.cursor() as cursor:
+                    # Use erpnext_invoice_counter table (single counter system)
                     # Check if counter table exists, create if not
                     cursor.execute("""
-                        CREATE TABLE IF NOT EXISTS invoice_counter (
+                        CREATE TABLE IF NOT EXISTS erpnext_invoice_counter (
                             id INT PRIMARY KEY AUTO_INCREMENT,
                             prefix VARCHAR(20) NOT NULL DEFAULT 'AGO2O',
                             financial_year VARCHAR(10) NOT NULL,
@@ -39,16 +40,16 @@ class RemoteInvoiceCreator:
                     
                     # Initialize counter if not exists
                     cursor.execute("""
-                        INSERT IGNORE INTO invoice_counter (prefix, financial_year, last_number)
+                        INSERT IGNORE INTO erpnext_invoice_counter (prefix, financial_year, last_number)
                         SELECT %s, %s, COALESCE(MAX(CAST(SUBSTRING_INDEX(invoice_number, '/', -1) AS UNSIGNED)), 0)
                         FROM purchase_requisitions 
                         WHERE invoice_number LIKE %s
                     """, (prefix, financial_year, f"{prefix}/{financial_year}/%"))
                     
                     # Atomic increment using MySQL session variable  
-                    print(f"🔥 DEBUG: About to increment counter for {prefix}/{financial_year}")
+                    print(f"🔥 DEBUG: About to increment erpnext_invoice_counter for {prefix}/{financial_year}")
                     cursor.execute("""
-                        UPDATE invoice_counter 
+                        UPDATE erpnext_invoice_counter 
                         SET last_number = (@cur_value := last_number + 1) 
                         WHERE prefix = %s AND financial_year = %s
                     """, (prefix, financial_year))
@@ -57,7 +58,7 @@ class RemoteInvoiceCreator:
                     if cursor.rowcount == 0:
                         # Initialize if somehow missed
                         cursor.execute("""
-                            INSERT INTO invoice_counter (prefix, financial_year, last_number)
+                            INSERT INTO erpnext_invoice_counter (prefix, financial_year, last_number)
                             VALUES (%s, %s, 1)
                         """, (prefix, financial_year))
                         next_number = 1
@@ -78,9 +79,9 @@ class RemoteInvoiceCreator:
                     print(f"🔥 DEBUG: Counter should now be permanently at: {next_number}")
                     
                     # Verify the counter was actually updated
-                    cursor.execute("SELECT last_number FROM invoice_counter WHERE prefix = %s AND financial_year = %s", (prefix, financial_year))
+                    cursor.execute("SELECT last_number FROM erpnext_invoice_counter WHERE prefix = %s AND financial_year = %s", (prefix, financial_year))
                     verify_result = cursor.fetchone()
-                    print(f"🔥 DEBUG: Verification - counter is now at: {verify_result['last_number'] if verify_result else 'NOT FOUND'}")
+                    print(f"🔥 DEBUG: Verification - erpnext_invoice_counter is now at: {verify_result['last_number'] if verify_result else 'NOT FOUND'}")
                     
                     return invoice_code
                     
