@@ -224,6 +224,97 @@ class SubBranch(Document):
             "address": address_doc.name
         }
 
+    @frappe.whitelist()
+    def auto_link_addresses_for_branch(self):
+        """Auto-link available addresses to this specific Sub Branch"""
+        try:
+            # Get addresses linked to this Sub Branch via Dynamic Links
+            dynamic_links = frappe.get_all('Dynamic Link',
+                filters={
+                    'parenttype': 'Address',
+                    'link_doctype': 'Sub Branch',
+                    'link_name': self.name
+                },
+                fields=['parent'],
+                limit=0
+            )
+            
+            if not dynamic_links:
+                return {
+                    "status": "info",
+                    "message": "No addresses found linked to this Sub Branch"
+                }
+            
+            # Get address details
+            address_names = [link.parent for link in dynamic_links]
+            addresses = frappe.get_all('Address',
+                filters={'name': ['in', address_names]},
+                fields=['name', 'address_type', 'address_line1', 'city', 'state', 'country', 'gstin', 'gst_state', 'gst_category', 'tax_category'],
+                limit=0
+            )
+            
+            # Categorize addresses
+            billing_addresses = [addr for addr in addresses if addr.address_type == 'Billing']
+            shipping_addresses = [addr for addr in addresses if addr.address_type == 'Shipping']
+            
+            updates = {}
+            linked_count = 0
+            
+            # Link billing address if not already linked and available
+            if not self.address and billing_addresses:
+                best_billing = billing_addresses[0]
+                updates['address'] = best_billing.name
+                linked_count += 1
+            
+            # Link shipping address if available (check if custom field exists)
+            if shipping_addresses:
+                # Check if custom_shipping_address field exists
+                if hasattr(self, 'custom_shipping_address') and not self.custom_shipping_address:
+                    best_shipping = shipping_addresses[0]
+                    updates['custom_shipping_address'] = best_shipping.name
+                    linked_count += 1
+            
+            # Update GST details from first available address if missing
+            first_address = billing_addresses[0] if billing_addresses else (shipping_addresses[0] if shipping_addresses else None)
+            if first_address:
+                gst_updated = False
+                if first_address.gstin and not self.gstin:
+                    updates['gstin'] = first_address.gstin
+                    gst_updated = True
+                if first_address.gst_state and not self.gst_state:
+                    updates['gst_state'] = first_address.gst_state
+                    gst_updated = True
+                if first_address.gst_category and not self.gst_category:
+                    updates['gst_category'] = first_address.gst_category
+                    gst_updated = True
+                if first_address.tax_category and not self.tax_category:
+                    updates['tax_category'] = first_address.tax_category
+                    gst_updated = True
+            
+            # Apply updates
+            if updates:
+                for field, value in updates.items():
+                    setattr(self, field, value)
+                self.save(ignore_permissions=True)
+                
+                return {
+                    "status": "success",
+                    "message": f"Successfully linked {linked_count} address(es) and updated GST details",
+                    "updates": updates
+                }
+            else:
+                return {
+                    "status": "info",
+                    "message": "No updates needed - addresses already linked"
+                }
+                
+        except Exception as e:
+            frappe.log_error(f"Auto-linking error for {self.name}: {str(e)}", "Sub Branch Auto-Linking")
+            return {
+                "status": "error",
+                "message": str(e)
+            }
+
 
 def get_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
     """
