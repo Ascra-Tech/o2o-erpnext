@@ -642,6 +642,221 @@ def calculate_item_gst_values(items_json):
         }
     
 @frappe.whitelist()
+def create_test_po_for_address_debug():
+    """Create a test Purchase Order with Allahabad sub-branch for debugging"""
+    try:
+        # Create a new Purchase Order
+        po = frappe.new_doc("Purchase Order")
+        po.supplier = "Bandhan AMC Limited"
+        po.custom_branch = "Mumbai (IB)"
+        po.custom_sub_branch = "Allahabad"
+        po.transaction_date = frappe.utils.today()
+        po.schedule_date = frappe.utils.add_days(frappe.utils.today(), 20)
+        po.company = "Bandhan AMC Limited"
+        
+        # Add a test item
+        po.append("items", {
+            "item_code": "Test Item",
+            "item_name": "Test Item for Address Debug",
+            "qty": 1,
+            "rate": 100,
+            "schedule_date": po.schedule_date,
+            "custom_product_type": "OPEX"
+        })
+        
+        po.insert(ignore_permissions=True)
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "po_name": po.name,
+            "message": f"Test PO created: {po.name}"
+        }
+        
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@frappe.whitelist()
+def study_branch_doctype_structure():
+    """Study Branch and Sub Branch doctype structures for address fields"""
+    try:
+        result = {}
+        
+        # Study Branch doctype
+        print("=== BRANCH DOCTYPE FIELDS ===")
+        branch_meta = frappe.get_meta('Branch')
+        branch_fields = []
+        for field in branch_meta.fields:
+            if 'address' in field.fieldname.lower() or field.fieldtype in ['Small Text', 'Text', 'Long Text', 'Data']:
+                branch_fields.append({
+                    'fieldname': field.fieldname,
+                    'fieldtype': field.fieldtype,
+                    'label': field.label
+                })
+                print(f"   {field.fieldname}: {field.fieldtype} - {field.label}")
+        
+        result['branch_fields'] = branch_fields
+        
+        # Get sample Branch data
+        branch_sample = frappe.db.sql("SELECT name FROM `tabBranch` LIMIT 1", as_dict=True)
+        if branch_sample:
+            branch_doc = frappe.get_doc('Branch', branch_sample[0].name)
+            print(f"\n=== SAMPLE BRANCH: {branch_doc.name} ===")
+            branch_data = {}
+            for field_info in branch_fields:
+                field_name = field_info['fieldname']
+                value = getattr(branch_doc, field_name, None)
+                if value:
+                    branch_data[field_name] = str(value)[:200] + "..." if len(str(value)) > 200 else str(value)
+                    print(f"   {field_name}: {branch_data[field_name]}")
+            result['sample_branch'] = branch_data
+        
+        print("\n=== SUB BRANCH DOCTYPE FIELDS ===")
+        # Study Sub Branch doctype
+        sub_branch_meta = frappe.get_meta('Sub Branch')
+        sub_branch_fields = []
+        for field in sub_branch_meta.fields:
+            if 'address' in field.fieldname.lower() or field.fieldtype in ['Small Text', 'Text', 'Long Text', 'Data']:
+                sub_branch_fields.append({
+                    'fieldname': field.fieldname,
+                    'fieldtype': field.fieldtype,
+                    'label': field.label
+                })
+                print(f"   {field.fieldname}: {field.fieldtype} - {field.label}")
+        
+        result['sub_branch_fields'] = sub_branch_fields
+        
+        # Get sample Sub Branch data
+        sub_branch_sample = frappe.db.sql("SELECT name FROM `tabSub Branch` WHERE name = 'Allahabad' LIMIT 1", as_dict=True)
+        if sub_branch_sample:
+            sub_branch_doc = frappe.get_doc('Sub Branch', sub_branch_sample[0].name)
+            print(f"\n=== SAMPLE SUB BRANCH: {sub_branch_doc.name} ===")
+            sub_branch_data = {}
+            for field_info in sub_branch_fields:
+                field_name = field_info['fieldname']
+                value = getattr(sub_branch_doc, field_name, None)
+                if value:
+                    sub_branch_data[field_name] = str(value)[:200] + "..." if len(str(value)) > 200 else str(value)
+                    print(f"   {field_name}: {sub_branch_data[field_name]}")
+            result['sample_sub_branch'] = sub_branch_data
+        
+        return result
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+@frappe.whitelist()
+def debug_address_display_issue():
+    """Debug function to check address display issue"""
+    try:
+        print("=== DEBUGGING ADDRESS DISPLAY ISSUE ===")
+        
+        # 1. Check Allahabad-Billing address content
+        print("\n1. Checking Allahabad-Billing address document:")
+        address_doc = frappe.get_doc('Address', 'Allahabad-Billing')
+        print(f"   Address Line 1: {address_doc.address_line1}")
+        print(f"   City: {address_doc.city}")
+        print(f"   State: {address_doc.state}")
+        print(f"   Country: {address_doc.country}")
+        print(f"   Pincode: {address_doc.pincode}")
+        
+        formatted_display = address_doc.get_display()
+        print(f"   Formatted Display: {formatted_display}")
+        print()
+        
+        # 2. Find any Purchase Order to test with
+        print("2. Finding any Purchase Order to test address update:")
+        po_list = frappe.db.sql("""
+            SELECT name, supplier_address, address_display, custom_sub_branch, custom_branch
+            FROM `tabPurchase Order` 
+            ORDER BY modified DESC
+            LIMIT 1
+        """, as_dict=True)
+        
+        if po_list:
+            po_data = po_list[0]
+            print(f"   Found PO: {po_data.name}")
+            print(f"   Current Sub Branch: {po_data.custom_sub_branch}")
+            print(f"   Current Branch: {po_data.custom_branch}")
+            print(f"   Current Supplier Address: {po_data.supplier_address}")
+            print(f"   Current Address Display: {po_data.address_display}")
+            print()
+            
+            # Test address update with Allahabad sub-branch
+            print("3. Testing address update with Allahabad sub-branch:")
+            result = fetch_branch_or_sub_branch_addresses(
+                purchase_order_name=po_data.name,
+                sub_branch='Allahabad',
+                branch='Mumbai (IB)'
+            )
+            print(f"   Update Result: {result}")
+            
+            # Check after update
+            updated_po = frappe.db.get_value('Purchase Order', po_data.name, 
+                                           ['supplier_address', 'address_display'], as_dict=True)
+            print(f"   After Update - Supplier Address: {updated_po.supplier_address}")
+            print(f"   After Update - Address Display: {updated_po.address_display}")
+            print()
+            
+            # Compare addresses
+            print("4. Address Comparison:")
+            print(f"   Expected (Allahabad-Billing): {formatted_display}")
+            print(f"   Actual (PO after update): {updated_po.address_display}")
+            print(f"   Match: {formatted_display == updated_po.address_display}")
+            
+            return {
+                "status": "success",
+                "po_name": po_data.name,
+                "expected_display": formatted_display,
+                "actual_display": updated_po.address_display,
+                "match": formatted_display == updated_po.address_display,
+                "update_result": result
+            }
+        else:
+            return {"status": "error", "message": "No Purchase Orders found"}
+            
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@frappe.whitelist()
+def get_correct_address_display(sub_branch=None, branch=None):
+    """Get correct address display content from Branch/Sub Branch to prevent overrides"""
+    try:
+        billing_display = None
+        shipping_display = None
+        
+        # First try sub-branch
+        if sub_branch and sub_branch.strip() != "":
+            try:
+                sub_branch_doc = frappe.get_doc("Sub Branch", sub_branch)
+                billing_display = getattr(sub_branch_doc, 'custom_billing_address_details', None)
+                shipping_display = getattr(sub_branch_doc, 'custom_shipping_address_details', None)
+            except frappe.exceptions.DoesNotExistError:
+                pass
+        
+        # If no sub-branch data, try branch
+        if (not billing_display and not shipping_display) and branch and branch.strip() != "":
+            try:
+                branch_doc = frappe.get_doc("Branch", branch)
+                billing_display = getattr(branch_doc, 'custom_billing_address_details', None)
+                shipping_display = getattr(branch_doc, 'custom_shipping_address_details', None)
+            except frappe.exceptions.DoesNotExistError:
+                pass
+        
+        return {
+            "status": "success",
+            "billing_display": billing_display,
+            "shipping_display": shipping_display
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+@frappe.whitelist()
 def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=None, branch=None):
     """
     Fetch billing and shipping addresses from sub-branch or branch and update Purchase Order.
@@ -723,9 +938,43 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
                 
                 if update_fields:
                     try:
-                        # Update directly using SQL to bypass document versioning
+                        # Get address display content first before updating links
+                        billing_display_content = None
+                        shipping_display_content = None
+                        
+                        if billing_address:
+                            if source == "sub_branch" and sub_branch:
+                                billing_display_content = frappe.db.get_value("Sub Branch", sub_branch, "custom_billing_address_details")
+                            elif source == "branch" and branch:
+                                billing_display_content = frappe.db.get_value("Branch", branch, "custom_billing_address_details")
+                        
+                        if shipping_address:
+                            if source == "sub_branch" and sub_branch:
+                                shipping_display_content = frappe.db.get_value("Sub Branch", sub_branch, "custom_shipping_address_details")
+                            elif source == "branch" and branch:
+                                shipping_display_content = frappe.db.get_value("Branch", branch, "custom_shipping_address_details")
+                        
+                        # Update address links and display fields together
+                        if billing_display_content:
+                            update_fields["address_display"] = billing_display_content
+                        if shipping_display_content:
+                            update_fields["shipping_address_display"] = shipping_display_content
+                        
+                        # Update all fields at once using SQL to bypass document versioning
                         frappe.db.set_value("Purchase Order", purchase_order_name, update_fields)
                         frappe.db.commit()
+                        
+                        # Force update again after a brief moment to prevent override
+                        if billing_display_content or shipping_display_content:
+                            force_update_fields = {}
+                            if billing_display_content:
+                                force_update_fields["address_display"] = billing_display_content
+                            if shipping_display_content:
+                                force_update_fields["shipping_address_display"] = shipping_display_content
+                            
+                            # Second update to ensure our values stick
+                            frappe.db.set_value("Purchase Order", purchase_order_name, force_update_fields)
+                            frappe.db.commit()
                     except Exception as e:
                         frappe.log_error(
                             message=f"Failed to update addresses: {str(e)}", 

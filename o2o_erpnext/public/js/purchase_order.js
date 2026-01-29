@@ -45,6 +45,13 @@ frappe.ui.form.on('Purchase Order', {
         if (frm.doc.__islocal && (frm.doc.custom_branch || frm.doc.custom_sub_branch)) {
             call_check_and_apply_branch_addresses(frm);
         }
+        
+        // Protect address display on form load for all documents
+        if (frm.doc.custom_sub_branch || frm.doc.custom_branch) {
+            setTimeout(() => {
+                protect_address_display_fields(frm);
+            }, 1500);
+        }
 
         // For NEW documents: Role-based sub-branch requirement
         if (frm.doc.__islocal) {
@@ -312,6 +319,11 @@ frappe.ui.form.on('Purchase Order', {
         // Apply branch/sub-branch addresses when branch changes
         call_check_and_apply_branch_addresses(frm);
         
+        // Protect address display after branch change
+        setTimeout(() => {
+            protect_address_display_fields(frm);
+        }, 1000);
+        
         if(frm.doc.custom_branch && !frm.doc.__islocal) {
             // Set branch approver
             frappe.call({
@@ -353,6 +365,11 @@ frappe.ui.form.on('Purchase Order', {
     custom_sub_branch: function(frm) {
         // Apply branch/sub-branch addresses when sub-branch changes
         call_check_and_apply_branch_addresses(frm);
+        
+        // Protect address display after sub-branch change
+        setTimeout(() => {
+            protect_address_display_fields(frm);
+        }, 1000);
         
         // Set requisition approver when sub-branch changes (for saved documents)
         if(frm.doc.custom_sub_branch && !frm.doc.__islocal && frm.doc.supplier) {
@@ -483,8 +500,40 @@ function call_check_and_apply_branch_addresses(frm, async_false = false) {
                     }
                 } else {
                     // For existing documents, the server has already updated the values
-                    // We just need to refresh the form fields silently
-                    frm.refresh_fields(['supplier_address', 'shipping_address']);
+                    // We need to refresh both the address links and display fields
+                    frm.refresh_fields(['supplier_address', 'shipping_address', 'address_display', 'shipping_address_display']);
+                    
+                    // Force protect our address display values from being overridden
+                    setTimeout(() => {
+                        protect_address_display_fields(frm);
+                    }, 500);
+                }
+            }
+        }
+    });
+}
+
+// Function to protect address display fields from being overridden
+function protect_address_display_fields(frm) {
+    if (!frm.doc.custom_sub_branch && !frm.doc.custom_branch) {
+        return;
+    }
+    
+    // Get the correct address display content from server
+    frappe.call({
+        method: 'o2o_erpnext.api.purchase_order.get_correct_address_display',
+        args: {
+            sub_branch: frm.doc.custom_sub_branch,
+            branch: frm.doc.custom_branch
+        },
+        callback: function(response) {
+            if (response.message && response.message.status === 'success') {
+                // Force set the correct address display values
+                if (response.message.billing_display && frm.doc.address_display !== response.message.billing_display) {
+                    frm.set_value('address_display', response.message.billing_display);
+                }
+                if (response.message.shipping_display && frm.doc.shipping_address_display !== response.message.shipping_display) {
+                    frm.set_value('shipping_address_display', response.message.shipping_display);
                 }
             }
         }
