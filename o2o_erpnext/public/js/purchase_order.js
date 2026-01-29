@@ -515,6 +515,12 @@ function call_check_and_apply_branch_addresses(frm, async_false = false) {
 
 // Function to protect address display fields from being overridden
 function protect_address_display_fields(frm) {
+    // CRITICAL: Only protect draft documents (docstatus = 0)
+    // Do not modify submitted/cancelled documents to avoid "Not Saved" status
+    if (frm.doc.docstatus !== 0) {
+        return; // Skip protection for submitted/cancelled documents
+    }
+    
     if (!frm.doc.custom_sub_branch && !frm.doc.custom_branch) {
         return;
     }

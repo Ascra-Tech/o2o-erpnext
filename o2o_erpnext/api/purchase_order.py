@@ -929,6 +929,11 @@ def fetch_branch_or_sub_branch_addresses(purchase_order_name=None, sub_branch=No
             
             # If Purchase Order is provided and it's a valid document, update it
             if po_doc and purchase_order_name:
+                # CRITICAL: Only update if document is in draft status (docstatus = 0)
+                # Do not update submitted/cancelled documents to avoid "Not Saved" status
+                if po_doc.docstatus != 0:
+                    return result  # Skip update for submitted/cancelled documents
+                
                 # Use direct SQL update to avoid concurrent modification issues
                 update_fields = {}
                 if billing_address:
