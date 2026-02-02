@@ -413,3 +413,30 @@ def has_permission(doc, user=None, permission_type=None):
         return doc.custom_vendor == vendor
     
     return False
+
+
+def update_custom_fields_from_first_item(doc, method=None):
+    """
+    Update custom_purchase_order and custom_purchase_invoice fields 
+    from the first item in the Purchase Receipt
+    """
+    # Only run on draft documents
+    if doc.docstatus != 0:
+        return
+    
+    if doc.items and len(doc.items) > 0:
+        first_item = doc.items[0]
+        
+        # Get values from first item
+        po_value = getattr(first_item, 'purchase_order', '') or ''
+        pi_value = getattr(first_item, 'purchase_invoice', '') or ''
+        
+        # Update custom fields
+        doc.custom_purchase_order = po_value
+        doc.custom_purchase_invoice = pi_value
+        
+        frappe.logger().info(f"Updated Purchase Receipt {doc.name}: PO={po_value}, PI={pi_value}")
+    else:
+        # Clear fields if no items
+        doc.custom_purchase_order = ''
+        doc.custom_purchase_invoice = ''

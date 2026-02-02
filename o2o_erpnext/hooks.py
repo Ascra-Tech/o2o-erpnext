@@ -274,14 +274,15 @@ doc_events = {
     "Sales Order": {
         "validate": "o2o_erpnext.custom_sales_order.CustomSalesOrder.validate_delivery_date"
     },
+    "Purchase Receipt": {
+        "validate": "o2o_erpnext.api.purchase_receipt.update_custom_fields_from_first_item",
+        "get_permission_query_conditions": "o2o_erpnext.api.purchase_receipt.get_permission_query_conditions",
+        "has_permission": "o2o_erpnext.api.purchase_receipt.has_permission"
+    },
     "Purchase Order": {
         "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order_hook",
         "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order",
         "has_permission": "o2o_erpnext.api.purchase_order.has_permission"
-    },
-    "Purchase Receipt": {
-        "get_permission_query_conditions": "o2o_erpnext.api.purchase_receipt.get_permission_query_conditions",
-        "has_permission": "o2o_erpnext.api.purchase_receipt.has_permission"
     },
     "Sub Branch": {
         "get_permission_query_conditions": "o2o_erpnext.o2o_erpnext.doctype.sub_branch.sub_branch.get_permission_query_conditions",
@@ -309,7 +310,11 @@ doctype_js = {
 doctype_list_js = {
     "Purchase Invoice": [
         "public/js/purchase_invoice_list.js",
-        "public/js/purchase_invoice_filters.js"
+        "public/js/purchase_invoice_filters.js",
+        "public/js/purchase_invoice_view.js"
+    ],
+    "Purchase Receipt": [
+        "public/js/purchase_receipt_view.js"
     ],
     "Purchase Order": [
         "public/js/purchase_order_list.js"
