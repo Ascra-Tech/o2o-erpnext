@@ -2495,3 +2495,229 @@ def set_requisition_approver_for_purchase_order(purchase_order_name):
             "status": "error",
             "message": str(e)
         }
+
+@frappe.whitelist()
+def update_submitted_po_items(items_data, deleted_items=None):
+    """
+    Update submitted Purchase Order Items - Simplified version
+    Only handles: quantity, unit rate, and item deletion
+    Uses direct database updates to bypass ERPNext restrictions
+    """
+    import json
+    
+    # Parse items_data if it's a string
+    if isinstance(items_data, str):
+        items_data = json.loads(items_data)
+    
+    if isinstance(deleted_items, str):
+        deleted_items = json.loads(deleted_items)
+    
+    if not deleted_items:
+        deleted_items = []
+    
+    updated_items = []
+    deleted_item_names = []
+    updated_po_names = []
+    
+    try:
+        # Handle item deletions first
+        for item_name in deleted_items:
+            # Get parent PO name before deletion
+            po_name = frappe.db.get_value('Purchase Order Item', item_name, 'parent')
+            
+            # Check if user has permission
+            if not frappe.has_permission('Purchase Order', 'write', po_name):
+                frappe.throw(_('No permission to update Purchase Order {0}').format(po_name))
+            
+            # Direct database delete - bypasses all ERPNext restrictions
+            frappe.db.sql("DELETE FROM `tabPurchase Order Item` WHERE name = %s", (item_name,))
+            
+            deleted_item_names.append(item_name)
+            
+            if po_name not in updated_po_names:
+                updated_po_names.append(po_name)
+        
+        # Handle item updates (quantity and rate only)
+        for item_data in items_data:
+            item_name = item_data.get('name')
+            changes = item_data.get('changes', {})
+            
+            if not item_name or not changes:
+                continue
+            
+            # Get parent PO name
+            po_name = frappe.db.get_value('Purchase Order Item', item_name, 'parent')
+            
+            # Check if user has permission
+            if not frappe.has_permission('Purchase Order', 'write', po_name):
+                frappe.throw(_('No permission to update Purchase Order {0}').format(po_name))
+            
+            # Only allow quantity and rate updates
+            allowed_fields = ['qty', 'rate']
+            
+            # Update each changed field using direct database update
+            for field, value in changes.items():
+                if field in allowed_fields:
+                    # Direct database update - bypasses all ERPNext restrictions
+                    frappe.db.sql(
+                        "UPDATE `tabPurchase Order Item` SET {0} = %s WHERE name = %s".format(field),
+                        (value, item_name)
+                    )
+                    
+                    # Calculate and update amount (qty * rate) and GSTN values
+                    if field in ['qty', 'rate']:
+                        # Get current qty, rate, and tax template
+                        current_data = frappe.db.get_value('Purchase Order Item', item_name, ['qty', 'rate', 'item_tax_template'], as_dict=True)
+                        if current_data:
+                            new_amount = float(current_data.qty or 0) * float(current_data.rate or 0)
+                            
+                            # Calculate GSTN value based on tax template
+                            gstn_value = 0.0
+                            if current_data.item_tax_template:
+                                # Get tax rate from tax template
+                                # Try different field names for tax rate
+                                tax_rate = None
+                                possible_fields = ['tax_rate', 'rate', 'tax_percentage', 'gst_rate']
+                                
+                                for field in possible_fields:
+                                    try:
+                                        tax_rate = frappe.db.get_value('Item Tax Template', current_data.item_tax_template, field)
+                                        if tax_rate:
+                                            break
+                                    except:
+                                        continue
+                                
+                                if tax_rate:
+                                    tax_rate_value = float(tax_rate) if tax_rate else 0
+                                    gstn_value = new_amount * (tax_rate_value / 100)
+                                else:
+                                    # Default to 18% GST if no tax rate found
+                                    gstn_value = new_amount * 0.18
+                            
+                            # Update amount, net_amount, base_amount, base_net_amount
+                            frappe.db.sql(
+                                """UPDATE `tabPurchase Order Item` 
+                                   SET amount = %s, net_amount = %s, base_amount = %s, base_net_amount = %s
+                                   WHERE name = %s""",
+                                (new_amount, new_amount, new_amount, new_amount, item_name)
+                            )
+                            
+                            # Try to update GSTN fields if they exist
+                            try:
+                                frappe.db.sql(
+                                    """UPDATE `tabPurchase Order Item` 
+                                       SET custom_gstn_value = %s, custom_grand_total = %s
+                                       WHERE name = %s""",
+                                    (gstn_value, new_amount + gstn_value, item_name)
+                                )
+                            except Exception as e:
+                                # If custom fields don't exist, skip GSTN update
+                                if "Unknown column" in str(e):
+                                    frappe.log_error(f"GSTN custom fields not found in database: {e}", "GSTN Update Warning")
+                                else:
+                                    raise e
+            
+            updated_items.append(item_name)
+            
+            if po_name not in updated_po_names:
+                updated_po_names.append(po_name)
+        
+        # Recalculate Purchase Order totals using direct database updates
+        for po_name in updated_po_names:
+            # Calculate totals from items
+            totals = frappe.db.sql("""
+                SELECT 
+                    SUM(qty) as total_qty,
+                    SUM(amount) as total,
+                    SUM(net_amount) as net_total,
+                    SUM(base_amount) as base_total,
+                    SUM(base_net_amount) as base_net_total
+                FROM `tabPurchase Order Item` 
+                WHERE parent = %s
+            """, (po_name,), as_dict=True)[0]
+            
+            # Try to get GSTN totals if custom fields exist
+            total_gstn = 0
+            try:
+                gstn_totals = frappe.db.sql("""
+                    SELECT SUM(custom_gstn_value) as total_gstn
+                    FROM `tabPurchase Order Item` 
+                    WHERE parent = %s
+                """, (po_name,), as_dict=True)[0]
+                total_gstn = gstn_totals.total_gstn or 0
+            except Exception as e:
+                if "Unknown column" in str(e):
+                    frappe.log_error(f"GSTN custom fields not found in database: {e}", "GSTN Totals Warning")
+                else:
+                    raise e
+            
+            # Calculate grand total (net_total + total_gstn)
+            grand_total = (totals.net_total or 0) + total_gstn
+            base_grand_total = (totals.base_net_total or 0) + total_gstn
+            
+            # Update Purchase Order totals directly in database
+            frappe.db.sql("""
+                UPDATE `tabPurchase Order` 
+                SET total_qty = %s, total = %s, net_total = %s, grand_total = %s,
+                    base_total = %s, base_net_total = %s, base_grand_total = %s
+                WHERE name = %s
+            """, (
+                totals.total_qty or 0,
+                totals.total or 0,
+                totals.net_total or 0,
+                grand_total,
+                totals.base_total or 0,
+                totals.base_net_total or 0,
+                base_grand_total,
+                po_name
+            ))
+            
+            # Try to update custom GSTN fields if they exist
+            try:
+                frappe.db.sql("""
+                    UPDATE `tabPurchase Order` 
+                    SET custom_total_gstn = %s, custom_grand_total = %s
+                    WHERE name = %s
+                """, (total_gstn, grand_total, po_name))
+            except Exception as e:
+                # If custom fields don't exist, skip GSTN update
+                if "Unknown column" in str(e):
+                    frappe.log_error(f"GSTN custom fields not found in Purchase Order: {e}", "PO GSTN Update Warning")
+                else:
+                    raise e
+            
+            # Add comment for audit trail
+            comment_text = _('Items updated via Edit Submitted Items: {0} items updated, {1} items deleted by {2}').format(
+                len(updated_items), len(deleted_item_names), frappe.session.user
+            )
+            frappe.db.sql("""
+                INSERT INTO `tabComment` (name, comment_type, reference_doctype, reference_name, content, comment_by, creation, modified)
+                VALUES (UUID(), 'Edit', 'Purchase Order', %s, %s, %s, NOW(), NOW())
+            """, (po_name, comment_text, frappe.session.user))
+        
+        # Commit the transaction
+        frappe.db.commit()
+        
+        # Return success response
+        return {
+            'status': 'success',
+            'updated_items': updated_items,
+            'deleted_items': deleted_item_names,
+            'updated_po_count': len(updated_po_names),
+            'message': _('Successfully updated {0} item(s) and deleted {1} item(s) in {2} Purchase Order(s)').format(
+                len(updated_items), len(deleted_item_names), len(updated_po_names)
+            )
+        }
+        
+    except Exception as e:
+        # Rollback on error
+        frappe.db.rollback()
+        
+        # Log the error
+        frappe.log_error(frappe.get_traceback(), 'Update Submitted PO Items Error')
+        
+        # Throw error to user
+        frappe.throw(_('Error updating items: {0}').format(str(e)))
+
+# Manually set the whitelist attribute to ensure the method is accessible
+update_submitted_po_items.whitelisted = True

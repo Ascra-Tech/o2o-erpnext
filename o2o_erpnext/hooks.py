@@ -305,6 +305,7 @@ doctype_js = {
     "Branch": "o2o_erpnext/doctype/branch/branch.js",
     "Sub Branch": "o2o_erpnext/doctype/sub_branch/sub_branch.js",
     "Purchase Order": "public/js/purchase_order.js",
+    "Purchase Order": "public/js/purchase_order_edit.js",
 }
 
 doctype_list_js = {
