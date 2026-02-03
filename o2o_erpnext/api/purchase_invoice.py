@@ -504,6 +504,14 @@ def update_submitted_pi_items(items_data, deleted_items=None):
                                 # Calculate and set GST value if applicable
                                 if gst_rate > 0:
                                     gstn_value = round(new_amount * gst_rate / 100, 2)
+                                    
+                                    # Calculate SGST, CGST, IGST (typically split equally for intra-state, full IGST for inter-state)
+                                    # Assuming intra-state transactions: SGST = CGST = GST/2, IGST = 0
+                                    # For inter-state: SGST = 0, CGST = 0, IGST = GST
+                                    # We'll use intra-state logic by default (SGST = CGST = GST/2)
+                                    sgst_amount = round(gstn_value / 2, 2)
+                                    cgst_amount = round(gstn_value / 2, 2)
+                                    igst_amount = 0  # For intra-state transactions
                                 
                                 # Update amount, net_amount, base_amount, base_net_amount
                                 frappe.db.sql(
@@ -517,9 +525,10 @@ def update_submitted_pi_items(items_data, deleted_items=None):
                                 try:
                                     frappe.db.sql(
                                         """UPDATE `tabPurchase Invoice Item` 
-                                           SET custom_gstn_value = %s, custom_grand_total = %s
+                                           SET custom_gstn_value = %s, custom_grand_total = %s,
+                                               custom_sgst_amount = %s, custom_cgst_amount = %s, custom_igst_amount = %s
                                            WHERE name = %s""",
-                                        (gstn_value, new_amount + gstn_value, item_name)
+                                        (gstn_value, new_amount + gstn_value, sgst_amount, cgst_amount, igst_amount, item_name)
                                     )
                                 except Exception as e:
                                     # If custom fields don't exist, skip GSTN update
