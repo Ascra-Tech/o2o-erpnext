@@ -575,7 +575,7 @@ def update_submitted_pr_items(items_data, deleted_items=None):
                                     frappe.db.sql(
                                         """UPDATE `tabPurchase Receipt Item` 
                                            SET custom_gstn_value = %s, custom_grand_total = %s,
-                                               custom_sgst_amount = %s, custom_cgst_amount = %s, custom_igst_amount = %s
+                                               sgst_amount = %s, cgst_amount = %s, igst_amount = %s
                                            WHERE name = %s""",
                                         (gstn_value, new_amount + gstn_value, sgst_amount, cgst_amount, igst_amount, item_name)
                                     )
