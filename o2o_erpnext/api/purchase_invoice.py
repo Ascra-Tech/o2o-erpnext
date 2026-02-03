@@ -391,3 +391,287 @@ def calculate_gst_values_for_purchase_invoice(doc_name):
             "status": "error",
             "message": str(e)
         }
+
+@frappe.whitelist()
+def update_submitted_pi_items(items_data, deleted_items=None):
+    """
+    Update items in a submitted Purchase Invoice using direct database updates.
+    This bypasses ERPNext's restrictions on editing submitted documents.
+    
+    Args:
+        items_data: JSON string or list of item changes with name, changes dict
+        deleted_items: JSON string or list of item names to delete
+    
+    Returns:
+        dict with status and message
+    """
+    import json
+    
+    try:
+        # Parse input data
+        if isinstance(items_data, str):
+            items_data = json.loads(items_data)
+        if isinstance(deleted_items, str):
+            deleted_items = json.loads(deleted_items) if deleted_items else []
+        elif deleted_items is None:
+            deleted_items = []
+            
+        if not items_data and not deleted_items:
+            return {
+                "status": "error",
+                "message": _("No items data or deleted items provided")
+            }
+        
+        # Validate user permissions
+        if not frappe.has_permission("Purchase Invoice", "write"):
+            frappe.throw(_("You don't have permission to edit Purchase Invoices"))
+        
+        updated_items = []
+        updated_pi_names = []
+        deleted_item_names = []
+        
+        # Process deleted items first
+        for item_name in deleted_items:
+            try:
+                # Get the Purchase Invoice name before deletion
+                pi_name = frappe.db.get_value("Purchase Invoice Item", item_name, "parent")
+                if not pi_name:
+                    continue
+                    
+                # Delete the item directly from database
+                frappe.db.sql("DELETE FROM `tabPurchase Invoice Item` WHERE name = %s", (item_name,))
+                
+                deleted_item_names.append(item_name)
+                if pi_name not in updated_pi_names:
+                    updated_pi_names.append(pi_name)
+                    
+            except Exception as e:
+                frappe.log_error(f"Error deleting Purchase Invoice item {item_name}: {str(e)}", "PI Item Deletion Error")
+                continue
+        
+        # Process item updates
+        for item_update in items_data:
+            item_name = item_update.get("name")
+            changes = item_update.get("changes", {})
+            
+            if not item_name or not changes:
+                continue
+                
+            try:
+                # Get the Purchase Invoice name
+                pi_name = frappe.db.get_value("Purchase Invoice Item", item_name, "parent")
+                if not pi_name:
+                    continue
+                
+                # Validate user has write permission for this Purchase Invoice
+                if not frappe.has_permission("Purchase Invoice", "write", pi_name):
+                    frappe.throw(_("You don't have permission to edit Purchase Invoice {0}").format(pi_name))
+                
+                # Allowed fields for editing
+                allowed_fields = ['qty', 'rate', 'amount', 'base_amount', 'base_rate', 'base_qty']
+                
+                # Update each changed field using direct database update
+                for field, value in changes.items():
+                    if field in allowed_fields:
+                        # Direct database update - bypasses all ERPNext restrictions
+                        frappe.db.sql(
+                            "UPDATE `tabPurchase Invoice Item` SET {0} = %s WHERE name = %s".format(field),
+                            (value, item_name)
+                        )
+                        
+                        # Calculate and update amount (qty * rate) and GSTN values
+                        if field in ['qty', 'rate']:
+                            # Get current qty, rate, and tax template
+                            current_data = frappe.db.get_value('Purchase Invoice Item', item_name, ['qty', 'rate', 'item_tax_template'], as_dict=True)
+                            if current_data:
+                                new_amount = float(current_data.qty or 0) * float(current_data.rate or 0)
+                                
+                                # Calculate GSTN value based on tax template using percentage-wise logic
+                                gstn_value = 0.0
+                                template = current_data.item_tax_template or ""
+                                gst_rate = 0
+                                
+                                # Extract GST rate from template name (same logic as calculate_gst_values_for_purchase_invoice)
+                                if "GST 5%" in template:
+                                    gst_rate = 5
+                                elif "GST 12%" in template:
+                                    gst_rate = 12
+                                elif "GST 18%" in template:
+                                    gst_rate = 18
+                                elif "GST 28%" in template:
+                                    gst_rate = 28
+                                
+                                # Calculate and set GST value if applicable
+                                if gst_rate > 0:
+                                    gstn_value = round(new_amount * gst_rate / 100, 2)
+                                
+                                # Update amount, net_amount, base_amount, base_net_amount
+                                frappe.db.sql(
+                                    """UPDATE `tabPurchase Invoice Item` 
+                                       SET amount = %s, base_amount = %s
+                                       WHERE name = %s""",
+                                    (new_amount, new_amount, item_name)
+                                )
+                                
+                                # Try to update GSTN fields if they exist
+                                try:
+                                    frappe.db.sql(
+                                        """UPDATE `tabPurchase Invoice Item` 
+                                           SET custom_gstn_value = %s, custom_grand_total = %s
+                                           WHERE name = %s""",
+                                        (gstn_value, new_amount + gstn_value, item_name)
+                                    )
+                                except Exception as e:
+                                    # If custom fields don't exist, skip GSTN update
+                                    if "Unknown column" in str(e):
+                                        frappe.log_error(f"GSTN custom fields not found in database: {e}", "GSTN Update Warning")
+                                    else:
+                                        raise e
+                
+                updated_items.append(item_name)
+                
+                if pi_name not in updated_pi_names:
+                    updated_pi_names.append(pi_name)
+            
+            except Exception as e:
+                frappe.log_error(f"Error updating Purchase Invoice item {item_name}: {str(e)}", "PI Item Update Error")
+                continue
+        
+        # Recalculate Purchase Invoice totals using percentage-wise GST logic
+        for pi_name in updated_pi_names:
+            # Get all items for this Purchase Invoice to calculate GST totals
+            items = frappe.db.sql("""
+                SELECT qty, rate, amount, item_tax_template, custom_gstn_value
+                FROM `tabPurchase Invoice Item` 
+                WHERE parent = %s
+            """, (pi_name,), as_dict=True)
+            
+            # Initialize summary values (same as calculate_gst_values_for_purchase_invoice)
+            gst_5_total = 0
+            gst_12_total = 0
+            gst_18_total = 0
+            gst_28_total = 0
+            goods_5_total = 0
+            goods_12_total = 0
+            goods_18_total = 0
+            goods_28_total = 0
+            total_qty = 0
+            total_amount = 0
+            total_base_amount = 0
+            
+            # Process each item with percentage-wise GST calculation
+            for item in items:
+                template = item.get('item_tax_template') or ""
+                amount = float(item.get('amount') or 0)
+                gst_rate = 0
+                
+                # Extract GST rate from template name
+                if "GST 5%" in template:
+                    gst_rate = 5
+                elif "GST 12%" in template:
+                    gst_rate = 12
+                elif "GST 18%" in template:
+                    gst_rate = 18
+                elif "GST 28%" in template:
+                    gst_rate = 28
+                
+                # Calculate and set GST value if applicable
+                if gst_rate > 0:
+                    gstn_value = round(amount * gst_rate / 100, 2)
+                    
+                    # Add to appropriate totals
+                    if gst_rate == 5:
+                        gst_5_total += gstn_value
+                        goods_5_total += amount
+                    elif gst_rate == 12:
+                        gst_12_total += gstn_value
+                        goods_12_total += amount
+                    elif gst_rate == 18:
+                        gst_18_total += gstn_value
+                        goods_18_total += amount
+                    elif gst_rate == 28:
+                        gst_28_total += gstn_value
+                        goods_28_total += amount
+                
+                # Update basic totals
+                total_qty += float(item.get('qty') or 0)
+                total_amount += amount
+                total_base_amount += amount  # Assuming base_amount is same as amount for simplicity
+            
+            # Calculate total GSTN value
+            total_gstn = round(gst_5_total + gst_12_total + gst_18_total + gst_28_total, 2)
+            
+            # Calculate grand total (total + total_gstn)
+            grand_total = total_amount + total_gstn
+            base_grand_total = total_base_amount + total_gstn
+            
+            # Update Purchase Invoice totals directly in database
+            frappe.db.sql("""
+                UPDATE `tabPurchase Invoice` 
+                SET total_qty = %s, total = %s, base_total = %s, grand_total = %s, base_grand_total = %s
+                WHERE name = %s
+            """, (
+                total_qty or 0,
+                total_amount or 0,
+                total_base_amount or 0,
+                grand_total,
+                base_grand_total,
+                pi_name
+            ))
+            
+            # Update custom GST percentage-wise fields if they exist
+            try:
+                frappe.db.sql("""
+                    UPDATE `tabPurchase Invoice` 
+                    SET custom_gst_5__ot = %s, custom_gst_12__ot = %s, custom_gst_18__ot = %s, custom_gst_28__ot = %s,
+                        custom_5_goods_value = %s, custom_12_goods_value = %s, custom_18_goods_value = %s, custom_28_goods_value = %s,
+                        custom_total_gstn = %s, custom_grand_total = %s
+                    WHERE name = %s
+                """, (
+                    round(gst_5_total, 2),
+                    round(gst_12_total, 2),
+                    round(gst_18_total, 2),
+                    round(gst_28_total, 2),
+                    round(goods_5_total, 2),
+                    round(goods_12_total, 2),
+                    round(goods_18_total, 2),
+                    round(goods_28_total, 2),
+                    total_gstn,
+                    grand_total,
+                    pi_name
+                ))
+            except Exception as e:
+                # If custom fields don't exist, skip GSTN update
+                if "Unknown column" in str(e):
+                    frappe.log_error(f"GSTN custom fields not found in Purchase Invoice: {e}", "PI GSTN Update Warning")
+                else:
+                    raise e
+            
+            # Add comment for audit trail
+            comment_text = _('Items updated via Edit Submitted Items: {0} items updated, {1} items deleted by {2}').format(
+                len(updated_items), len(deleted_item_names), frappe.session.user
+            )
+            frappe.db.sql("""
+                INSERT INTO `tabComment` (name, comment_type, reference_doctype, reference_name, content, comment_by, creation, modified)
+                VALUES (UUID(), 'Edit', 'Purchase Invoice', %s, %s, %s, NOW(), NOW())
+            """, (pi_name, comment_text, frappe.session.user))
+        
+        # Commit the transaction
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": _("Purchase Invoice items updated successfully: {0} items updated, {1} items deleted").format(
+                len(updated_items), len(deleted_item_names)
+            ),
+            "updated_items": updated_items,
+            "deleted_items": deleted_item_names
+        }
+        
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(f"Error updating Purchase Invoice items: {str(e)}", "PI Update Error")
+        frappe.throw(_('Error updating items: {0}').format(str(e)))
+
+# Manual whitelist for additional security
+update_submitted_pi_items.whitelisted = True
