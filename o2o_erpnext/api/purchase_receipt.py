@@ -608,6 +608,11 @@ def update_submitted_pr_items(items_data, deleted_items=None):
             total_amount = 0
             total_base_amount = 0
             
+            # Initialize SGST, CGST, IGST totals
+            total_sgst = 0
+            total_cgst = 0
+            total_igst = 0
+            
             # Process each item with percentage-wise GST calculation
             for item in items:
                 template = item.get('item_tax_template') or ""
@@ -628,6 +633,14 @@ def update_submitted_pr_items(items_data, deleted_items=None):
                 if gst_rate > 0:
                     gstn_value = round(amount * gst_rate / 100, 2)
                     
+                    # Calculate SGST, CGST, IGST (typically split equally for intra-state, full IGST for inter-state)
+                    # Assuming intra-state transactions: SGST = CGST = GST/2, IGST = 0
+                    # For inter-state: SGST = 0, CGST = 0, IGST = GST
+                    # We'll use intra-state logic by default (SGST = CGST = GST/2)
+                    sgst_amount = round(gstn_value / 2, 2)
+                    cgst_amount = round(gstn_value / 2, 2)
+                    igst_amount = 0  # For intra-state transactions
+                    
                     # Add to appropriate totals
                     if gst_rate == 5:
                         gst_5_total += gstn_value
@@ -641,6 +654,11 @@ def update_submitted_pr_items(items_data, deleted_items=None):
                     elif gst_rate == 28:
                         gst_28_total += gstn_value
                         goods_28_total += amount
+                    
+                    # Add to SGST, CGST, IGST totals
+                    total_sgst += sgst_amount
+                    total_cgst += cgst_amount
+                    total_igst += igst_amount
                 
                 # Update basic totals
                 total_qty += float(item.get('qty') or 0)
@@ -674,7 +692,8 @@ def update_submitted_pr_items(items_data, deleted_items=None):
                     UPDATE `tabPurchase Receipt` 
                     SET custom_gst_5__ot = %s, custom_gst_12__ot = %s, custom_gst_18__ot = %s, custom_gst_28__ot = %s,
                         custom_5_goods_value = %s, custom_12_goods_value = %s, custom_18_goods_value = %s, custom_28_goods_value = %s,
-                        custom_total_gstn = %s, custom_grand_total = %s
+                        custom_total_gstn = %s, custom_grand_total = %s,
+                        custom_total_sgst = %s, custom_total_cgst = %s, custom_total_igst = %s
                     WHERE name = %s
                 """, (
                     round(gst_5_total, 2),
@@ -687,6 +706,9 @@ def update_submitted_pr_items(items_data, deleted_items=None):
                     round(goods_28_total, 2),
                     total_gstn,
                     grand_total,
+                    round(total_sgst, 2),
+                    round(total_cgst, 2),
+                    round(total_igst, 2),
                     pr_name
                 ))
             except Exception as e:

@@ -2571,28 +2571,24 @@ def update_submitted_po_items(items_data, deleted_items=None):
                         if current_data:
                             new_amount = float(current_data.qty or 0) * float(current_data.rate or 0)
                             
-                            # Calculate GSTN value based on tax template
+                            # Calculate GSTN value based on tax template using percentage-wise logic (same as Purchase Invoice)
                             gstn_value = 0.0
-                            if current_data.item_tax_template:
-                                # Get tax rate from tax template
-                                # Try different field names for tax rate
-                                tax_rate = None
-                                possible_fields = ['tax_rate', 'rate', 'tax_percentage', 'gst_rate']
-                                
-                                for field in possible_fields:
-                                    try:
-                                        tax_rate = frappe.db.get_value('Item Tax Template', current_data.item_tax_template, field)
-                                        if tax_rate:
-                                            break
-                                    except:
-                                        continue
-                                
-                                if tax_rate:
-                                    tax_rate_value = float(tax_rate) if tax_rate else 0
-                                    gstn_value = new_amount * (tax_rate_value / 100)
-                                else:
-                                    # Default to 18% GST if no tax rate found
-                                    gstn_value = new_amount * 0.18
+                            template = current_data.item_tax_template or ""
+                            gst_rate = 0
+                            
+                            # Extract GST rate from template name
+                            if "GST 5%" in template:
+                                gst_rate = 5
+                            elif "GST 12%" in template:
+                                gst_rate = 12
+                            elif "GST 18%" in template:
+                                gst_rate = 18
+                            elif "GST 28%" in template:
+                                gst_rate = 28
+                            
+                            # Calculate and set GST value if applicable
+                            if gst_rate > 0:
+                                gstn_value = round(new_amount * gst_rate / 100, 2)
                             
                             # Update amount, net_amount, base_amount, base_net_amount
                             frappe.db.sql(
@@ -2622,38 +2618,95 @@ def update_submitted_po_items(items_data, deleted_items=None):
             if po_name not in updated_po_names:
                 updated_po_names.append(po_name)
         
-        # Recalculate Purchase Order totals using direct database updates
+        # Recalculate Purchase Order totals using percentage-wise GST logic (same as Purchase Invoice)
         for po_name in updated_po_names:
-            # Calculate totals from items
-            totals = frappe.db.sql("""
-                SELECT 
-                    SUM(qty) as total_qty,
-                    SUM(amount) as total,
-                    SUM(net_amount) as net_total,
-                    SUM(base_amount) as base_total,
-                    SUM(base_net_amount) as base_net_total
+            # Get all items for this Purchase Order to calculate GST totals
+            items = frappe.db.sql("""
+                SELECT qty, rate, amount, item_tax_template, custom_gstn_value
                 FROM `tabPurchase Order Item` 
                 WHERE parent = %s
-            """, (po_name,), as_dict=True)[0]
+            """, (po_name,), as_dict=True)
             
-            # Try to get GSTN totals if custom fields exist
-            total_gstn = 0
-            try:
-                gstn_totals = frappe.db.sql("""
-                    SELECT SUM(custom_gstn_value) as total_gstn
-                    FROM `tabPurchase Order Item` 
-                    WHERE parent = %s
-                """, (po_name,), as_dict=True)[0]
-                total_gstn = gstn_totals.total_gstn or 0
-            except Exception as e:
-                if "Unknown column" in str(e):
-                    frappe.log_error(f"GSTN custom fields not found in database: {e}", "GSTN Totals Warning")
-                else:
-                    raise e
+            # Initialize summary values (same as Purchase Invoice)
+            gst_5_total = 0
+            gst_12_total = 0
+            gst_18_total = 0
+            gst_28_total = 0
+            goods_5_total = 0
+            goods_12_total = 0
+            goods_18_total = 0
+            goods_28_total = 0
+            total_qty = 0
+            total_amount = 0
+            total_net_amount = 0
+            total_base_amount = 0
+            total_base_net_amount = 0
+            
+            # Initialize SGST, CGST, IGST totals
+            total_sgst = 0
+            total_cgst = 0
+            total_igst = 0
+            
+            # Process each item with percentage-wise GST calculation
+            for item in items:
+                template = item.get('item_tax_template') or ""
+                amount = float(item.get('amount') or 0)
+                gst_rate = 0
+                
+                # Extract GST rate from template name
+                if "GST 5%" in template:
+                    gst_rate = 5
+                elif "GST 12%" in template:
+                    gst_rate = 12
+                elif "GST 18%" in template:
+                    gst_rate = 18
+                elif "GST 28%" in template:
+                    gst_rate = 28
+                
+                # Calculate and set GST value if applicable
+                if gst_rate > 0:
+                    gstn_value = round(amount * gst_rate / 100, 2)
+                    
+                    # Calculate SGST, CGST, IGST (typically split equally for intra-state, full IGST for inter-state)
+                    # Assuming intra-state transactions: SGST = CGST = GST/2, IGST = 0
+                    # For inter-state: SGST = 0, CGST = 0, IGST = GST
+                    # We'll use intra-state logic by default (SGST = CGST = GST/2)
+                    sgst_amount = round(gstn_value / 2, 2)
+                    cgst_amount = round(gstn_value / 2, 2)
+                    igst_amount = 0  # For intra-state transactions
+                    
+                    # Add to appropriate totals
+                    if gst_rate == 5:
+                        gst_5_total += gstn_value
+                        goods_5_total += amount
+                    elif gst_rate == 12:
+                        gst_12_total += gstn_value
+                        goods_12_total += amount
+                    elif gst_rate == 18:
+                        gst_18_total += gstn_value
+                        goods_18_total += amount
+                    elif gst_rate == 28:
+                        gst_28_total += gstn_value
+                        goods_28_total += amount
+                    
+                    # Add to SGST, CGST, IGST totals
+                    total_sgst += sgst_amount
+                    total_cgst += cgst_amount
+                    total_igst += igst_amount
+                
+                # Update basic totals
+                total_qty += float(item.get('qty') or 0)
+                total_amount += amount
+                total_net_amount += amount  # Assuming net_amount is same as amount for simplicity
+                total_base_amount += amount  # Assuming base_amount is same as amount for simplicity
+                total_base_net_amount += amount  # Assuming base_net_amount is same as amount for simplicity
+            
+            # Calculate total GSTN value
+            total_gstn = round(gst_5_total + gst_12_total + gst_18_total + gst_28_total, 2)
             
             # Calculate grand total (net_total + total_gstn)
-            grand_total = (totals.net_total or 0) + total_gstn
-            base_grand_total = (totals.base_net_total or 0) + total_gstn
+            grand_total = total_net_amount + total_gstn
+            base_grand_total = total_base_net_amount + total_gstn
             
             # Update Purchase Order totals directly in database
             frappe.db.sql("""
@@ -2662,23 +2715,41 @@ def update_submitted_po_items(items_data, deleted_items=None):
                     base_total = %s, base_net_total = %s, base_grand_total = %s
                 WHERE name = %s
             """, (
-                totals.total_qty or 0,
-                totals.total or 0,
-                totals.net_total or 0,
+                total_qty or 0,
+                total_amount or 0,
+                total_net_amount or 0,
                 grand_total,
-                totals.base_total or 0,
-                totals.base_net_total or 0,
+                total_base_amount or 0,
+                total_base_net_amount or 0,
                 base_grand_total,
                 po_name
             ))
             
-            # Try to update custom GSTN fields if they exist
+            # Update custom GST percentage-wise fields if they exist
             try:
                 frappe.db.sql("""
                     UPDATE `tabPurchase Order` 
-                    SET custom_total_gstn = %s, custom_grand_total = %s
+                    SET custom_gst_5__ot = %s, custom_gst_12__ot = %s, custom_gst_18__ot = %s, custom_gst_28__ot = %s,
+                        custom_5_goods_value = %s, custom_12_goods_value = %s, custom_18_goods_value = %s, custom_28_goods_value = %s,
+                        custom_total_gstn = %s, custom_grand_total = %s,
+                        custom_total_sgst = %s, custom_total_cgst = %s, custom_total_igst = %s
                     WHERE name = %s
-                """, (total_gstn, grand_total, po_name))
+                """, (
+                    round(gst_5_total, 2),
+                    round(gst_12_total, 2),
+                    round(gst_18_total, 2),
+                    round(gst_28_total, 2),
+                    round(goods_5_total, 2),
+                    round(goods_12_total, 2),
+                    round(goods_18_total, 2),
+                    round(goods_28_total, 2),
+                    total_gstn,
+                    grand_total,
+                    round(total_sgst, 2),
+                    round(total_cgst, 2),
+                    round(total_igst, 2),
+                    po_name
+                ))
             except Exception as e:
                 # If custom fields don't exist, skip GSTN update
                 if "Unknown column" in str(e):

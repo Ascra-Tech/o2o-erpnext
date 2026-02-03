@@ -256,18 +256,36 @@ function build_items_dashboard(frm, dialog) {
             $(this).closest('.po-item-card').addClass('po-changed');
         });
 
-        // Add real-time calculation on rate/qty change
+        // Add real-time calculation on rate/qty change with percentage-wise GST logic (same as Purchase Invoice)
         $('.po-field-input[data-fieldname="qty"], .po-field-input[data-fieldname="rate"]').on('input', function() {
             let $card = $(this).closest('.po-item-card');
             let qty = parseFloat($card.find('[data-fieldname="qty"]').val()) || 0;
             let rate = parseFloat($card.find('[data-fieldname="rate"]').val()) || 0;
             let amount = qty * rate;
             
-            // Get tax template for GST calculation (simplified - using default 18% if no template)
-            let tax_rate = 18; // Default GST rate
-            // In a real implementation, you'd fetch the actual tax rate from the tax template
+            // Get the item index to fetch tax template
+            let idx = $card.data('idx');
+            let item = frm.doc.items[idx];
+            let template = item ? (item.item_tax_template || "") : "";
             
-            let gstn_value = amount * (tax_rate / 100);
+            // Extract GST rate from template name (same logic as server-side)
+            let gst_rate = 0;
+            if (template.includes("GST 5%")) {
+                gst_rate = 5;
+            } else if (template.includes("GST 12%")) {
+                gst_rate = 12;
+            } else if (template.includes("GST 18%")) {
+                gst_rate = 18;
+            } else if (template.includes("GST 28%")) {
+                gst_rate = 28;
+            }
+            
+            // Calculate GST value if applicable
+            let gstn_value = 0;
+            if (gst_rate > 0) {
+                gstn_value = Math.round(amount * gst_rate / 100 * 100) / 100; // Round to 2 decimal places
+            }
+            
             let grand_total = amount + gstn_value;
             
             // Update the displays
