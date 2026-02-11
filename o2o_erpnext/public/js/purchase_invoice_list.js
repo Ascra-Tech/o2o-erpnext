@@ -132,70 +132,165 @@ function add_print_buttons(listview) {
     console.log("✅ Print dropdown added successfully");
 }
 
-// Enhanced Print PI & PO function with better error handling - Make globally accessible
+// Enhanced Print PI & PO function supporting single and multiple selections - Make globally accessible
 window.handle_print_pi_po = function(listview) {
     const selected_docs = listview.get_checked_items();
     
+    // Debug: Log the selection
+    console.log("Print PI & PO button clicked. Selected docs:", selected_docs.length, selected_docs);
+    
     if (selected_docs.length === 0) {
         frappe.show_alert({
-            message: __('Please select a Purchase Invoice'),
+            message: __('Please select at least one Purchase Invoice'),
             indicator: 'yellow'
         }, 3);
         return;
     }
     
-    if (selected_docs.length > 1) {
+    // Handle single invoice (original functionality)
+    if (selected_docs.length === 1) {
+        console.log("Processing single invoice:", selected_docs[0].name);
+        
+        // Show loading indicator
         frappe.show_alert({
-            message: __('Please select only one Purchase Invoice for PI & PO print'),
-            indicator: 'yellow'
+            message: __('Preparing PDF, please wait...'),
+            indicator: 'blue'
         }, 3);
-        return;
-    }
-    
-    // Show loading indicator
-    frappe.show_alert({
-        message: __('Preparing PDF, please wait...'),
-        indicator: 'blue'
-    }, 3);
-    
-    // Use frappe.call for better error handling
-    frappe.call({
-        method: 'o2o_erpnext.api.merge_pdf.merge_invoice_and_po_pdfs',
-        args: {
-            invoice_name: selected_docs[0].name
-        },
-        callback: function(r) {
-            if (r.message && r.message.success) {
-                // If API returns a URL, open it
-                if (r.message.download_url) {
-                    window.open(r.message.download_url);
-                } else {
-                    // Fallback to direct URL construction
-                    const download_url = frappe.urllib.get_full_url(
-                        '/api/method/o2o_erpnext.api.merge_pdf.merge_invoice_and_po_pdfs?' +
-                        'invoice_name=' + encodeURIComponent(selected_docs[0].name)
-                    );
-                    window.open(download_url);
-                }
-                
-                frappe.show_alert({
-                    message: __('PDF download initiated'),
-                    indicator: 'green'
-                }, 3);
-            } else {
-                frappe.show_alert({
-                    message: __(r.message ? r.message.message : 'Failed to generate PDF'),
-                    indicator: 'red'
-                }, 5);
-            }
-        },
-        error: function(r) {
+        
+        // Use direct URL approach like the working client script
+        const download_url = frappe.urllib.get_full_url(
+            '/api/method/o2o_erpnext.api.merge_pdf.merge_invoice_and_po_pdfs?' +
+            'invoice_name=' + encodeURIComponent(selected_docs[0].name)
+        );
+        
+        console.log("Single invoice download URL:", download_url);
+        
+        // Open the URL directly - same as working client script
+        const w = window.open(download_url);
+        
+        if (w) {
             frappe.show_alert({
-                message: __('Failed to generate PDF. Please try again.'),
+                message: __('PDF download initiated'),
+                indicator: 'green'
+            }, 3);
+        } else {
+            frappe.show_alert({
+                message: __('Failed to download PDF. Please enable pop-ups and try again.'),
                 indicator: 'red'
             }, 5);
         }
+        return;
+    }
+    
+    // Handle multiple invoices (create ZIP with merged PI+PO PDFs)
+    console.log("Processing multiple invoices:", selected_docs.length, "invoices");
+    
+    if (selected_docs.length > 10) {
+        frappe.confirm(
+            __('You are about to process {0} invoices into a ZIP file. This may take some time. Continue?', [selected_docs.length]),
+            () => {
+                process_multiple_invoices_zip(selected_docs);
+            }
+        );
+    } else {
+        process_multiple_invoices_zip(selected_docs);
+    }
+}
+
+// Function to handle multiple invoices ZIP processing
+function process_multiple_invoices_zip(selected_docs) {
+    // Show progress dialog for multiple invoices
+    let progress_dialog = new frappe.ui.Dialog({
+        title: __('Creating ZIP with Merged PI+PO PDFs'),
+        size: 'small',
+        fields: [{
+            fieldtype: 'HTML',
+            fieldname: 'progress_html',
+            options: `
+                <div class="zip-progress-container" style="text-align: center; padding: 20px;">
+                    <div class="loading-spinner" style="margin-bottom: 15px;">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="sr-only">Processing...</span>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 20px; margin-bottom: 15px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                             role="progressbar" style="width: 0%" id="zip-progress-bar">
+                        </div>
+                    </div>
+                    <div class="progress-text">
+                        <strong id="zip-progress-status">Preparing to process ${selected_docs.length} invoices...</strong>
+                    </div>
+                    <div class="progress-details" style="margin-top: 10px; font-size: 12px; color: #666;">
+                        <span id="zip-progress-details">Creating ZIP file with merged PI+PO combinations...</span>
+                    </div>
+                </div>
+                <style>
+                    .zip-progress-container {
+                        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                        border-radius: 8px;
+                        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+                    }
+                </style>
+            `
+        }]
     });
+    
+    progress_dialog.show();
+    
+    // Update progress indicators
+    const progress_bar = progress_dialog.$wrapper.find('#zip-progress-bar');
+    const progress_status = progress_dialog.$wrapper.find('#zip-progress-status');
+    const progress_details = progress_dialog.$wrapper.find('#zip-progress-details');
+    
+    // Step 1: Starting
+    setTimeout(() => {
+        progress_bar.css('width', '20%');
+        progress_status.text('Processing invoices...');
+        progress_details.text('Generating merged PDF files for each invoice...');
+    }, 300);
+    
+    // Step 2: Processing
+    setTimeout(() => {
+        progress_bar.css('width', '60%');
+        progress_status.text('Creating ZIP file...');
+        progress_details.text('Combining all merged PDFs into ZIP archive...');
+    }, 1000);
+    
+    // Extract invoice names
+    const invoice_names = selected_docs.map(doc => doc.name);
+    
+    // Use direct URL approach for ZIP download
+    const download_url = frappe.urllib.get_full_url(
+        '/api/method/o2o_erpnext.api.merge_pdf.merge_multiple_invoices_and_pos_zip?' +
+        'invoice_names=' + encodeURIComponent(JSON.stringify(invoice_names))
+    );
+    
+    // Complete progress
+    setTimeout(() => {
+        progress_bar.css('width', '100%');
+        progress_status.text('Download starting...');
+        progress_details.text('Opening ZIP file download...');
+        
+        // Open the URL directly
+        const w = window.open(download_url);
+        
+        setTimeout(() => {
+            progress_dialog.hide();
+            
+            if (w) {
+                frappe.show_alert({
+                    message: __('ZIP file download initiated for {0} merged PI+PO PDFs', [selected_docs.length]),
+                    indicator: 'green'
+                }, 5);
+            } else {
+                frappe.show_alert({
+                    message: __('Failed to download ZIP file. Please enable pop-ups and try again.'),
+                    indicator: 'red'
+                }, 5);
+            }
+        }, 1000);
+    }, 1500);
 }
 
 // Enhanced batch printing with Promise-based approach - Make globally accessible
