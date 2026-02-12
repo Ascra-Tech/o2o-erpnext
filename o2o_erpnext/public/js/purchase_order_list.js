@@ -131,8 +131,13 @@ function add_print_buttons(listview) {
             }
         });
     }, true).addClass('btn-primary');
+
+    // Add Export PO button
+    listview.page.add_button(__('Export PO'), function() {
+        export_po_dialog(window.purchase_order_listview || listview);
+    }, true).addClass('btn-primary');
     
-    console.log("✅ Print buttons added successfully");
+    console.log("✅ Print and Export buttons added successfully");
 }
 
 function hide_ui_elements(listview) {
@@ -143,8 +148,12 @@ function hide_ui_elements(listview) {
         return;
     }
     
-    // Hide specific action buttons (from client script)
-    listview.page.actions.find('[data-label="Edit"],[data-label="Print"],[data-label="Export"],[data-label="Assign%20To"],[data-label="Apply%20Assignment%20Rule"],[data-label="Add%20Tags"]').parent().parent().remove();
+    // Hide specific action buttons (from client script) - but keep our custom buttons
+    listview.page.actions.find('[data-label="Edit"],[data-label="Assign%20To"],[data-label="Apply%20Assignment%20Rule"],[data-label="Add%20Tags"]').parent().parent().remove();
+    
+    // Hide the default Export and Print buttons but not our custom ones
+    listview.page.actions.find('[data-label="Export"]:not([data-label*="Export PO"])').parent().parent().remove();
+    listview.page.actions.find('[data-label="Print"]:not([data-label*="Print P"])').parent().parent().remove();
     
     console.log("✅ UI elements hidden successfully");
 }
@@ -174,6 +183,7 @@ function add_po_scanner_buttons(listview) {
         listview.page.add_menu_item(__('📊 PO Statistics'), function() {
             window.show_po_statistics();
         });
+        
         
         console.log("✅ PO Scanner menu items added successfully");
     });
@@ -757,6 +767,250 @@ function export_to_csv(partial_pos) {
     frappe.show_alert({
         message: __('CSV file downloaded successfully!'),
         indicator: 'green'
+    });
+}
+
+
+/**
+ * Open dialog for selecting fields to export
+ */
+function export_po_dialog(listview) {
+    // Ensure we have a valid listview reference
+    if (!listview) {
+        listview = window.purchase_order_listview;
+    }
+    
+    if (!listview) {
+        frappe.msgprint(__('Unable to access list view. Please refresh the page.'));
+        return;
+    }
+    
+    // Get selected purchase orders
+    const selected_pos = listview.get_checked_items();
+    
+    if (!selected_pos || selected_pos.length === 0) {
+        frappe.throw(__('Please select Purchase Orders first to export'));
+        return;
+    }
+    
+    // Direct export with predefined fields - no dialog needed
+    perform_po_export(selected_pos);
+}
+
+/**
+ * Show the field selection dialog for Purchase Orders
+ */
+function show_po_field_selection_dialog(selected_pos, fields_data) {
+    // Track selected fields
+    let selected_fields = new Set();
+    
+    // Create dialog HTML
+    let html = `
+        <div style="padding: 15px;">
+            <div style="margin-bottom: 15px;">
+                <h6 style="margin: 10px 0;">Quick Actions:</h6>
+                <button class="btn btn-sm btn-default select-all-btn" style="margin: 5px 5px 5px 0;">
+                    <i class="fa fa-check"></i> Select All Fields
+                </button>
+                <button class="btn btn-sm btn-default select-mandatory-btn" style="margin: 5px 5px 5px 0;">
+                    <i class="fa fa-star"></i> Select Mandatory Fields
+                </button>
+                <button class="btn btn-sm btn-default unselect-all-btn" style="margin: 5px 5px 5px 0;">
+                    <i class="fa fa-times"></i> Unselect All
+                </button>
+            </div>
+            
+            <hr>
+            
+            <div style="margin-bottom: 15px;">
+                <input type="text" class="field-search form-control" placeholder="Search fields..." style="margin-bottom: 10px;">
+            </div>
+            
+            <div class="field-selection-container" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                <h6 style="margin-top: 0; margin-bottom: 10px; background: #f8f9fa; padding: 8px; margin: -10px -10px 10px -10px;">
+                    <strong>Mandatory Fields</strong>
+                </h6>
+                <div id="mandatory-fields">
+    `;
+    
+    // Add mandatory fields
+    fields_data.mandatory_fields.forEach(field => {
+        html += create_po_field_checkbox(field, true);
+    });
+    
+    html += `
+                </div>
+                
+                <h6 style="margin-top: 15px; margin-bottom: 10px; background: #f8f9fa; padding: 8px; margin: -10px -10px 10px -10px;">
+                    <strong>Optional Fields</strong>
+                </h6>
+                <div id="optional-fields">
+    `;
+    
+    // Add optional fields
+    fields_data.optional_fields.forEach(field => {
+        html += create_po_field_checkbox(field, false);
+    });
+    
+    html += `
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                <p style="color: #666; font-size: 12px;">
+                    <strong>Purchase Orders to export:</strong> ${selected_pos.length} selected
+                </p>
+            </div>
+        </div>
+    `;
+    
+    // Create the dialog
+    let dialog = new frappe.ui.Dialog({
+        title: __('Export Purchase Orders to Excel'),
+        fields: [
+            {
+                fieldtype: 'HTML',
+                fieldname: 'export_html',
+                options: html
+            }
+        ],
+        primary_action_label: __('Export'),
+        primary_action(d) {
+            if (selected_fields.size === 0) {
+                frappe.msgprint({
+                    title: __('No Fields Selected'),
+                    indicator: 'red',
+                    message: __('Please select at least one field to export.')
+                });
+                return;
+            }
+            
+            // Perform export
+            perform_po_export(selected_pos, Array.from(selected_fields));
+            d.hide();
+        },
+        secondary_action_label: __('Cancel'),
+        secondary_action(d) {
+            d.hide();
+        }
+    });
+    
+    dialog.show();
+    
+    // Setup event handlers after dialog is shown
+    setTimeout(() => {
+        const container = dialog.$wrapper.find('.field-selection-container');
+        const search_input = dialog.$wrapper.find('.field-search');
+        
+        // Select All button
+        dialog.$wrapper.find('.select-all-btn').click(function() {
+            container.find('input[type="checkbox"]').prop('checked', true);
+            container.find('input[type="checkbox"]').each(function() {
+                selected_fields.add($(this).data('fieldname'));
+            });
+        });
+        
+        // Select Mandatory button
+        dialog.$wrapper.find('.select-mandatory-btn').click(function() {
+            container.find('input[type="checkbox"]').prop('checked', false);
+            selected_fields.clear();
+            $('#mandatory-fields input[type="checkbox"]').prop('checked', true);
+            $('#mandatory-fields input[type="checkbox"]').each(function() {
+                selected_fields.add($(this).data('fieldname'));
+            });
+        });
+        
+        // Unselect All button
+        dialog.$wrapper.find('.unselect-all-btn').click(function() {
+            container.find('input[type="checkbox"]').prop('checked', false);
+            selected_fields.clear();
+        });
+        
+        // Field checkbox change handler
+        container.find('input[type="checkbox"]').change(function() {
+            const fieldname = $(this).data('fieldname');
+            if ($(this).is(':checked')) {
+                selected_fields.add(fieldname);
+            } else {
+                selected_fields.delete(fieldname);
+            }
+        });
+        
+        // Search functionality
+        search_input.on('keyup', function() {
+            const search_term = $(this).val().toLowerCase();
+            container.find('.field-checkbox-wrapper').each(function() {
+                const label = $(this).find('label').text().toLowerCase();
+                const fieldname = $(this).find('input').data('fieldname').toLowerCase();
+                
+                if (label.includes(search_term) || fieldname.includes(search_term)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+        
+    }, 100);
+}
+
+/**
+ * Create HTML for a single field checkbox for Purchase Orders
+ */
+function create_po_field_checkbox(field, is_mandatory) {
+    const mandatory_badge = field.mandatory ? ' <span class="badge badge-warning" style="margin-left: 5px; font-size: 10px;">MANDATORY</span>' : '';
+    const is_custom = field.is_custom ? ' <span class="badge" style="margin-left: 5px; font-size: 10px; background: #6c757d;">CUSTOM</span>' : '';
+    
+    return `
+        <div class="field-checkbox-wrapper" style="padding: 8px; border-bottom: 1px solid #e9ecef;">
+            <div style="display: flex; align-items: center;">
+                <input type="checkbox" data-fieldname="${field.fieldname}" style="margin-right: 10px;">
+                <div style="flex: 1;">
+                    <label style="margin: 0; cursor: pointer; display: inline;">
+                        <strong>${field.label}</strong>
+                        <span style="color: #666; font-size: 11px;">(${field.fieldname})</span>
+                        ${mandatory_badge}
+                        ${is_custom}
+                    </label>
+                    <div style="color: #999; font-size: 11px; margin-top: 2px;">
+                        Field Type: ${field.fieldtype}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Perform the actual Purchase Order export
+ */
+function perform_po_export(selected_pos) {
+    frappe.call({
+        method: 'o2o_erpnext.api.purchase_order_export.export_pos_to_excel',
+        args: {
+            po_ids: JSON.stringify(selected_pos)
+        },
+        freeze: true,
+        freeze_message: __('Generating Excel file...'),
+        callback: function(r) {
+            if (r.message && r.message.status === 'success') {
+                frappe.msgprint({
+                    title: __('Success'),
+                    indicator: 'green',
+                    message: __('Purchase Orders exported successfully. Downloading file...')
+                });
+                
+                // Trigger file download
+                let download_url = frappe.urllib.get_full_url(
+                    "/api/method/o2o_erpnext.api.purchase_order_export.download_exported_file?" +
+                    "filename=" + encodeURIComponent(r.message.filename)
+                );
+                window.open(download_url);
+            }
+        },
+        error: function(r) {
+            console.log('Export error:', r);
+        }
     });
 }
 
