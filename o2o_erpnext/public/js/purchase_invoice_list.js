@@ -136,9 +136,6 @@ function add_print_buttons(listview) {
 window.handle_print_pi_po = function(listview) {
     const selected_docs = listview.get_checked_items();
     
-    // Debug: Log the selection
-    console.log("Print PI & PO button clicked. Selected docs:", selected_docs.length, selected_docs);
-    
     if (selected_docs.length === 0) {
         frappe.show_alert({
             message: __('Please select at least one Purchase Invoice'),
@@ -149,8 +146,6 @@ window.handle_print_pi_po = function(listview) {
     
     // Handle single invoice (original functionality)
     if (selected_docs.length === 1) {
-        console.log("Processing single invoice:", selected_docs[0].name);
-        
         // Show loading indicator
         frappe.show_alert({
             message: __('Preparing PDF, please wait...'),
@@ -162,8 +157,6 @@ window.handle_print_pi_po = function(listview) {
             '/api/method/o2o_erpnext.api.merge_pdf.merge_invoice_and_po_pdfs?' +
             'invoice_name=' + encodeURIComponent(selected_docs[0].name)
         );
-        
-        console.log("Single invoice download URL:", download_url);
         
         // Open the URL directly - same as working client script
         const w = window.open(download_url);
@@ -183,8 +176,6 @@ window.handle_print_pi_po = function(listview) {
     }
     
     // Handle multiple invoices (create ZIP with merged PI+PO PDFs)
-    console.log("Processing multiple invoices:", selected_docs.length, "invoices");
-    
     if (selected_docs.length > 10) {
         frappe.confirm(
             __('You are about to process {0} invoices into a ZIP file. This may take some time. Continue?', [selected_docs.length]),
