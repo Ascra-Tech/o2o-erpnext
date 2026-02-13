@@ -286,3 +286,98 @@ def _find_replacement_receipt(purchase_order_name, excluded_receipt_name):
     except Exception as e:
         frappe.log_error(f"Error finding replacement receipt: {str(e)}")
         return None
+
+@frappe.whitelist()
+def bulk_link_all_purchase_orders():
+    """
+    Bulk link all submitted Purchase Orders with their corresponding Purchase Receipts
+    This function processes all submitted POs and updates their custom_purchase_receipt field
+    """
+    import time
+    start_time = time.time()
+    
+    try:
+        # Initialize counters
+        total_processed = 0
+        successfully_linked = 0
+        already_linked = 0
+        no_receipt_found = 0
+        errors = 0
+        
+        # Get all submitted Purchase Orders
+        po_query = """
+            SELECT name, custom_purchase_receipt
+            FROM `tabPurchase Order`
+            WHERE docstatus = 1
+            ORDER BY creation DESC
+        """
+        
+        purchase_orders = frappe.db.sql(po_query, as_dict=True)
+        total_pos = len(purchase_orders)
+        
+        if total_pos == 0:
+            return {
+                "status": "success",
+                "message": "No submitted Purchase Orders found to process",
+                "data": {
+                    "total_processed": 0,
+                    "successfully_linked": 0,
+                    "already_linked": 0,
+                    "no_receipt_found": 0,
+                    "errors": 0,
+                    "processing_time": "0.00s"
+                }
+            }
+        
+        # Process each Purchase Order
+        for po in purchase_orders:
+            total_processed += 1
+            po_name = po.name
+            current_pr_link = po.custom_purchase_receipt
+            
+            try:
+                # Use the existing function to update the field
+                result = update_purchase_receipt_field_for_submitted_po(po_name)
+                
+                if result.get("success"):
+                    if result.get("updated"):
+                        successfully_linked += 1
+                    else:
+                        if result.get("purchase_receipt"):
+                            already_linked += 1
+                        else:
+                            no_receipt_found += 1
+                else:
+                    errors += 1
+                    frappe.log_error(f"Failed to link PO {po_name}: {result.get('message', 'Unknown error')}")
+                    
+            except Exception as e:
+                errors += 1
+                frappe.log_error(f"Error processing PO {po_name}: {str(e)}", "Bulk Link Purchase Orders Error")
+        
+        # Calculate processing time
+        end_time = time.time()
+        processing_time = f"{end_time - start_time:.2f}s"
+        
+        # Commit all changes
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": f"Bulk linking completed. Processed {total_processed} Purchase Orders.",
+            "data": {
+                "total_processed": total_processed,
+                "successfully_linked": successfully_linked,
+                "already_linked": already_linked,
+                "no_receipt_found": no_receipt_found,
+                "errors": errors,
+                "processing_time": processing_time
+            }
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Error in bulk_link_all_purchase_orders: {str(e)}", "Bulk Link Purchase Orders Error")
+        return {
+            "status": "error",
+            "message": f"Failed to perform bulk linking: {str(e)}"
+        }

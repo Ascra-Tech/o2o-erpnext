@@ -118,8 +118,13 @@ function add_print_buttons(listview) {
     listview.page.add_button(__('Export PO'), function() {
         export_po_dialog(window.purchase_order_listview || listview);
     }, true).addClass('btn-primary');
+
+    // Add Link PR button for bulk linking Purchase Orders with Purchase Receipts
+    listview.page.add_button(__('Link PR'), function() {
+        bulk_link_purchase_receipts(listview);
+    }, true).addClass('btn-success');
     
-    console.log("✅ Print and Export buttons added successfully");
+    console.log("✅ Print, Export, and Link PR buttons added successfully");
 }
 
 function hide_ui_elements(listview) {
@@ -994,6 +999,94 @@ function perform_po_export(selected_pos) {
             console.log('Export error:', r);
         }
     });
+}
+
+/**
+ * Bulk link Purchase Orders with their Purchase Receipts
+ */
+function bulk_link_purchase_receipts(listview) {
+    console.log("🔗 Starting bulk Purchase Receipt linking...");
+    
+    if (!listview || !listview.page) {
+        console.error("❌ Invalid listview for bulk linking");
+        return;
+    }
+
+    // Show confirmation dialog
+    frappe.confirm(
+        __('This will link all submitted Purchase Orders with their corresponding Purchase Receipts. This may take some time for large datasets. Continue?'),
+        function() {
+            // User confirmed, proceed with bulk linking
+            frappe.show_alert({
+                message: __('🔗 Starting bulk Purchase Receipt linking...'),
+                indicator: 'blue'
+            }, 3);
+
+            frappe.call({
+                method: 'o2o_erpnext.api.purchase_order_linking.bulk_link_all_purchase_orders',
+                freeze: true,
+                freeze_message: __('Linking Purchase Orders with Purchase Receipts...'),
+                callback: function(r) {
+                    console.log("Bulk linking result:", r);
+                    
+                    if (r.message && r.message.status === 'success') {
+                        let data = r.message.data;
+                        
+                        // Show detailed results
+                        let message = `
+                            <div style="padding: 15px;">
+                                <h4>🔗 Bulk Linking Results</h4>
+                                <div style="margin: 15px 0;">
+                                    <div style="margin: 8px 0;"><strong>Total Processed:</strong> ${data.total_processed || 0}</div>
+                                    <div style="margin: 8px 0; color: #28a745;"><strong>Successfully Linked:</strong> ${data.successfully_linked || 0}</div>
+                                    <div style="margin: 8px 0; color: #ffc107;"><strong>Already Linked:</strong> ${data.already_linked || 0}</div>
+                                    <div style="margin: 8px 0; color: #dc3545;"><strong>No Receipt Found:</strong> ${data.no_receipt_found || 0}</div>
+                                    <div style="margin: 8px 0; color: #6c757d;"><strong>Errors:</strong> ${data.errors || 0}</div>
+                                </div>
+                                ${data.processing_time ? `<div style="margin-top: 15px; font-size: 12px; color: #666;">Processing time: ${data.processing_time}</div>` : ''}
+                            </div>
+                        `;
+                        
+                        frappe.msgprint({
+                            title: __('Bulk Linking Complete'),
+                            message: message,
+                            indicator: 'green',
+                            wide: true
+                        });
+
+                        // Refresh the list view to show updated data
+                        if (listview && listview.refresh) {
+                            setTimeout(function() {
+                                listview.refresh();
+                            }, 1000);
+                        }
+                        
+                    } else {
+                        frappe.msgprint({
+                            title: __('Error'),
+                            message: r.message?.message || __('Failed to perform bulk linking'),
+                            indicator: 'red'
+                        });
+                    }
+                },
+                error: function(r) {
+                    console.error("Bulk linking error:", r);
+                    frappe.msgprint({
+                        title: __('Error'),
+                        message: __('Unable to perform bulk linking. Please check server logs.'),
+                        indicator: 'red'
+                    });
+                }
+            });
+        },
+        function() {
+            // User cancelled
+            frappe.show_alert({
+                message: __('Bulk linking cancelled'),
+                indicator: 'orange'
+            }, 2);
+        }
+    );
 }
 
 // Debug function to check if script is loaded
