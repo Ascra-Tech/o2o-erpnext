@@ -1,3 +1,4 @@
+
 // ===== PURCHASE INVOICE VIEW ENHANCEMENTS =====
 // This file provides both list view and form functionality for Purchase Invoice
 // - List view: Shows custom_purchase_receipt and custom_purchase_order as clickable columns

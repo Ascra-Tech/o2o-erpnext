@@ -245,7 +245,7 @@ fixtures = [
     #"Workflow",
     #"Workflow State",
     #"Workflow Action",
-    #"Print Format",
+    "Print Format",
     #"Number Card",
     #"Report",
     #"Workflow Action Master",
@@ -257,6 +257,17 @@ fixtures = [
 # Hook on document methods and events
 
 doc_events = {
+    "Purchase Order": {
+        "validate": "o2o_erpnext.api.purchase_order.validate_and_set_purchase_order_defaults_hook",
+        "on_submit": "o2o_erpnext.api.purchase_order.update_budgets_for_po",
+        "on_cancel": "o2o_erpnext.api.purchase_order.update_budgets_for_po"
+    },
+    "Purchase Receipt": {
+        "validate": "o2o_erpnext.api.purchase_receipt.validate_and_set_purchase_receipt_defaults_hook",
+        "after_insert": "o2o_erpnext.api.purchase_order_linking.update_linked_purchase_orders_on_receipt_create",
+        "on_submit": "o2o_erpnext.api.purchase_order_linking.update_linked_purchase_orders_on_receipt_submit",
+        "on_cancel": "o2o_erpnext.api.purchase_order_linking.update_linked_purchase_orders_on_receipt_cancel"
+    },
     "Purchase Invoice": {
         "validate": [
             "o2o_erpnext.api.purchase_invoice_controller.validate_remote_duplicate_on_submit"
@@ -267,22 +278,10 @@ doc_events = {
         "on_submit": [
             "o2o_erpnext.api.purchase_invoice_controller.validate_remote_duplicate_on_submit",
             "o2o_erpnext.api.purchase_invoice_controller.create_remote_invoice_on_submit"
-        ],
-        "on_update_after_submit": "o2o_erpnext.sync.erpnext_to_external_updated.auto_push_invoice_on_submit"
-        # "on_cancel": "o2o_erpnext.sync.erpnext_to_external_updated.handle_invoice_cancellation"  # Function not implemented yet
+        ]
     },
     "Sales Order": {
         "validate": "o2o_erpnext.custom_sales_order.CustomSalesOrder.validate_delivery_date"
-    },
-    "Purchase Receipt": {
-        "validate": "o2o_erpnext.api.purchase_receipt.update_custom_fields_from_first_item",
-        "get_permission_query_conditions": "o2o_erpnext.api.purchase_receipt.get_permission_query_conditions",
-        "has_permission": "o2o_erpnext.api.purchase_receipt.has_permission"
-    },
-    "Purchase Order": {
-        "validate": "o2o_erpnext.api.purchase_order.validate_purchase_order_hook",
-        "on_submit": "o2o_erpnext.api.purchase_order.on_submit_purchase_order",
-        "has_permission": "o2o_erpnext.api.purchase_order.has_permission"
     },
     "Sub Branch": {
         "get_permission_query_conditions": "o2o_erpnext.o2o_erpnext.doctype.sub_branch.sub_branch.get_permission_query_conditions",

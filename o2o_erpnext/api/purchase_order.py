@@ -7,45 +7,70 @@ import json
 import uuid
 from frappe.utils import now
 
+def validate_and_set_purchase_order_defaults_hook(doc, method):
+    """
+    Document hook version - called during Purchase Order validation
+    """
+    try:
+        _validate_and_set_purchase_order_defaults_internal(doc)
+    except Exception as e:
+        frappe.log_error(f"Error in Purchase Order validation hook: {str(e)}")
+        # Don't raise the error to avoid breaking the save process
+        pass
+
 @frappe.whitelist()
 def validate_and_set_purchase_order_defaults(doc_name=None):
+    """
+    API method version - called from client-side JavaScript
+    """
     try:
-        user_email = frappe.session.user
-        employee = frappe.get_value("Employee", 
-                                  {"user_id": user_email}, 
-                                  ["name", "custom_supplier", "branch", "custom_sub_branch"],
-                                  as_dict=1)
-        
-        if not employee:
-            frappe.throw(_("No Employee record found linked to your User ID"), title=_("Employee Not Found"))
-            
         if doc_name:
             po_doc = frappe.get_doc("Purchase Order", doc_name)
         else:
             po_doc = frappe.new_doc("Purchase Order")
             
-        if employee.custom_supplier:
-            po_doc.supplier = employee.custom_supplier
-            # Set supplier code based on supplier
-            if po_doc.supplier:
-                po_doc.custom_supplier_code = po_doc.supplier[:3].upper() if po_doc.supplier else ""
+        return _validate_and_set_purchase_order_defaults_internal(po_doc)
+    except Exception as e:
+        frappe.log_error(f"Error in validate_and_set_purchase_order_defaults API: {str(e)}")
+        raise e
+
+def _validate_and_set_purchase_order_defaults_internal(po_doc):
+    """
+    Internal function that contains the actual logic
+    """
+    user_email = frappe.session.user
+    employee = frappe.get_value("Employee", 
+                              {"user_id": user_email}, 
+                              ["name", "custom_supplier", "branch", "custom_sub_branch"],
+                              as_dict=1)
+    
+    if not employee:
+        frappe.throw(_("No Employee record found linked to your User ID"), title=_("Employee Not Found"))
+    
+    if employee.custom_supplier:
+        po_doc.supplier = employee.custom_supplier
+        # Set supplier code based on supplier
+        if po_doc.supplier:
+            po_doc.custom_supplier_code = po_doc.supplier[:3].upper() if po_doc.supplier else ""
+        
+    branch_approver_info = None
+    if employee.branch:
+        po_doc.custom_branch = employee.branch
+        
+        # Find branch approver once we set the branch
+        branch_approver_info = get_branch_approver_info(employee.branch)
+        if branch_approver_info:
+            po_doc.custom__approver_name_and_email = branch_approver_info
             
-        branch_approver_info = None
-        if employee.branch:
-            po_doc.custom_branch = employee.branch
-            
-            # Find branch approver once we set the branch
-            branch_approver_info = get_branch_approver_info(employee.branch)
-            if branch_approver_info:
-                po_doc.custom__approver_name_and_email = branch_approver_info
-                
-                # Extract and set the PO approver email
-                approver_parts = branch_approver_info.split(':', 1)
-                if len(approver_parts) > 1:
-                    po_doc.custom_po_approver_email = approver_parts[1]
+            # Extract and set the PO approver email
+            approver_parts = branch_approver_info.split(':', 1)
+            if len(approver_parts) > 1:
+                po_doc.custom_po_approver_email = approver_parts[1]
             
         requisition_approver_info = None
-        if employee.custom_sub_branch:
+        # Only set custom_sub_branch for new documents or if document doesn't already have a branch
+        # This prevents overriding branch-level user's intentionally empty sub_branch
+        if employee.custom_sub_branch and (not hasattr(po_doc, 'name') or not po_doc.name or not po_doc.custom_branch):
             po_doc.custom_sub_branch = employee.custom_sub_branch
             
             # Only set requisition approver if approval flow is "3 way"
@@ -62,50 +87,37 @@ def validate_and_set_purchase_order_defaults(doc_name=None):
                         if len(approver_parts) > 1:
                             po_doc.custom_requisition_approver_email = approver_parts[1]
         
-        # Set order code
-        update_order_code(po_doc)
+    # Set order code
+    update_order_code(po_doc)
+    
+    # Return data for API calls (when called from client-side)
+    response_data = {
+        "supplier": employee.custom_supplier,
+        "custom_branch": employee.branch,
+        "custom_sub_branch": employee.custom_sub_branch,
+        "custom_supplier_code": po_doc.custom_supplier_code if hasattr(po_doc, 'custom_supplier_code') else "",
+        "custom_order_code": po_doc.custom_order_code if hasattr(po_doc, 'custom_order_code') else ""
+    }
+    
+    if branch_approver_info:
+        response_data["custom__approver_name_and_email"] = branch_approver_info
+        # Also include the PO approver email in the response
+        approver_parts = branch_approver_info.split(':', 1)
+        if len(approver_parts) > 1:
+            response_data["custom_po_approver_email"] = approver_parts[1]
             
-        if not doc_name:
-            response_data = {
-                "supplier": employee.custom_supplier,
-                "custom_branch": employee.branch,
-                "custom_sub_branch": employee.custom_sub_branch,
-                "custom_supplier_code": po_doc.custom_supplier_code if hasattr(po_doc, 'custom_supplier_code') else "",
-                "custom_order_code": po_doc.custom_order_code if hasattr(po_doc, 'custom_order_code') else ""
-            }
+    if 'requisition_approver_info' in locals() and requisition_approver_info:
+        response_data["custom_requisition_approver_name_and_email"] = requisition_approver_info
+        # Also include the requisition approver email in the response
+        approver_parts = requisition_approver_info.split(':', 1)
+        if len(approver_parts) > 1:
+            response_data["custom_requisition_approver_email"] = approver_parts[1]
             
-            if branch_approver_info:
-                response_data["custom__approver_name_and_email"] = branch_approver_info
-                # Also include the PO approver email in the response
-                approver_parts = branch_approver_info.split(':', 1)
-                if len(approver_parts) > 1:
-                    response_data["custom_po_approver_email"] = approver_parts[1]
-                
-            if requisition_approver_info:
-                response_data["custom_requisition_approver_name_and_email"] = requisition_approver_info
-                # Also include the requisition approver email in the response
-                approver_parts = requisition_approver_info.split(':', 1)
-                if len(approver_parts) > 1:
-                    response_data["custom_requisition_approver_email"] = approver_parts[1]
-                
-            return {
-                "status": "success",
-                "message": _("Default values set successfully"),
-                "data": response_data
-            }
-        
-        po_doc.save(ignore_version=True)
-        frappe.db.commit()
-        
-        return {
-            "status": "success",
-            "message": _("Purchase Order updated successfully")
-        }
-            
-    except Exception as e:
-        frappe.log_error(f"Error in Purchase Order auto-fill: {str(e)}", 
-                        "Purchase Order API Error")
-        raise e
+    return {
+        "status": "success",
+        "message": _("Default values set successfully"),
+        "data": response_data
+    }
 
 
 def update_order_code(po_doc):

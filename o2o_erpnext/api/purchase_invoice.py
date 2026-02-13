@@ -318,10 +318,14 @@ def calculate_gst_values_for_purchase_invoice(doc_name):
         gst_12_total = 0
         gst_18_total = 0
         gst_28_total = 0
+        gst_40_total = 0
+        gst_0_total = 0
         goods_5_total = 0
         goods_12_total = 0
         goods_18_total = 0
         goods_28_total = 0
+        goods_40_total = 0
+        goods_0_total = 0
         
         # Process each item in the invoice
         for item in pi_doc.get('items', []):
@@ -338,6 +342,10 @@ def calculate_gst_values_for_purchase_invoice(doc_name):
                 gst_rate = 18
             elif "GST 28%" in template:
                 gst_rate = 28
+            elif "GST 40%" in template:
+                gst_rate = 40
+            elif "GST 0%" in template:
+                gst_rate = 0
             
             # Calculate and set GST value if applicable
             if gst_rate > 0:
@@ -357,19 +365,29 @@ def calculate_gst_values_for_purchase_invoice(doc_name):
                 elif gst_rate == 28:
                     gst_28_total += gstn_value
                     goods_28_total += amount
+                elif gst_rate == 40:
+                    gst_40_total += gstn_value
+                    goods_40_total += amount
+                elif gst_rate == 0:
+                    gst_0_total += gstn_value  # Will be 0 but for consistency
+                    goods_0_total += amount
         
         # Set document-level summary fields
         pi_doc.custom_gst_5__ot = round(gst_5_total, 2)
         pi_doc.custom_gst_12__ot = round(gst_12_total, 2)
         pi_doc.custom_gst_18__ot = round(gst_18_total, 2)
         pi_doc.custom_gst_28__ot = round(gst_28_total, 2)
+        pi_doc.custom_gst_40__ot = round(gst_40_total, 2)
+        pi_doc.custom_gst_0__ot = round(gst_0_total, 2)
         pi_doc.custom_5_goods_value = round(goods_5_total, 2)
         pi_doc.custom_12_goods_value = round(goods_12_total, 2)
         pi_doc.custom_18_goods_value = round(goods_18_total, 2)
         pi_doc.custom_28_goods_value = round(goods_28_total, 2)
+        pi_doc.custom_40_goods_value = round(goods_40_total, 2)
+        pi_doc.custom_0_goods_value = round(goods_0_total, 2)
         
         # Calculate total GSTN value
-        total_gstn = round(gst_5_total + gst_12_total + gst_18_total + gst_28_total, 2)
+        total_gstn = round(gst_5_total + gst_12_total + gst_18_total + gst_28_total + gst_40_total + gst_0_total, 2)
         
         # Set total GSTN if the field exists
         if hasattr(pi_doc, 'gstn_value'):
@@ -500,6 +518,10 @@ def update_submitted_pi_items(items_data, deleted_items=None):
                                     gst_rate = 18
                                 elif "GST 28%" in template:
                                     gst_rate = 28
+                                elif "GST 40%" in template:
+                                    gst_rate = 40
+                                elif "GST 0%" in template:
+                                    gst_rate = 0
                                 
                                 # Calculate and set GST value if applicable
                                 if gst_rate > 0:
@@ -560,10 +582,14 @@ def update_submitted_pi_items(items_data, deleted_items=None):
             gst_12_total = 0
             gst_18_total = 0
             gst_28_total = 0
+            gst_40_total = 0
+            gst_0_total = 0
             goods_5_total = 0
             goods_12_total = 0
             goods_18_total = 0
             goods_28_total = 0
+            goods_40_total = 0
+            goods_0_total = 0
             total_qty = 0
             total_amount = 0
             total_base_amount = 0
@@ -588,6 +614,10 @@ def update_submitted_pi_items(items_data, deleted_items=None):
                     gst_rate = 18
                 elif "GST 28%" in template:
                     gst_rate = 28
+                elif "GST 40%" in template:
+                    gst_rate = 40
+                elif "GST 0%" in template:
+                    gst_rate = 0
                 
                 # Calculate and set GST value if applicable
                 if gst_rate > 0:
@@ -614,6 +644,12 @@ def update_submitted_pi_items(items_data, deleted_items=None):
                     elif gst_rate == 28:
                         gst_28_total += gstn_value
                         goods_28_total += amount
+                    elif gst_rate == 40:
+                        gst_40_total += gstn_value
+                        goods_40_total += amount
+                    elif gst_rate == 0:
+                        gst_0_total += gstn_value  # Will be 0 but for consistency
+                        goods_0_total += amount
                     
                     # Add to SGST, CGST, IGST totals
                     total_sgst += sgst_amount
@@ -626,7 +662,7 @@ def update_submitted_pi_items(items_data, deleted_items=None):
                 total_base_amount += amount  # Assuming base_amount is same as amount for simplicity
             
             # Calculate total GSTN value
-            total_gstn = round(gst_5_total + gst_12_total + gst_18_total + gst_28_total, 2)
+            total_gstn = round(gst_5_total + gst_12_total + gst_18_total + gst_28_total + gst_40_total + gst_0_total, 2)
             
             # Calculate grand total (total + total_gstn)
             grand_total = total_amount + total_gstn
@@ -651,7 +687,9 @@ def update_submitted_pi_items(items_data, deleted_items=None):
                 frappe.db.sql("""
                     UPDATE `tabPurchase Invoice` 
                     SET custom_gst_5__ot = %s, custom_gst_12__ot = %s, custom_gst_18__ot = %s, custom_gst_28__ot = %s,
+                        custom_gst_40__ot = %s, custom_gst_0__ot = %s,
                         custom_5_goods_value = %s, custom_12_goods_value = %s, custom_18_goods_value = %s, custom_28_goods_value = %s,
+                        custom_40_goods_value = %s, custom_0_goods_value = %s,
                         custom_total_gstn = %s, custom_grand_total = %s,
                         custom_total_sgst = %s, custom_total_cgst = %s, custom_total_igst = %s
                     WHERE name = %s
@@ -660,10 +698,14 @@ def update_submitted_pi_items(items_data, deleted_items=None):
                     round(gst_12_total, 2),
                     round(gst_18_total, 2),
                     round(gst_28_total, 2),
+                    round(gst_40_total, 2),
+                    round(gst_0_total, 2),
                     round(goods_5_total, 2),
                     round(goods_12_total, 2),
                     round(goods_18_total, 2),
                     round(goods_28_total, 2),
+                    round(goods_40_total, 2),
+                    round(goods_0_total, 2),
                     total_gstn,
                     grand_total,
                     round(total_sgst, 2),

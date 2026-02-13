@@ -7,21 +7,21 @@
 // Wait for the DOM to be ready and then extend listview settings
 $(document).ready(function() {
     // Ensure the listview settings exist
-    if (!frappe.listview_settings['Purchase Receipt']) {
-        frappe.listview_settings['Purchase Receipt'] = {};
+    if (!frappe.listview_settings['Purchase Receipt1']) {
+        frappe.listview_settings['Purchase Receipt1'] = {};
     }
     
     // Add custom fields to existing add_fields array or create new one
-    const existing_add_fields = frappe.listview_settings['Purchase Receipt'].add_fields || [];
-    frappe.listview_settings['Purchase Receipt'].add_fields = [
+    const existing_add_fields = frappe.listview_settings['Purchase Receipt1'].add_fields || [];
+    frappe.listview_settings['Purchase Receipt1'].add_fields = [
         ...existing_add_fields,
         "custom_purchase_invoice", 
         "custom_purchase_order"
     ];
     
     // Add formatters to existing formatters object or create new one
-    const existing_formatters = frappe.listview_settings['Purchase Receipt'].formatters || {};
-    frappe.listview_settings['Purchase Receipt'].formatters = {
+    const existing_formatters = frappe.listview_settings['Purchase Receipt2'].formatters || {};
+    frappe.listview_settings['Purchase Receipt2'].formatters = {
         ...existing_formatters,
         custom_purchase_invoice: function(value, field, doc) {
             if (value) {
@@ -46,7 +46,7 @@ $(document).ready(function() {
 });
 
 // ===== FORM FUNCTIONALITY =====
-frappe.ui.form.on('Purchase Receipt', {
+frappe.ui.form.on('Purchase Receipt3', {
     refresh: function(frm) {
         console.log("Purchase Receipt - Refresh triggered");
         update_po_pi_from_first_item(frm);

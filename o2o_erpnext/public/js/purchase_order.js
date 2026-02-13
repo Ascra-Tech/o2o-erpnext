@@ -124,7 +124,11 @@ frappe.ui.form.on('Purchase Order', {
                     if (r.message.data.supplier) updates.supplier = r.message.data.supplier;
                     if (r.message.data.custom_branch) updates.custom_branch = r.message.data.custom_branch;
                     if (r.message.data.custom__approver_name_and_email) updates.custom__approver_name_and_email = r.message.data.custom__approver_name_and_email;
-                    if (r.message.data.custom_sub_branch) updates.custom_sub_branch = r.message.data.custom_sub_branch;
+                    // Only set custom_sub_branch for new documents or if document doesn't already have a branch set
+                    // This prevents PO Approver from overriding branch-level user's intentionally empty sub_branch
+                    if (r.message.data.custom_sub_branch && (frm.doc.__islocal || !frm.doc.custom_branch)) {
+                        updates.custom_sub_branch = r.message.data.custom_sub_branch;
+                    }
                     if (r.message.data.custom_supplier_code) updates.custom_supplier_code = r.message.data.custom_supplier_code;
                     if (r.message.data.custom_order_code) updates.custom_order_code = r.message.data.custom_order_code;
                     
@@ -515,10 +519,10 @@ function call_check_and_apply_branch_addresses(frm, async_false = false) {
 
 // Function to protect address display fields from being overridden
 function protect_address_display_fields(frm) {
-    // CRITICAL: Only protect draft documents (docstatus = 0)
-    // Do not modify submitted/cancelled documents to avoid "Not Saved" status
-    if (frm.doc.docstatus !== 0) {
-        return; // Skip protection for submitted/cancelled documents
+    // CRITICAL: Only protect draft documents (docstatus = 0) and not in workflow
+    // Do not modify submitted/cancelled documents or documents in Awaiting Approval to avoid "Not Saved" status
+    if (frm.doc.docstatus !== 0 || frm.doc.workflow_state === "Awaiting Approval") {
+        return; // Skip protection for submitted/cancelled documents or documents in workflow
     }
     
     if (!frm.doc.custom_sub_branch && !frm.doc.custom_branch) {

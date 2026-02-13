@@ -3,10 +3,36 @@ from frappe import _
 from frappe.utils import flt, get_datetime
 from frappe.exceptions import DoesNotExistError
 
+def validate_and_set_purchase_receipt_defaults_hook(doc, method):
+    """
+    Document hook version - called during Purchase Receipt validation
+    """
+    try:
+        _validate_and_set_purchase_receipt_defaults_internal(doc)
+    except Exception as e:
+        frappe.log_error(f"Error in Purchase Receipt validation hook: {str(e)}")
+        # Don't raise the error to avoid breaking the save process
+        pass
+
 @frappe.whitelist()
 def validate_and_set_purchase_receipt_defaults(doc_name=None):
     """
-    Validates and sets default values for a Purchase Receipt based on the logged-in user's Employee record.
+    API method version - called from client-side JavaScript
+    """
+    try:
+        if doc_name:
+            pr_doc = frappe.get_doc("Purchase Receipt", doc_name)
+        else:
+            pr_doc = frappe.new_doc("Purchase Receipt")
+        
+        return _validate_and_set_purchase_receipt_defaults_internal(pr_doc)
+    except Exception as e:
+        frappe.log_error(f"Error in validate_and_set_purchase_receipt_defaults API: {str(e)}")
+        raise e
+
+def _validate_and_set_purchase_receipt_defaults_internal(pr_doc):
+    """
+    Internal function that contains the actual logic
     """
     try:
         user_email = frappe.session.user
@@ -16,7 +42,8 @@ def validate_and_set_purchase_receipt_defaults(doc_name=None):
                                   as_dict=1)
         
         if not employee:
-            frappe.throw(_("No Employee record found linked to your User ID"), title=_("Employee Not Found"))
+            # No Employee record found - skip setting defaults but don't block save
+            return {"status": "skipped", "message": "No Employee record found - defaults not set"}
             
         if doc_name:
             pr_doc = frappe.get_doc("Purchase Receipt", doc_name)

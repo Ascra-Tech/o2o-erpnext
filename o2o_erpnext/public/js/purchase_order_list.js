@@ -8,10 +8,24 @@
 // Store listview reference globally for use in other functions
 window.purchase_order_listview = null;
 
-frappe.listview_settings['Purchase Order'] = {
-    hide_name_column: true,
+// Extend existing listview settings instead of overriding
+if (!frappe.listview_settings['Purchase Order']) {
+    frappe.listview_settings['Purchase Order'] = {};
+}
+
+// Store original onload if it exists
+const original_onload = frappe.listview_settings['Purchase Order'].onload;
+const original_refresh = frappe.listview_settings['Purchase Order'].refresh;
+
+// Extend the settings
+Object.assign(frappe.listview_settings['Purchase Order'], {
     onload: function(listview) {
         console.log("Purchase Order List View onload called");
+        
+        // Call original onload first if it exists
+        if (original_onload && typeof original_onload === 'function') {
+            original_onload.call(this, listview);
+        }
         
         // Store listview reference globally
         window.purchase_order_listview = listview;
@@ -32,10 +46,15 @@ frappe.listview_settings['Purchase Order'] = {
         console.log("All Purchase Order list functionality setup complete");
     },
     refresh: function(listview) {
+        // Call original refresh first if it exists
+        if (original_refresh && typeof original_refresh === 'function') {
+            original_refresh.call(this, listview);
+        }
+        
         // Hide like icons (from client script)
         $("use.like-icon").hide();
     }
-};
+});
 
 function add_print_buttons(listview) {
     console.log("🖨️ Adding Print functionality buttons");
@@ -63,8 +82,8 @@ function add_print_buttons(listview) {
         window.open(pdfUrl);
     }, true).addClass('btn-primary');
 
-    // Add Print PR button
-    listview.page.add_button(__('Print PR'), function() {
+    // Add Print PI button
+    listview.page.add_button(__('Print PI'), function() {
         let selected = listview.get_checked_items();
         if (!selected.length || selected.length > 1) {
             frappe.msgprint('Please select one Purchase Order');
@@ -72,65 +91,28 @@ function add_print_buttons(listview) {
         }
 
         frappe.call({
-            method: 'frappe.client.get_list',
+            method: 'o2o_erpnext.api.purchase_order_linking.get_linked_purchase_invoices',
             args: {
-                doctype: 'Purchase Receipt',
-                filters: [['Purchase Receipt Item', 'purchase_order', '=', selected[0].name]],
-                fields: ['name', 'posting_date', 'supplier', 'grand_total', 'status']
+                purchase_order_name: selected[0].name
             },
             callback: function(r) {
-                if (!r.message?.length) {
-                    frappe.msgprint('No Purchase Receipts found');
+                if (!r.message?.success || !r.message?.purchase_invoices?.length) {
+                    frappe.msgprint('No Purchase Invoices found');
                     return;
                 }
 
-                let d = new frappe.ui.Dialog({
-                    title: 'Select Purchase Receipt to Print',
-                    fields: [{
-                        label: 'Select Purchase Receipt',
-                        fieldname: 'selected_pr',
-                        fieldtype: 'Select',
-                        options: r.message.map(pr => ({
-                            label: `${pr.name} | ${frappe.datetime.str_to_user(pr.posting_date)} | ${format_currency(pr.grand_total)}`,
-                            value: pr.name
-                        })),
-                        reqd: 1
-                    }],
-                    primary_action_label: 'Print',
-                    primary_action(values) {
-                        frappe.set_route('print', 'Purchase Receipt', values.selected_pr);
-                        d.hide();
-                    }
-                });
-
-                let receipt_list = `<div class="receipt-list" style="margin-top: 10px;">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Receipt No</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${r.message.map(pr => `
-                            <tr>
-                                <td>${pr.name}</td>
-                                <td>${frappe.datetime.str_to_user(pr.posting_date)}</td>
-                                <td>${pr.status}</td>
-                                <td>${format_currency(pr.grand_total)}</td>
-                            </tr>
-                        `).join('')}
-                        </tbody>
-                    </table>
-                </div>`;
-                
-                d.fields_dict.selected_pr.$wrapper.append(receipt_list);
-                d.show();
+                // Since our API returns only one Purchase Invoice, directly open it for printing
+                let pi_name = r.message.purchase_invoices[0];
+                let pdfUrl = "/api/method/frappe.utils.print_format.download_pdf?"
+                    + "doctype=" + encodeURIComponent("Purchase Invoice")
+                    + "&name=" + encodeURIComponent(pi_name)
+                    + "&format=" + encodeURIComponent("Standard")
+                    + "&no_letterhead=0"
+                    + "&_lang=en";
+                window.open(pdfUrl);
             }
         });
-    }, true).addClass('btn-primary');
+    }, true).addClass('btn-secondary');
 
     // Add Export PO button
     listview.page.add_button(__('Export PO'), function() {
@@ -1016,3 +998,12 @@ function perform_po_export(selected_pos) {
 
 // Debug function to check if script is loaded
 console.log("✅ Purchase Order List Script Loaded Successfully");
+
+// ===== MERGED CONTENT FROM purchase_order_view.js =====
+// Note: List view enhancement removed to prevent filter issues
+
+// ===== FORM FUNCTIONALITY REMOVED =====
+// Purchase Receipt form functionality removed to prevent display issues
+// Automatic linking now handled purely server-side via Purchase Receipt hooks
+
+console.log("✅ Purchase Order List Script Completed");
