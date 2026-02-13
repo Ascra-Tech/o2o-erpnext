@@ -91,9 +91,9 @@ def export_pos_to_excel(po_ids):
         ]
         
         if HAS_XLSXWRITER:
-            return export_to_excel_with_items(po_names, predefined_fields, temp_dir, timestamp)
+            return export_to_excel_with_items(po_names, temp_dir, timestamp)
         else:
-            return export_to_csv_with_items(po_names, predefined_fields, temp_dir, timestamp)
+            return export_to_csv_with_items(po_names, temp_dir, timestamp)
         
     except Exception as e:
         frappe.log_error(f"Error exporting POs: {str(e)}", "PO Export Error")
@@ -102,7 +102,7 @@ def export_pos_to_excel(po_ids):
             'message': str(e)
         }
 
-def export_to_excel_with_items(po_names, fields_list, temp_dir, timestamp):
+def export_to_excel_with_items(po_names, temp_dir, timestamp):
     """Export to Excel format with Purchase Order Items using xlsxwriter"""
     filename = f"purchase_orders_export_{timestamp}.xlsx"
     filepath = os.path.join(temp_dir, filename)
@@ -127,70 +127,130 @@ def export_to_excel_with_items(po_names, fields_list, temp_dir, timestamp):
         'text_wrap': True
     })
     
-    item_header_format = workbook.add_format({
-        'bold': True,
-        'bg_color': '#E8F4FD',
-        'border': 1,
-        'align': 'center',
-        'valign': 'vcenter'
-    })
-    
-    # Get field labels for headers
-    meta = frappe.get_meta("Purchase Order")
-    field_labels = {}
-    for field in meta.fields:
-        field_labels[field.fieldname] = field.label or field.fieldname.replace('_', ' ').title()
-    
-    # Define headers including items
-    headers = []
-    for fieldname in fields_list:
-        headers.append(field_labels.get(fieldname, fieldname.replace('_', ' ').title()))
-    
-    # Add item headers (removed: Item Code, UOM, Product Type)
-    item_headers = ['Item Name', 'Qty', 'Rate', 'Amount', 'Category']
-    headers.extend(item_headers)
+    # Define the exact headers as per user requirement
+    headers = [
+        'Entity', 'Order Number', 'Branch Name', 'Approver Name', 'Product Category',
+        'Product name', 'Quantity', 'Gross Amount', 'CGST', 'SGST', 'IGST', 'Total',
+        'Order Code', 'Dispatch Status', 'Order status', 'GRN', 'Vendor status',
+        'Created At', 'Approved At', 'Vendor Approved At'
+    ]
     
     # Write headers
     for col, header in enumerate(headers):
-        if col < len(fields_list):
-            worksheet.write(0, col, header, header_format)
-        else:
-            worksheet.write(0, col, header, item_header_format)
+        worksheet.write(0, col, header, header_format)
         worksheet.set_column(col, col, 15)
     
     # Fetch and write Purchase Order data
     row = 1
+    
     for po_name in po_names:
         try:
             po_doc = frappe.get_doc("Purchase Order", po_name)
             
+            # Get company name for Entity
+            company_name = po_doc.company or ''
+            
             # If PO has items, write one row per item
             if po_doc.items:
                 for item in po_doc.items:
-                    # Write PO fields
-                    for col, fieldname in enumerate(fields_list):
-                        value = format_field_value(po_doc, fieldname)
-                        worksheet.write(row, col, value, cell_format)
+                    # Calculate tax amounts for this item
+                    cgst_amount = 0
+                    sgst_amount = 0
+                    igst_amount = 0
                     
-                    # Write item fields (removed: item_code, uom, custom_product_type)
-                    base_col = len(fields_list)
-                    worksheet.write(row, base_col, item.item_name or '', cell_format)
-                    worksheet.write(row, base_col + 1, item.qty or 0, cell_format)
-                    worksheet.write(row, base_col + 2, item.rate or 0, cell_format)
-                    worksheet.write(row, base_col + 3, item.amount or 0, cell_format)
-                    worksheet.write(row, base_col + 4, item.item_group or '', cell_format)
+                    # Get tax details from item taxes
+                    if hasattr(item, 'item_tax_template') and item.item_tax_template:
+                        try:
+                            tax_template = frappe.get_doc("Item Tax Template", item.item_tax_template)
+                            for tax in tax_template.taxes:
+                                if 'cgst' in tax.tax_type.lower():
+                                    cgst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
+                                elif 'sgst' in tax.tax_type.lower():
+                                    sgst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
+                                elif 'igst' in tax.tax_type.lower():
+                                    igst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
+                        except:
+                            pass
+                    
+                    # Calculate total with tax
+                    total_amount = (item.amount or 0) + cgst_amount + sgst_amount + igst_amount
+                    
+                    # Format dates - fix the date formatting
+                    try:
+                        created_at = frappe.utils.formatdate(po_doc.creation, "dd/mm/yy") if po_doc.creation else ''
+                        if po_doc.creation:
+                            created_at += " " + frappe.utils.format_time(po_doc.creation)
+                    except:
+                        created_at = str(po_doc.creation) if po_doc.creation else ''
+                    
+                    try:
+                        approved_at = ''
+                        if hasattr(po_doc, 'custom__approved_at') and po_doc.custom__approved_at:
+                            approved_at = frappe.utils.formatdate(po_doc.custom__approved_at, "dd/mm/yy")
+                            approved_at += " " + frappe.utils.format_time(po_doc.custom__approved_at)
+                    except:
+                        approved_at = ''
+                    
+                    vendor_approved_at = ''  # Add logic if you have vendor approval date field
+                    
+                    # Write row data
+                    row_data = [
+                        company_name,  # Entity
+                        po_doc.name,  # Order Number
+                        getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
+                        getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
+                        item.item_group or '',  # Product Category
+                        item.item_name or '',  # Product name
+                        item.qty or 0,  # Quantity
+                        item.amount or 0,  # Gross Amount
+                        cgst_amount,  # CGST
+                        sgst_amount,  # SGST
+                        igst_amount,  # IGST
+                        total_amount,  # Total
+                        getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
+                        '',  # Dispatch Status
+                        po_doc.workflow_state or po_doc.status or '',  # Order status
+                        getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # GRN
+                        '',  # Vendor status
+                        created_at,  # Created At
+                        approved_at,  # Approved At
+                        vendor_approved_at  # Vendor Approved At
+                    ]
+                    
+                    for col, value in enumerate(row_data):
+                        worksheet.write(row, col, value, cell_format)
                     
                     row += 1
             else:
                 # Write PO without items
-                for col, fieldname in enumerate(fields_list):
-                    value = format_field_value(po_doc, fieldname)
-                    worksheet.write(row, col, value, cell_format)
+                created_at = frappe.utils.formatdate(po_doc.creation, "d/m/yy H:MM") if po_doc.creation else ''
+                approved_at = frappe.utils.formatdate(po_doc.custom__approved_at, "d/m/yy H:MM") if getattr(po_doc, 'custom__approved_at', None) else ''
                 
-                # Empty item columns
-                base_col = len(fields_list)
-                for i in range(len(item_headers)):
-                    worksheet.write(row, base_col + i, '', cell_format)
+                row_data = [
+                    company_name,  # Entity
+                    po_doc.name,  # Order Number
+                    getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
+                    getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
+                    '',  # Product Category
+                    '',  # Product name
+                    0,  # Quantity
+                    0,  # Gross Amount
+                    0,  # CGST
+                    0,  # SGST
+                    0,  # IGST
+                    0,  # Total
+                    getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
+                    '',  # Dispatch Status
+                    po_doc.workflow_state or po_doc.status or '',  # Order status
+                    getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # GRN
+                    '',  # Vendor status
+                    created_at,  # Created At
+                    approved_at,  # Approved At
+                    ''  # Vendor Approved At
+                ]
+                
+                for col, value in enumerate(row_data):
+                    worksheet.write(row, col, value, cell_format)
                 
                 row += 1
             
@@ -206,28 +266,21 @@ def export_to_excel_with_items(po_names, fields_list, temp_dir, timestamp):
         'message': _('Purchase Orders exported successfully')
     }
 
-def export_to_csv_with_items(po_names, fields_list, temp_dir, timestamp):
+def export_to_csv_with_items(po_names, temp_dir, timestamp):
     """Export to CSV format with Purchase Order Items as fallback"""
     filename = f"purchase_orders_export_{timestamp}.csv"
     filepath = os.path.join(temp_dir, filename)
     
-    # Get field labels for headers
-    meta = frappe.get_meta("Purchase Order")
-    field_labels = {}
-    for field in meta.fields:
-        field_labels[field.fieldname] = field.label or field.fieldname.replace('_', ' ').title()
-    
     with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         
-        # Write headers including items
-        headers = []
-        for fieldname in fields_list:
-            headers.append(field_labels.get(fieldname, fieldname.replace('_', ' ').title()))
-        
-        # Add item headers (removed: Item Code, UOM, Product Type)
-        item_headers = ['Item Name', 'Qty', 'Rate', 'Amount', 'Category']
-        headers.extend(item_headers)
+        # Define the exact headers as per user requirement
+        headers = [
+            'Entity', 'Order Number', 'Branch Name', 'Approver Name', 'Product Category',
+            'Product name', 'Quantity', 'Gross Amount', 'CGST', 'SGST', 'IGST', 'Total',
+            'Order Code', 'Dispatch Status', 'Order status', 'GRN', 'Vendor status',
+            'Created At', 'Approved At', 'Vendor Approved At'
+        ]
         writer.writerow(headers)
         
         # Fetch and write Purchase Order data
@@ -235,35 +288,105 @@ def export_to_csv_with_items(po_names, fields_list, temp_dir, timestamp):
             try:
                 po_doc = frappe.get_doc("Purchase Order", po_name)
                 
+                # Get company name for Entity
+                company_name = po_doc.company or ''
+                
                 # If PO has items, write one row per item
                 if po_doc.items:
                     for item in po_doc.items:
-                        row_data = []
+                        # Calculate tax amounts for this item
+                        cgst_amount = 0
+                        sgst_amount = 0
+                        igst_amount = 0
                         
-                        # Write PO fields
-                        for fieldname in fields_list:
-                            value = format_field_value(po_doc, fieldname)
-                            row_data.append(value)
+                        # Get tax details from item taxes
+                        if hasattr(item, 'item_tax_template') and item.item_tax_template:
+                            try:
+                                tax_template = frappe.get_doc("Item Tax Template", item.item_tax_template)
+                                for tax in tax_template.taxes:
+                                    if 'cgst' in tax.tax_type.lower():
+                                        cgst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
+                                    elif 'sgst' in tax.tax_type.lower():
+                                        sgst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
+                                    elif 'igst' in tax.tax_type.lower():
+                                        igst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
+                            except:
+                                pass
                         
-                        # Write item fields (removed: item_code, uom, custom_product_type)
-                        row_data.extend([
-                            item.item_name or '',
-                            item.qty or 0,
-                            item.rate or 0,
-                            item.amount or 0,
-                            item.item_group or ''
-                        ])
+                        # Calculate total with tax
+                        total_amount = (item.amount or 0) + cgst_amount + sgst_amount + igst_amount
+                        
+                        # Format dates - fix the date formatting
+                        try:
+                            created_at = frappe.utils.formatdate(po_doc.creation, "dd/mm/yy") if po_doc.creation else ''
+                            if po_doc.creation:
+                                created_at += " " + frappe.utils.format_time(po_doc.creation)
+                        except:
+                            created_at = str(po_doc.creation) if po_doc.creation else ''
+                        
+                        try:
+                            approved_at = ''
+                            if hasattr(po_doc, 'custom__approved_at') and po_doc.custom__approved_at:
+                                approved_at = frappe.utils.formatdate(po_doc.custom__approved_at, "dd/mm/yy")
+                                approved_at += " " + frappe.utils.format_time(po_doc.custom__approved_at)
+                        except:
+                            approved_at = ''
+                        
+                        vendor_approved_at = ''  # Add logic if you have vendor approval date field
+                        
+                        # Write row data
+                        row_data = [
+                            company_name,  # Entity
+                            po_doc.name,  # Order Number
+                            getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
+                            getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
+                            item.item_group or '',  # Product Category
+                            item.item_name or '',  # Product name
+                            item.qty or 0,  # Quantity
+                            item.amount or 0,  # Gross Amount
+                            cgst_amount,  # CGST
+                            sgst_amount,  # SGST
+                            igst_amount,  # IGST
+                            total_amount,  # Total
+                            getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
+                            '',  # Dispatch Status
+                            po_doc.workflow_state or po_doc.status or '',  # Order status
+                            getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # GRN
+                            '',  # Vendor status
+                            created_at,  # Created At
+                            approved_at,  # Approved At
+                            vendor_approved_at  # Vendor Approved At
+                        ]
                         
                         writer.writerow(row_data)
                 else:
                     # Write PO without items
-                    row_data = []
-                    for fieldname in fields_list:
-                        value = format_field_value(po_doc, fieldname)
-                        row_data.append(value)
+                    created_at = frappe.utils.formatdate(po_doc.creation, "d/m/yy H:MM") if po_doc.creation else ''
+                    approved_at = frappe.utils.formatdate(po_doc.custom__approved_at, "d/m/yy H:MM") if getattr(po_doc, 'custom__approved_at', None) else ''
                     
-                    # Empty item columns
-                    row_data.extend([''] * len(item_headers))
+                    row_data = [
+                        company_name,  # Entity
+                        po_doc.name,  # Order Number
+                        getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
+                        getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
+                        '',  # Product Category
+                        '',  # Product name
+                        0,  # Quantity
+                        0,  # Gross Amount
+                        0,  # CGST
+                        0,  # SGST
+                        0,  # IGST
+                        0,  # Total
+                        getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
+                        '',  # Dispatch Status
+                        po_doc.workflow_state or po_doc.status or '',  # Order status
+                        getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # GRN
+                        '',  # Vendor status
+                        created_at,  # Created At
+                        approved_at,  # Approved At
+                        ''  # Vendor Approved At
+                    ]
+                    
                     writer.writerow(row_data)
                 
             except Exception as e:
