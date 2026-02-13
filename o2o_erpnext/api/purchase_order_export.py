@@ -147,8 +147,8 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
         try:
             po_doc = frappe.get_doc("Purchase Order", po_name)
             
-            # Get company name for Entity
-            company_name = po_doc.company or ''
+            # Get supplier name for Entity
+            supplier_name = po_doc.supplier or ''
             
             # If PO has items, write one row per item
             if po_doc.items:
@@ -195,7 +195,7 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
                     
                     # Write row data
                     row_data = [
-                        company_name,  # Entity
+                        supplier_name,  # Entity
                         po_doc.name,  # Order Number
                         getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
                         getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
