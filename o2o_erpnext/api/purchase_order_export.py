@@ -153,24 +153,13 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
             # If PO has items, write one row per item
             if po_doc.items:
                 for item in po_doc.items:
-                    # Read exact tax amounts from Purchase Order - no calculations
-                    cgst_amount = 0
-                    sgst_amount = 0
-                    igst_amount = 0
+                    # Read exact tax amounts from item-level tax fields
+                    cgst_amount = getattr(item, 'cgst_amount', 0) or 0
+                    sgst_amount = getattr(item, 'sgst_amount', 0) or 0
+                    igst_amount = getattr(item, 'igst_amount', 0) or 0
                     
-                    # Get exact tax amounts from Purchase Order taxes
-                    if hasattr(po_doc, 'taxes') and po_doc.taxes:
-                        for tax in po_doc.taxes:
-                            if tax.tax_amount:
-                                if 'cgst' in (tax.account_head or '').lower():
-                                    cgst_amount = tax.tax_amount or 0
-                                elif 'sgst' in (tax.account_head or '').lower():
-                                    sgst_amount = tax.tax_amount or 0
-                                elif 'igst' in (tax.account_head or '').lower():
-                                    igst_amount = tax.tax_amount or 0
-                    
-                    # Use exact total from Purchase Order
-                    total_amount = po_doc.grand_total or 0
+                    # Calculate item total with taxes
+                    total_amount = (item.amount or 0) + cgst_amount + sgst_amount + igst_amount
                     
                     # Format dates - fix the date formatting
                     try:
@@ -305,24 +294,13 @@ def export_to_csv_with_items(po_names, temp_dir, timestamp):
                 # If PO has items, write one row per item
                 if po_doc.items:
                     for item in po_doc.items:
-                        # Read exact tax amounts from Purchase Order - no calculations
-                        cgst_amount = 0
-                        sgst_amount = 0
-                        igst_amount = 0
+                        # Read exact tax amounts from item-level tax fields
+                        cgst_amount = getattr(item, 'cgst_amount', 0) or 0
+                        sgst_amount = getattr(item, 'sgst_amount', 0) or 0
+                        igst_amount = getattr(item, 'igst_amount', 0) or 0
                         
-                        # Get exact tax amounts from Purchase Order taxes
-                        if hasattr(po_doc, 'taxes') and po_doc.taxes:
-                            for tax in po_doc.taxes:
-                                if tax.tax_amount:
-                                    if 'cgst' in (tax.account_head or '').lower():
-                                        cgst_amount = tax.tax_amount or 0
-                                    elif 'sgst' in (tax.account_head or '').lower():
-                                        sgst_amount = tax.tax_amount or 0
-                                    elif 'igst' in (tax.account_head or '').lower():
-                                        igst_amount = tax.tax_amount or 0
-                        
-                        # Use exact total from Purchase Order
-                        total_amount = po_doc.grand_total or 0
+                        # Calculate item total with taxes
+                        total_amount = (item.amount or 0) + cgst_amount + sgst_amount + igst_amount
                         
                         # Format dates - fix the date formatting
                         try:
