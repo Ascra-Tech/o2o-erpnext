@@ -127,12 +127,12 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
         'text_wrap': True
     })
     
-    # Define the exact headers as per user requirement
+    # Define the updated headers as per user requirement
     headers = [
-        'Entity', 'Order Number', 'Branch Name', 'Approver Name', 'Product Category',
+        'Entity', 'Order Number', 'Branch Name', 'Sub Branch', 'Approver Name', 'Product Category',
         'Product name', 'Quantity', 'Gross Amount', 'CGST', 'SGST', 'IGST', 'Total',
-        'Order Code', 'Dispatch Status', 'Order status', 'GRN', 'Vendor status',
-        'Created At', 'Approved At', 'Vendor Approved At'
+        'Order Code', 'Dispatch Status', 'Order status', 'Purchase Receipt', 'Vendor status', 'Vendor Name',
+        'Created At', 'Approved At'
     ]
     
     # Write headers
@@ -153,24 +153,32 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
             # If PO has items, write one row per item
             if po_doc.items:
                 for item in po_doc.items:
-                    # Calculate tax amounts for this item
+                    # Calculate tax amounts for this item - Fix tax logic
                     cgst_amount = 0
                     sgst_amount = 0
                     igst_amount = 0
                     
-                    # Get tax details from item taxes
-                    if hasattr(item, 'item_tax_template') and item.item_tax_template:
-                        try:
-                            tax_template = frappe.get_doc("Item Tax Template", item.item_tax_template)
-                            for tax in tax_template.taxes:
-                                if 'cgst' in tax.tax_type.lower():
-                                    cgst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
-                                elif 'sgst' in tax.tax_type.lower():
-                                    sgst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
-                                elif 'igst' in tax.tax_type.lower():
-                                    igst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
-                        except:
-                            pass
+                    # Get tax details from Purchase Order taxes (not item taxes)
+                    if hasattr(po_doc, 'taxes') and po_doc.taxes:
+                        item_amount = item.amount or 0
+                        for tax in po_doc.taxes:
+                            if tax.tax_amount and item_amount > 0:
+                                # Calculate proportional tax for this item
+                                tax_ratio = item_amount / (po_doc.net_total or 1)
+                                proportional_tax = (tax.tax_amount or 0) * tax_ratio
+                                
+                                if 'cgst' in (tax.account_head or '').lower():
+                                    cgst_amount = proportional_tax
+                                elif 'sgst' in (tax.account_head or '').lower():
+                                    sgst_amount = proportional_tax
+                                elif 'igst' in (tax.account_head or '').lower():
+                                    igst_amount = proportional_tax
+                    
+                    # Tax logic: Show CGST/SGST OR IGST, not both
+                    if igst_amount > 0:
+                        # If IGST is present, zero out CGST and SGST
+                        cgst_amount = 0
+                        sgst_amount = 0
                     
                     # Calculate total with tax
                     total_amount = (item.amount or 0) + cgst_amount + sgst_amount + igst_amount
@@ -198,6 +206,7 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
                         supplier_name,  # Entity
                         po_doc.name,  # Order Number
                         getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
+                        getattr(po_doc, 'custom_sub_branch', '') or '',  # Sub Branch
                         getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
                         item.item_group or '',  # Product Category
                         item.item_name or '',  # Product name
@@ -210,11 +219,11 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
                         getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
                         '',  # Dispatch Status
                         po_doc.workflow_state or po_doc.status or '',  # Order status
-                        getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # GRN
+                        getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # Purchase Receipt
                         '',  # Vendor status
+                        getattr(po_doc, 'custom_vendor', '') or '',  # Vendor Name
                         created_at,  # Created At
                         approved_at,  # Approved At
-                        vendor_approved_at  # Vendor Approved At
                     ]
                     
                     for col, value in enumerate(row_data):
@@ -223,13 +232,26 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
                     row += 1
             else:
                 # Write PO without items
-                created_at = frappe.utils.formatdate(po_doc.creation, "d/m/yy H:MM") if po_doc.creation else ''
-                approved_at = frappe.utils.formatdate(po_doc.custom__approved_at, "d/m/yy H:MM") if getattr(po_doc, 'custom__approved_at', None) else ''
+                try:
+                    created_at = frappe.utils.formatdate(po_doc.creation, "dd/mm/yy") if po_doc.creation else ''
+                    if po_doc.creation:
+                        created_at += " " + frappe.utils.format_time(po_doc.creation)
+                except:
+                    created_at = str(po_doc.creation) if po_doc.creation else ''
+                
+                try:
+                    approved_at = ''
+                    if hasattr(po_doc, 'custom__approved_at') and po_doc.custom__approved_at:
+                        approved_at = frappe.utils.formatdate(po_doc.custom__approved_at, "dd/mm/yy")
+                        approved_at += " " + frappe.utils.format_time(po_doc.custom__approved_at)
+                except:
+                    approved_at = ''
                 
                 row_data = [
-                    company_name,  # Entity
+                    supplier_name,  # Entity
                     po_doc.name,  # Order Number
                     getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
+                    getattr(po_doc, 'custom_sub_branch', '') or '',  # Sub Branch
                     getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
                     '',  # Product Category
                     '',  # Product name
@@ -242,11 +264,11 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
                     getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
                     '',  # Dispatch Status
                     po_doc.workflow_state or po_doc.status or '',  # Order status
-                    getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # GRN
+                    getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # Purchase Receipt
                     '',  # Vendor status
+                    getattr(po_doc, 'custom_vendor', '') or '',  # Vendor Name
                     created_at,  # Created At
                     approved_at,  # Approved At
-                    ''  # Vendor Approved At
                 ]
                 
                 for col, value in enumerate(row_data):
@@ -274,12 +296,12 @@ def export_to_csv_with_items(po_names, temp_dir, timestamp):
     with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         
-        # Define the exact headers as per user requirement
+        # Define the updated headers as per user requirement
         headers = [
-            'Entity', 'Order Number', 'Branch Name', 'Approver Name', 'Product Category',
+            'Entity', 'Order Number', 'Branch Name', 'Sub Branch', 'Approver Name', 'Product Category',
             'Product name', 'Quantity', 'Gross Amount', 'CGST', 'SGST', 'IGST', 'Total',
-            'Order Code', 'Dispatch Status', 'Order status', 'GRN', 'Vendor status',
-            'Created At', 'Approved At', 'Vendor Approved At'
+            'Order Code', 'Dispatch Status', 'Order status', 'Purchase Receipt', 'Vendor status', 'Vendor Name',
+            'Created At', 'Approved At'
         ]
         writer.writerow(headers)
         
@@ -288,30 +310,38 @@ def export_to_csv_with_items(po_names, temp_dir, timestamp):
             try:
                 po_doc = frappe.get_doc("Purchase Order", po_name)
                 
-                # Get company name for Entity
-                company_name = po_doc.company or ''
+                # Get supplier name for Entity
+                supplier_name = po_doc.supplier or ''
                 
                 # If PO has items, write one row per item
                 if po_doc.items:
                     for item in po_doc.items:
-                        # Calculate tax amounts for this item
+                        # Calculate tax amounts for this item - Fix tax logic
                         cgst_amount = 0
                         sgst_amount = 0
                         igst_amount = 0
                         
-                        # Get tax details from item taxes
-                        if hasattr(item, 'item_tax_template') and item.item_tax_template:
-                            try:
-                                tax_template = frappe.get_doc("Item Tax Template", item.item_tax_template)
-                                for tax in tax_template.taxes:
-                                    if 'cgst' in tax.tax_type.lower():
-                                        cgst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
-                                    elif 'sgst' in tax.tax_type.lower():
-                                        sgst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
-                                    elif 'igst' in tax.tax_type.lower():
-                                        igst_amount = (item.amount or 0) * (tax.tax_rate or 0) / 100
-                            except:
-                                pass
+                        # Get tax details from Purchase Order taxes (not item taxes)
+                        if hasattr(po_doc, 'taxes') and po_doc.taxes:
+                            item_amount = item.amount or 0
+                            for tax in po_doc.taxes:
+                                if tax.tax_amount and item_amount > 0:
+                                    # Calculate proportional tax for this item
+                                    tax_ratio = item_amount / (po_doc.net_total or 1)
+                                    proportional_tax = (tax.tax_amount or 0) * tax_ratio
+                                    
+                                    if 'cgst' in (tax.account_head or '').lower():
+                                        cgst_amount = proportional_tax
+                                    elif 'sgst' in (tax.account_head or '').lower():
+                                        sgst_amount = proportional_tax
+                                    elif 'igst' in (tax.account_head or '').lower():
+                                        igst_amount = proportional_tax
+                        
+                        # Tax logic: Show CGST/SGST OR IGST, not both
+                        if igst_amount > 0:
+                            # If IGST is present, zero out CGST and SGST
+                            cgst_amount = 0
+                            sgst_amount = 0
                         
                         # Calculate total with tax
                         total_amount = (item.amount or 0) + cgst_amount + sgst_amount + igst_amount
@@ -336,9 +366,10 @@ def export_to_csv_with_items(po_names, temp_dir, timestamp):
                         
                         # Write row data
                         row_data = [
-                            company_name,  # Entity
+                            supplier_name,  # Entity
                             po_doc.name,  # Order Number
                             getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
+                            getattr(po_doc, 'custom_sub_branch', '') or '',  # Sub Branch
                             getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
                             item.item_group or '',  # Product Category
                             item.item_name or '',  # Product name
@@ -351,23 +382,36 @@ def export_to_csv_with_items(po_names, temp_dir, timestamp):
                             getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
                             '',  # Dispatch Status
                             po_doc.workflow_state or po_doc.status or '',  # Order status
-                            getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # GRN
+                            getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # Purchase Receipt
                             '',  # Vendor status
+                            getattr(po_doc, 'custom_vendor', '') or '',  # Vendor Name
                             created_at,  # Created At
                             approved_at,  # Approved At
-                            vendor_approved_at  # Vendor Approved At
                         ]
                         
                         writer.writerow(row_data)
                 else:
                     # Write PO without items
-                    created_at = frappe.utils.formatdate(po_doc.creation, "d/m/yy H:MM") if po_doc.creation else ''
-                    approved_at = frappe.utils.formatdate(po_doc.custom__approved_at, "d/m/yy H:MM") if getattr(po_doc, 'custom__approved_at', None) else ''
+                    try:
+                        created_at = frappe.utils.formatdate(po_doc.creation, "dd/mm/yy") if po_doc.creation else ''
+                        if po_doc.creation:
+                            created_at += " " + frappe.utils.format_time(po_doc.creation)
+                    except:
+                        created_at = str(po_doc.creation) if po_doc.creation else ''
+                    
+                    try:
+                        approved_at = ''
+                        if hasattr(po_doc, 'custom__approved_at') and po_doc.custom__approved_at:
+                            approved_at = frappe.utils.formatdate(po_doc.custom__approved_at, "dd/mm/yy")
+                            approved_at += " " + frappe.utils.format_time(po_doc.custom__approved_at)
+                    except:
+                        approved_at = ''
                     
                     row_data = [
-                        company_name,  # Entity
+                        supplier_name,  # Entity
                         po_doc.name,  # Order Number
                         getattr(po_doc, 'custom_branch', '') or '',  # Branch Name
+                        getattr(po_doc, 'custom_sub_branch', '') or '',  # Sub Branch
                         getattr(po_doc, 'custom__approver_name_and_email', '') or '',  # Approver Name
                         '',  # Product Category
                         '',  # Product name
@@ -380,11 +424,11 @@ def export_to_csv_with_items(po_names, temp_dir, timestamp):
                         getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
                         '',  # Dispatch Status
                         po_doc.workflow_state or po_doc.status or '',  # Order status
-                        getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # GRN
+                        getattr(po_doc, 'custom_purchase_receipt', '') or '-',  # Purchase Receipt
                         '',  # Vendor status
+                        getattr(po_doc, 'custom_vendor', '') or '',  # Vendor Name
                         created_at,  # Created At
                         approved_at,  # Approved At
-                        ''  # Vendor Approved At
                     ]
                     
                     writer.writerow(row_data)
