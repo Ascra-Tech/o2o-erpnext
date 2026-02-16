@@ -211,11 +211,11 @@ def export_to_excel_with_items(po_names, temp_dir, timestamp):
                         item.item_group or '',  # Product Category
                         item.item_name or '',  # Product name
                         item.qty or 0,  # Quantity
-                        item.amount or 0,  # Gross Amount
-                        cgst_amount,  # CGST
-                        sgst_amount,  # SGST
-                        igst_amount,  # IGST
-                        total_amount,  # Total
+                        round(item.amount or 0, 2),  # Gross Amount
+                        round(cgst_amount, 2),  # CGST
+                        round(sgst_amount, 2),  # SGST
+                        round(igst_amount, 2),  # IGST
+                        round(total_amount, 2),  # Total
                         getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
                         '',  # Dispatch Status
                         po_doc.workflow_state or po_doc.status or '',  # Order status
@@ -374,11 +374,11 @@ def export_to_csv_with_items(po_names, temp_dir, timestamp):
                             item.item_group or '',  # Product Category
                             item.item_name or '',  # Product name
                             item.qty or 0,  # Quantity
-                            item.amount or 0,  # Gross Amount
-                            cgst_amount,  # CGST
-                            sgst_amount,  # SGST
-                            igst_amount,  # IGST
-                            total_amount,  # Total
+                            round(item.amount or 0, 2),  # Gross Amount
+                            round(cgst_amount, 2),  # CGST
+                            round(sgst_amount, 2),  # SGST
+                            round(igst_amount, 2),  # IGST
+                            round(total_amount, 2),  # Total
                             getattr(po_doc, 'custom_order_code', '') or '',  # Order Code
                             '',  # Dispatch Status
                             po_doc.workflow_state or po_doc.status or '',  # Order status
