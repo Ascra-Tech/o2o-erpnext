@@ -41,6 +41,13 @@ def get_columns():
             "width": 200
         },
         {
+            "fieldname": "purchase_invoice",
+            "label": _("Purchase Invoice"),
+            "fieldtype": "Link",
+            "options": "Purchase Invoice",
+            "width": 200
+        },
+        {
             "fieldname": "purchase_receipt",
             "label": _("Purchase Receipt"),
             "fieldtype": "Link",
@@ -175,6 +182,7 @@ def get_data(filters):
         SELECT 
             po.supplier as entity,
             po.name as purchase_order,
+            pi.name as purchase_invoice,
             po.custom_purchase_receipt as purchase_receipt,
             poi.item_name as product_name,
             po.custom_order_code as order_code,
@@ -197,6 +205,8 @@ def get_data(filters):
             po.custom__approved_at as approved_at
         FROM `tabPurchase Order` po
         INNER JOIN `tabPurchase Order Item` poi ON po.name = poi.parent
+        LEFT JOIN `tabPurchase Invoice Item` pii ON pii.purchase_order = po.name
+        LEFT JOIN `tabPurchase Invoice` pi ON pi.name = pii.parent
         WHERE po.docstatus = 1 {conditions}
         ORDER BY po.transaction_date DESC, po.name
     """.format(conditions=conditions)

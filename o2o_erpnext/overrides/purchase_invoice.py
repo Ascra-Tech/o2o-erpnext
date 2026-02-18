@@ -5,12 +5,29 @@ from frappe.model.naming import getseries
 class CustomPurchaseInvoice(PurchaseInvoice):
     def autoname(self):
         """
-        Custom naming method that fetches next invoice number from remote database counter
+        Custom naming method - uses remote counter for regular invoices, ERPNext naming for debit notes
         """
         try:
-            # Debug logging to verify controller is being used
-            frappe.logger().info("🔥 CustomPurchaseInvoice.autoname() called - Controller is ACTIVE!")
-            print("🔥 DEBUG: CustomPurchaseInvoice.autoname() called - Controller is ACTIVE!")
+            # Check if this is a debit note (return)
+            if getattr(self, 'is_return', 0):
+                # Use ERPNext standard naming for debit notes
+                frappe.logger().info("� Creating debit note with ERPNext standard naming")
+                print("�🔥 DEBUG: Creating debit note with ERPNext standard naming")
+                
+                from frappe.model.naming import make_autoname
+                
+                # Set naming series for debit notes
+                self.naming_series = "CN/25-26/.####"
+                self.name = make_autoname(self.naming_series)
+                
+                frappe.logger().info(f"✅ Generated debit note name: {self.name}")
+                print(f"🔥 DEBUG: Generated debit note name: {self.name}")
+                return
+            
+            # For regular invoices, use remote counter system
+            frappe.logger().info("📄 Creating regular invoice with remote counter")
+            print("🔥 DEBUG: Creating regular invoice with remote counter")
+            
             # Import here to avoid circular imports
             from o2o_erpnext.api.remote_invoice_creator import RemoteInvoiceCreator
             
@@ -58,18 +75,22 @@ class CustomPurchaseInvoice(PurchaseInvoice):
             print(f"🔥 DEBUG: Generated invoice name from remote counter: {next_invoice_code}")
             
         except Exception as e:
-            # Fallback to default naming if remote counter fails
+            # Fallback to default naming if naming fails
             error_msg = str(e)
-            frappe.logger().error(f"❌ Remote counter naming failed: {error_msg}")
+            frappe.logger().error(f"❌ Naming failed: {error_msg}")
             
-            # Use fallback naming with getseries
-            prefix = "PINV-.YY.-"
+            # Use different fallback based on is_return
+            if getattr(self, 'is_return', 0):
+                prefix = "CN/25-26/.####"
+            else:
+                prefix = "PINV-.YY.-"
+                
             self.name = getseries(prefix, 5)
             
             frappe.msgprint(
-                f"⚠️ <strong>Warning:</strong> Could not fetch next number from remote database.<br><br>"
+                f"⚠️ <strong>Warning:</strong> Naming system failed.<br><br>"
                 f"<strong>Error:</strong> {error_msg}<br><br>"
                 f"<em>Using fallback naming: {self.name}</em>",
-                title="🔗 Remote Counter Warning",
+                title="🔗 Naming Warning",
                 indicator="orange"
             )

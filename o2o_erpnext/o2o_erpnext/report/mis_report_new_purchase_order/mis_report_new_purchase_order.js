@@ -81,62 +81,7 @@ frappe.query_reports["MIS Report New Purchase Order"] = {
     },
     
     "onload": function(report) {
-        // Add custom buttons
-        report.page.add_inner_button(__("Export to Excel"), function() {
-            frappe.utils.csv_to_excel(frappe.query_report.get_data_for_csv(), __("Purchase Order MIS Report"));
-        });
-        
-        report.page.add_inner_button(__("Create Purchase Receipt"), function() {
-            let selected_items = frappe.query_report.datatable.rowmanager.getCheckedRows();
-            if (selected_items.length === 0) {
-                frappe.msgprint(__("Please select at least one Purchase Order"));
-                return;
-            }
-            
-            let purchase_orders = selected_items.map(item => 
-                frappe.query_report.data[item].purchase_order
-            );
-            
-            // Create new Purchase Receipt with selected POs
-            frappe.new_doc("Purchase Receipt", {
-                "purchase_orders": purchase_orders.join(", ")
-            });
-        });
-        
-        report.page.add_inner_button(__("Bulk Approve"), function() {
-            let selected_items = frappe.query_report.datatable.rowmanager.getCheckedRows();
-            if (selected_items.length === 0) {
-                frappe.msgprint(__("Please select at least one Purchase Order"));
-                return;
-            }
-            
-            let pending_orders = selected_items.filter(item => 
-                frappe.query_report.data[item].status === "Awaiting Approval"
-            ).map(item => frappe.query_report.data[item].purchase_order);
-            
-            if (pending_orders.length === 0) {
-                frappe.msgprint(__("No pending orders selected for approval"));
-                return;
-            }
-            
-            frappe.confirm(
-                __("Are you sure you want to approve {0} Purchase Orders?", [pending_orders.length]),
-                function() {
-                    frappe.call({
-                        method: "o2o_erpnext.api.purchase_order.bulk_approve_orders",
-                        args: {
-                            "purchase_orders": pending_orders
-                        },
-                        callback: function(r) {
-                            if (r.message) {
-                                frappe.msgprint(__("Successfully approved {0} Purchase Orders", [r.message.approved_count]));
-                                frappe.query_report.refresh();
-                            }
-                        }
-                    });
-                }
-            );
-        });
+        // Custom onload functionality can be added here if needed
     },
     
     "get_datatable_options": function(options) {
