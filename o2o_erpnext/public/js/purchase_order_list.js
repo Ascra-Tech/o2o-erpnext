@@ -123,8 +123,13 @@ function add_print_buttons(listview) {
     listview.page.add_button(__('Link PR'), function() {
         bulk_link_purchase_receipts(listview);
     }, true).addClass('btn-success');
+
+    // Add Overview button for workflow state dashboard
+    listview.page.add_button(__('Overview'), function() {
+        show_po_overview_dashboard(listview);
+    }, true).addClass('btn-info');
     
-    console.log("✅ Print, Export, and Link PR buttons added successfully");
+    console.log("✅ Print, Export, Link PR, and Overview buttons added successfully");
 }
 
 function hide_ui_elements(listview) {
@@ -1098,5 +1103,905 @@ console.log("✅ Purchase Order List Script Loaded Successfully");
 // ===== FORM FUNCTIONALITY REMOVED =====
 // Purchase Receipt form functionality removed to prevent display issues
 // Automatic linking now handled purely server-side via Purchase Receipt hooks
+
+// ===== OVERVIEW DASHBOARD FUNCTIONALITY =====
+
+function show_po_overview_dashboard(listview) {
+    console.log("🔍 Opening PO Overview Dashboard");
+    
+    // Get available workflow states from backend
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.get_workflow_states',
+        callback: function(r) {
+            if (r.message && r.message.length > 0) {
+                show_workflow_state_dialog(r.message, listview);
+            } else {
+                frappe.msgprint(__('No Purchase Orders found with workflow states'));
+            }
+        }
+    });
+}
+
+function show_workflow_state_dialog(workflow_states, listview) {
+    let d = new frappe.ui.Dialog({
+        title: __('Select Workflow State for Overview'),
+        fields: [
+            {
+                label: __('Workflow State'),
+                fieldname: 'workflow_state',
+                fieldtype: 'Select',
+                options: workflow_states.join('\n'),
+                reqd: 1,
+                description: __('Select the workflow state to view Purchase Orders dashboard')
+            }
+        ],
+        primary_action_label: __('Show Dashboard'),
+        primary_action(values) {
+            if (values.workflow_state) {
+                d.hide();
+                show_po_dashboard(values.workflow_state, listview);
+            }
+        }
+    });
+    
+    d.show();
+}
+
+function show_po_dashboard(workflow_state, listview) {
+    console.log(`📊 Loading dashboard for workflow state: ${workflow_state}`);
+    
+    // Directly create dialog-based dashboard
+    create_dashboard_dialog(workflow_state, listview);
+}
+
+function create_dashboard_dialog(workflow_state, listview) {
+    // Fetch Purchase Orders dashboard data from backend
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.get_po_dashboard_data',
+        args: {
+            workflow_state: workflow_state
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                show_advanced_dashboard(workflow_state, r.message.data);
+                if (r.message.message && r.message.message.includes('No Purchase Orders found')) {
+                    frappe.show_alert({
+                        message: r.message.message,
+                        indicator: 'blue'
+                    });
+                }
+            } else {
+                frappe.msgprint(__(r.message.message || `Error loading dashboard data for workflow state: ${workflow_state}`));
+            }
+        }
+    });
+}
+
+function show_advanced_dashboard(workflow_state, dashboard_data) {
+    // Extract data from backend response
+    let summary = dashboard_data.summary;
+    let purchase_orders = dashboard_data.purchase_orders;
+    let supplier_stats = dashboard_data.supplier_stats;
+    
+    // Create advanced dashboard HTML with filters and actions
+    let dashboard_html = `
+        <div class="po-overview-dashboard" style="padding: 20px;">
+            <div class="dashboard-header" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div>
+                        <h2 style="color: #2c3e50; margin: 0;">Purchase Orders Overview</h2>
+                        <h3 style="color: #7f8c8d; font-weight: normal; margin: 5px 0 0 0;">Workflow State: <span style="color: #3498db;">${workflow_state}</span></h3>
+                    </div>
+                    <div class="dashboard-actions" style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary btn-sm" onclick="refresh_dashboard('${workflow_state}')">
+                            <i class="fa fa-refresh"></i> Refresh
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="show_filters_dialog('${workflow_state}')">
+                            <i class="fa fa-filter"></i> Filters
+                        </button>
+                        <button class="btn btn-info btn-sm" onclick="export_dashboard_data('${workflow_state}')">
+                            <i class="fa fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Advanced Filters Bar -->
+                <div id="filters-bar" style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px; display: none;">
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <label style="font-size: 0.85em; color: #666;">Supplier:</label>
+                            <input type="text" id="supplier-filter" placeholder="Search supplier..." style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 3px; width: 150px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85em; color: #666;">Branch:</label>
+                            <select id="branch-filter" style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px;">
+                                <option value="">All Branches</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85em; color: #666;">Date Range:</label>
+                            <input type="date" id="from-date" style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 3px; width: 130px;">
+                            <span style="margin: 0 5px;">to</span>
+                            <input type="date" id="to-date" style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 3px; width: 130px;">
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-xs" onclick="apply_filters('${workflow_state}')">Apply</button>
+                            <button class="btn btn-default btn-xs" onclick="clear_filters('${workflow_state}')">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bulk Actions Bar -->
+                <div id="bulk-actions-bar" style="background: #e8f4fd; padding: 10px; border-radius: 5px; margin-bottom: 15px; display: none;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="font-weight: 500; color: #2c3e50;">
+                            <span id="selected-count">0</span> items selected
+                        </span>
+                        <div class="bulk-action-buttons" style="display: flex; gap: 8px;">
+                            <button class="btn btn-success btn-xs" onclick="bulk_approve_pos()">
+                                <i class="fa fa-check"></i> Approve
+                            </button>
+                            <button class="btn btn-danger btn-xs" onclick="bulk_reject_pos()">
+                                <i class="fa fa-times"></i> Reject
+                            </button>
+                            <button class="btn btn-info btn-xs" onclick="bulk_create_pr()">
+                                <i class="fa fa-plus"></i> Create PR
+                            </button>
+                            <button class="btn btn-warning btn-xs" onclick="bulk_create_pi()">
+                                <i class="fa fa-file-text"></i> Create PI
+                            </button>
+                        </div>
+                        <button class="btn btn-default btn-xs" onclick="clear_selection()">Clear Selection</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-stats" style="display: flex; justify-content: space-around; margin-bottom: 30px; flex-wrap: wrap;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; min-width: 200px; margin: 10px;">
+                    <h3 style="margin: 0; font-size: 2em;">${summary.total_orders}</h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Total Orders</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; min-width: 200px; margin: 10px;">
+                    <h3 style="margin: 0; font-size: 2em;">${format_currency(summary.total_amount)}</h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Total Value</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; min-width: 200px; margin: 10px;">
+                    <h3 style="margin: 0; font-size: 2em;">${format_currency(summary.avg_amount)}</h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Average Value</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; min-width: 200px; margin: 10px;">
+                    <h3 style="margin: 0; font-size: 2em;">${summary.unique_suppliers}</h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Unique Suppliers</p>
+                </div>
+            </div>
+            
+            <div class="dashboard-content" style="display: block;">
+                <div class="po-list-section" style="width: 100%; margin-bottom: 30px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1;">📋 Purchase Orders List</h4>
+                    <div class="po-table-container" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px;">
+                        ${generate_po_table(purchase_orders)}
+                    </div>
+                </div>
+                
+                <div class="supplier-stats-section" style="width: 100%;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #ecf0f1;">👥 Supplier Statistics</h4>
+                    <div class="supplier-stats" style="max-height: 300px; overflow-y: auto;">
+                        ${generate_supplier_stats(supplier_stats)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Create and show the dashboard dialog
+    let dashboard_dialog = new frappe.ui.Dialog({
+        title: __(`Purchase Orders Overview - ${workflow_state}`),
+        fields: [{
+            fieldtype: 'HTML',
+            fieldname: 'dashboard_html',
+            options: dashboard_html
+        }],
+        size: 'extra-large'
+    });
+    
+    // Set custom width to accommodate all columns
+    dashboard_dialog.$wrapper.find('.modal-dialog').css({
+        'max-width': '95vw',
+        'width': '95vw'
+    });
+    
+    dashboard_dialog.show();
+    
+    // Add click handlers for PO links
+    setTimeout(() => {
+        dashboard_dialog.$wrapper.find('.po-link').on('click', function(e) {
+            e.preventDefault();
+            let po_name = $(this).data('po-name');
+            frappe.set_route('Form', 'Purchase Order', po_name);
+            dashboard_dialog.hide();
+        });
+    }, 100);
+}
+
+function generate_po_table(purchase_orders) {
+    if (!purchase_orders || purchase_orders.length === 0) {
+        return `
+            <div style="text-align: center; padding: 40px; color: #6c757d;">
+                <i class="fa fa-inbox" style="font-size: 3em; margin-bottom: 15px; display: block;"></i>
+                <h4>No Purchase Orders Found</h4>
+                <p>There are no Purchase Orders in this workflow state.</p>
+            </div>
+        `;
+    }
+    
+    let table_html = `
+        <table class="table table-striped table-bordered" style="margin: 0; font-size: 0.8em; width: 100%; table-layout: fixed;">
+            <thead style="background: #f8f9fa;">
+                <tr>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 3%;">
+                        <input type="checkbox" id="select-all-pos" onchange="toggle_all_selection()" style="transform: scale(0.9);">
+                    </th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 11%;">PO No (FULL)</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 13%;">Supplier</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 10%;">Approved At</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 8%;">Branch</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 8%;">Sub Branch</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 10%;">Created By</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 7%;">Status</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 11%;">Purchase Receipt</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 7%;">Grand Total</th>
+                    <th style="padding: 5px; border: 1px solid #dee2e6; width: 12%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    purchase_orders.forEach(po => {
+        let status_color = get_status_color(po.status);
+        let approved_at = po.custom__approved_at ? frappe.datetime.str_to_user(po.custom__approved_at) : '';
+        
+        table_html += `
+            <tr class="po-row" data-po-name="${po.name}">
+                <td style="padding: 5px; border: 1px solid #dee2e6; text-align: center;">
+                    <input type="checkbox" class="po-checkbox" value="${po.name}" onchange="update_selection_count()" style="transform: scale(0.9);">
+                </td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; word-wrap: break-word; overflow: hidden;">
+                    <a href="#Form/Purchase Order/${po.name}" style="color: #007bff; text-decoration: none; font-weight: 500;" onclick="event.stopPropagation();">
+                        ${po.name}
+                    </a>
+                </td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; word-wrap: break-word; overflow: hidden;" title="${po.supplier || ''}">${po.supplier || ''}</td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; word-wrap: break-word; overflow: hidden;">${approved_at}</td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; word-wrap: break-word; overflow: hidden;" title="${po.custom_branch || ''}">${po.custom_branch || ''}</td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; word-wrap: break-word; overflow: hidden;" title="${po.custom_sub_branch || ''}">${po.custom_sub_branch || ''}</td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; word-wrap: break-word; overflow: hidden;" title="${po.custom_created_by || po.owner || ''}">${po.custom_created_by || po.owner || ''}</td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; text-align: center;">
+                    <span style="background: ${status_color}; color: white; padding: 2px 4px; border-radius: 8px; font-size: 0.7em; font-weight: 500;">
+                        ${po.status || ''}
+                    </span>
+                </td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; word-wrap: break-word; overflow: hidden;">
+                    ${po.custom_purchase_receipt ? 
+                        `<a href="#Form/Purchase Receipt/${po.custom_purchase_receipt}" style="color: #007bff; text-decoration: none; font-weight: 500;" title="${po.custom_purchase_receipt}" onclick="event.stopPropagation();">
+                            ${po.custom_purchase_receipt}
+                        </a>` : 
+                        '<span style="color: #6c757d;">Not Created</span>'
+                    }
+                </td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; text-align: right; font-weight: 500;">
+                    ${format_currency(po.grand_total || 0)}
+                </td>
+                <td style="padding: 5px; border: 1px solid #dee2e6; text-align: center;">
+                    <div class="btn-group" style="display: flex; gap: 2px;">
+                        <button class="btn btn-xs btn-success" onclick="approve_po('${po.name}')" title="Approve">
+                            <i class="fa fa-check" style="font-size: 0.7em;"></i>
+                        </button>
+                        <button class="btn btn-xs btn-danger" onclick="reject_po('${po.name}')" title="Reject">
+                            <i class="fa fa-times" style="font-size: 0.7em;"></i>
+                        </button>
+                        <button class="btn btn-xs btn-info" onclick="create_pr_from_po('${po.name}')" title="Create PR">
+                            <i class="fa fa-plus" style="font-size: 0.7em;"></i>
+                        </button>
+                        <button class="btn btn-xs btn-warning" onclick="create_pi_from_po('${po.name}')" title="Create PI">
+                            <i class="fa fa-file-text" style="font-size: 0.7em;"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    table_html += `
+            </tbody>
+        </table>
+    `;
+    
+    return table_html;
+}
+
+function generate_supplier_stats(supplier_stats) {
+    let stats_html = '';
+    
+    // Convert supplier_stats object to array and sort by total amount
+    let sorted_suppliers = Object.entries(supplier_stats)
+        .sort((a, b) => b[1].total - a[1].total)
+        .slice(0, 10); // Top 10 suppliers
+    
+    let total_all_suppliers = Object.values(supplier_stats).reduce((sum, s) => sum + s.total, 0);
+    
+    sorted_suppliers.forEach(([supplier, stats]) => {
+        let percentage = total_all_suppliers > 0 ? ((stats.total / total_all_suppliers) * 100).toFixed(1) : 0;
+        stats_html += `
+            <div class="supplier-card" style="background: white; border: 1px solid #e1e8ed; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h5 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 0.95em;">${supplier}</h5>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="color: #7f8c8d; font-size: 0.85em;">Orders:</span>
+                    <span style="font-weight: 500;">${stats.count}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #7f8c8d; font-size: 0.85em;">Total:</span>
+                    <span style="font-weight: 500; color: #27ae60;">${format_currency(stats.total)}</span>
+                </div>
+                <div style="background-color: #ecf0f1; border-radius: 10px; height: 6px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); height: 100%; width: ${percentage}%; transition: width 0.3s ease;"></div>
+                </div>
+                <div style="text-align: right; margin-top: 5px;">
+                    <span style="font-size: 0.8em; color: #7f8c8d;">${percentage}%</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    return stats_html;
+}
+
+function get_status_color(status) {
+    const status_colors = {
+        'Draft': '#6c757d',
+        'To Receive and Bill': '#17a2b8',
+        'To Bill': '#ffc107',
+        'To Receive': '#28a745',
+        'Completed': '#28a745',
+        'Cancelled': '#dc3545',
+        'Closed': '#6f42c1',
+        'On Hold': '#fd7e14'
+    };
+    return status_colors[status] || '#6c757d';
+}
+
+// ===== ADVANCED DASHBOARD FUNCTIONS =====
+
+window.refresh_dashboard = function(workflow_state) {
+    console.log(`🔄 Refreshing dashboard for workflow state: ${workflow_state}`);
+    create_dashboard_dialog(workflow_state, null);
+}
+
+window.show_filters_dialog = function(workflow_state) {
+    let filters_bar = document.getElementById('filters-bar');
+    if (filters_bar.style.display === 'none') {
+        filters_bar.style.display = 'block';
+        load_filter_options();
+    } else {
+        filters_bar.style.display = 'none';
+    }
+}
+
+window.load_filter_options = function() {
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.get_dashboard_filters',
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                let branch_select = document.getElementById('branch-filter');
+                branch_select.innerHTML = '<option value="">All Branches</option>';
+                
+                r.message.data.branches.forEach(branch => {
+                    branch_select.innerHTML += `<option value="${branch}">${branch}</option>`;
+                });
+            }
+        }
+    });
+}
+
+window.apply_filters = function(workflow_state) {
+    let filters = {
+        supplier: document.getElementById('supplier-filter').value,
+        branch: document.getElementById('branch-filter').value,
+        date_range: {
+            from_date: document.getElementById('from-date').value,
+            to_date: document.getElementById('to-date').value
+        }
+    };
+    
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.get_po_dashboard_data',
+        args: {
+            workflow_state: workflow_state,
+            filters: JSON.stringify(filters)
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                // Update the dashboard with filtered data
+                let dashboard_content = document.querySelector('.po-overview-dashboard');
+                if (dashboard_content) {
+                    show_advanced_dashboard(workflow_state, r.message.data);
+                }
+            }
+        }
+    });
+}
+
+window.clear_filters = function(workflow_state) {
+    document.getElementById('supplier-filter').value = '';
+    document.getElementById('branch-filter').value = '';
+    document.getElementById('from-date').value = '';
+    document.getElementById('to-date').value = '';
+    apply_filters(workflow_state);
+}
+
+window.export_dashboard_data = function(workflow_state) {
+    frappe.msgprint('Export functionality will be implemented soon!');
+}
+
+window.toggle_all_selection = function() {
+    let select_all = document.getElementById('select-all-pos');
+    let checkboxes = document.querySelectorAll('.po-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = select_all.checked;
+    });
+    
+    update_selection_count();
+}
+
+window.update_selection_count = function() {
+    let selected_checkboxes = document.querySelectorAll('.po-checkbox:checked');
+    let count = selected_checkboxes.length;
+    
+    document.getElementById('selected-count').textContent = count;
+    
+    let bulk_actions_bar = document.getElementById('bulk-actions-bar');
+    if (count > 0) {
+        bulk_actions_bar.style.display = 'block';
+    } else {
+        bulk_actions_bar.style.display = 'none';
+    }
+}
+
+window.clear_selection = function() {
+    document.getElementById('select-all-pos').checked = false;
+    document.querySelectorAll('.po-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    update_selection_count();
+}
+
+window.get_selected_pos = function() {
+    let selected_pos = [];
+    document.querySelectorAll('.po-checkbox:checked').forEach(checkbox => {
+        selected_pos.push(checkbox.value);
+    });
+    return selected_pos;
+}
+
+// ===== WORKFLOW ACTION FUNCTIONS =====
+
+window.approve_po = function(po_name) {
+    // First get available workflow actions for this PO
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.get_workflow_actions',
+        args: {
+            po_name: po_name
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                let transitions = r.message.data.transitions;
+                let approve_actions = transitions.filter(t => 
+                    t.action.toLowerCase().includes('approve') || 
+                    t.action === 'PO Approve' || 
+                    t.action === 'Requisition Approve'
+                );
+                
+                if (approve_actions.length === 0) {
+                    frappe.show_alert({
+                        message: 'No approval actions available for this Purchase Order',
+                        indicator: 'orange'
+                    });
+                    return;
+                }
+                
+                // If multiple approval actions, show dialog to choose
+                if (approve_actions.length > 1) {
+                    let d = new frappe.ui.Dialog({
+                        title: 'Select Approval Action',
+                        fields: [{
+                            label: 'Action',
+                            fieldname: 'action',
+                            fieldtype: 'Select',
+                            options: approve_actions.map(a => a.action).join('\n'),
+                            reqd: 1
+                        }],
+                        primary_action_label: 'Approve',
+                        primary_action(values) {
+                            apply_workflow_action_to_po(po_name, values.action, 'approve');
+                            d.hide();
+                        }
+                    });
+                    d.show();
+                } else {
+                    // Single approval action available
+                    frappe.confirm(
+                        `Are you sure you want to approve Purchase Order ${po_name}?`,
+                        () => {
+                            apply_workflow_action_to_po(po_name, approve_actions[0].action, 'approve');
+                        }
+                    );
+                }
+            } else {
+                frappe.show_alert({
+                    message: r.message.message || 'Error getting workflow actions',
+                    indicator: 'red'
+                });
+            }
+        }
+    });
+}
+
+window.reject_po = function(po_name) {
+    // First get available workflow actions for this PO
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.get_workflow_actions',
+        args: {
+            po_name: po_name
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                let transitions = r.message.data.transitions;
+                let reject_actions = transitions.filter(t => 
+                    t.action.toLowerCase().includes('reject') || 
+                    t.action === 'PO Reject' || 
+                    t.action === 'Requisition Reject'
+                );
+                
+                if (reject_actions.length === 0) {
+                    frappe.show_alert({
+                        message: 'No rejection actions available for this Purchase Order',
+                        indicator: 'orange'
+                    });
+                    return;
+                }
+                
+                // If multiple rejection actions, show dialog to choose
+                if (reject_actions.length > 1) {
+                    let d = new frappe.ui.Dialog({
+                        title: 'Select Rejection Action',
+                        fields: [{
+                            label: 'Action',
+                            fieldname: 'action',
+                            fieldtype: 'Select',
+                            options: reject_actions.map(a => a.action).join('\n'),
+                            reqd: 1
+                        }],
+                        primary_action_label: 'Reject',
+                        primary_action(values) {
+                            apply_workflow_action_to_po(po_name, values.action, 'reject');
+                            d.hide();
+                        }
+                    });
+                    d.show();
+                } else {
+                    // Single rejection action available
+                    frappe.confirm(
+                        `Are you sure you want to reject Purchase Order ${po_name}?`,
+                        () => {
+                            apply_workflow_action_to_po(po_name, reject_actions[0].action, 'reject');
+                        }
+                    );
+                }
+            } else {
+                frappe.show_alert({
+                    message: r.message.message || 'Error getting workflow actions',
+                    indicator: 'red'
+                });
+            }
+        }
+    });
+}
+
+// Helper function to apply workflow action
+window.apply_workflow_action_to_po = function(po_name, action, action_type) {
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.apply_workflow_action',
+        args: {
+            po_name: po_name,
+            action: action
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                frappe.show_alert({
+                    message: r.message.message,
+                    indicator: action_type === 'approve' ? 'green' : 'orange'
+                });
+                refresh_dashboard(get_current_workflow_state());
+            } else {
+                frappe.show_alert({
+                    message: r.message.message || `Error ${action_type}ing PO`,
+                    indicator: 'red'
+                });
+            }
+        }
+    });
+}
+
+window.create_pr_from_po = function(po_name) {
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.create_purchase_receipt',
+        args: {
+            po_name: po_name
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                frappe.show_alert({
+                    message: r.message.message,
+                    indicator: 'green'
+                });
+                // Open the created Purchase Receipt
+                frappe.set_route('Form', 'Purchase Receipt', r.message.data.pr_name);
+            } else {
+                frappe.show_alert({
+                    message: r.message.message || 'Error creating Purchase Receipt',
+                    indicator: 'red'
+                });
+            }
+        }
+    });
+}
+
+window.create_pi_from_po = function(po_name) {
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.create_purchase_invoice',
+        args: {
+            po_name: po_name
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                frappe.show_alert({
+                    message: r.message.message,
+                    indicator: 'green'
+                });
+                // Open the created Purchase Invoice
+                frappe.set_route('Form', 'Purchase Invoice', r.message.data.pi_name);
+            } else {
+                frappe.show_alert({
+                    message: r.message.message || 'Error creating Purchase Invoice',
+                    indicator: 'red'
+                });
+            }
+        }
+    });
+}
+
+// ===== BULK ACTION FUNCTIONS =====
+
+window.bulk_approve_pos = function() {
+    let selected_pos = get_selected_pos();
+    if (selected_pos.length === 0) {
+        frappe.msgprint('Please select Purchase Orders to approve');
+        return;
+    }
+    
+    // Get available actions for the first PO to determine bulk action
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.get_workflow_actions',
+        args: {
+            po_name: selected_pos[0]
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                let transitions = r.message.data.transitions;
+                let approve_actions = transitions.filter(t => 
+                    t.action.toLowerCase().includes('approve') || 
+                    t.action === 'PO Approve' || 
+                    t.action === 'Requisition Approve'
+                );
+                
+                if (approve_actions.length === 0) {
+                    frappe.show_alert({
+                        message: 'No approval actions available for selected Purchase Orders',
+                        indicator: 'orange'
+                    });
+                    return;
+                }
+                
+                let action_to_use = approve_actions[0].action;
+                
+                frappe.confirm(
+                    `Are you sure you want to apply "${action_to_use}" to ${selected_pos.length} Purchase Orders?`,
+                    () => {
+                        frappe.call({
+                            method: 'o2o_erpnext.dashboard.bulk_workflow_action',
+                            args: {
+                                po_names: JSON.stringify(selected_pos),
+                                action: action_to_use
+                            },
+                            callback: function(r) {
+                                if (r.message && r.message.success) {
+                                    frappe.show_alert({
+                                        message: r.message.message,
+                                        indicator: 'green'
+                                    });
+                                    clear_selection();
+                                    refresh_dashboard(get_current_workflow_state());
+                                } else {
+                                    frappe.show_alert({
+                                        message: r.message.message || 'Error in bulk approval',
+                                        indicator: 'red'
+                                    });
+                                }
+                            }
+                        });
+                    }
+                );
+            } else {
+                frappe.show_alert({
+                    message: 'Error getting workflow actions for bulk operation',
+                    indicator: 'red'
+                });
+            }
+        }
+    });
+}
+
+window.bulk_reject_pos = function() {
+    let selected_pos = get_selected_pos();
+    if (selected_pos.length === 0) {
+        frappe.msgprint('Please select Purchase Orders to reject');
+        return;
+    }
+    
+    // Get available actions for the first PO to determine bulk action
+    frappe.call({
+        method: 'o2o_erpnext.dashboard.get_workflow_actions',
+        args: {
+            po_name: selected_pos[0]
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                let transitions = r.message.data.transitions;
+                let reject_actions = transitions.filter(t => 
+                    t.action.toLowerCase().includes('reject') || 
+                    t.action === 'PO Reject' || 
+                    t.action === 'Requisition Reject'
+                );
+                
+                if (reject_actions.length === 0) {
+                    frappe.show_alert({
+                        message: 'No rejection actions available for selected Purchase Orders',
+                        indicator: 'orange'
+                    });
+                    return;
+                }
+                
+                let action_to_use = reject_actions[0].action;
+                
+                frappe.confirm(
+                    `Are you sure you want to apply "${action_to_use}" to ${selected_pos.length} Purchase Orders?`,
+                    () => {
+                        frappe.call({
+                            method: 'o2o_erpnext.dashboard.bulk_workflow_action',
+                            args: {
+                                po_names: JSON.stringify(selected_pos),
+                                action: action_to_use
+                            },
+                            callback: function(r) {
+                                if (r.message && r.message.success) {
+                                    frappe.show_alert({
+                                        message: r.message.message,
+                                        indicator: 'orange'
+                                    });
+                                    clear_selection();
+                                    refresh_dashboard(get_current_workflow_state());
+                                } else {
+                                    frappe.show_alert({
+                                        message: r.message.message || 'Error in bulk rejection',
+                                        indicator: 'red'
+                                    });
+                                }
+                            }
+                        });
+                    }
+                );
+            } else {
+                frappe.show_alert({
+                    message: 'Error getting workflow actions for bulk operation',
+                    indicator: 'red'
+                });
+            }
+        }
+    });
+}
+
+window.bulk_create_pr = function() {
+    let selected_pos = get_selected_pos();
+    if (selected_pos.length === 0) {
+        frappe.msgprint('Please select Purchase Orders to create Purchase Receipts');
+        return;
+    }
+    
+    frappe.msgprint(`Creating Purchase Receipts for ${selected_pos.length} Purchase Orders...`);
+    
+    let promises = selected_pos.map(po_name => {
+        return new Promise((resolve, reject) => {
+            frappe.call({
+                method: 'o2o_erpnext.dashboard.create_purchase_receipt',
+                args: { po_name: po_name },
+                callback: function(r) {
+                    if (r.message && r.message.success) {
+                        resolve(r.message.data.pr_name);
+                    } else {
+                        reject(r.message.message || 'Error creating PR');
+                    }
+                }
+            });
+        });
+    });
+    
+    Promise.allSettled(promises).then(results => {
+        let successful = results.filter(r => r.status === 'fulfilled').length;
+        let failed = results.filter(r => r.status === 'rejected').length;
+        
+        frappe.show_alert({
+            message: `Created ${successful} Purchase Receipts. ${failed} failed.`,
+            indicator: successful > 0 ? 'green' : 'red'
+        });
+        
+        clear_selection();
+        refresh_dashboard(get_current_workflow_state());
+    });
+}
+
+window.bulk_create_pi = function() {
+    let selected_pos = get_selected_pos();
+    if (selected_pos.length === 0) {
+        frappe.msgprint('Please select Purchase Orders to create Purchase Invoices');
+        return;
+    }
+    
+    frappe.msgprint(`Creating Purchase Invoices for ${selected_pos.length} Purchase Orders...`);
+    
+    let promises = selected_pos.map(po_name => {
+        return new Promise((resolve, reject) => {
+            frappe.call({
+                method: 'o2o_erpnext.dashboard.create_purchase_invoice',
+                args: { po_name: po_name },
+                callback: function(r) {
+                    if (r.message && r.message.success) {
+                        resolve(r.message.data.pi_name);
+                    } else {
+                        reject(r.message.message || 'Error creating PI');
+                    }
+                }
+            });
+        });
+    });
+    
+    Promise.allSettled(promises).then(results => {
+        let successful = results.filter(r => r.status === 'fulfilled').length;
+        let failed = results.filter(r => r.status === 'rejected').length;
+        
+        frappe.show_alert({
+            message: `Created ${successful} Purchase Invoices. ${failed} failed.`,
+            indicator: successful > 0 ? 'green' : 'red'
+        });
+        
+        clear_selection();
+        refresh_dashboard(get_current_workflow_state());
+    });
+}
+
+window.get_current_workflow_state = function() {
+    // Get current workflow state from dashboard title
+    let title_element = document.querySelector('.po-overview-dashboard h3 span');
+    return title_element ? title_element.textContent : 'Awaiting Approval';
+}
 
 console.log("✅ Purchase Order List Script Completed");
