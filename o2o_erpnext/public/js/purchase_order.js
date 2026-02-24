@@ -48,9 +48,18 @@ frappe.ui.form.on('Purchase Order', {
         
         // Protect address display on form load for all documents
         if (frm.doc.custom_sub_branch || frm.doc.custom_branch) {
-            setTimeout(() => {
-                protect_address_display_fields(frm);
-            }, 1500);
+            // For new documents, run protection immediately and also after delay
+            if (frm.doc.__islocal) {
+                protect_address_display_fields(frm); // Run immediately for new POs
+                setTimeout(() => {
+                    protect_address_display_fields(frm); // Also run after delay
+                }, 1500);
+            } else {
+                // For existing documents, run after delay
+                setTimeout(() => {
+                    protect_address_display_fields(frm);
+                }, 1500);
+            }
         }
 
         // For NEW documents: Role-based sub-branch requirement
@@ -502,6 +511,25 @@ function call_check_and_apply_branch_addresses(frm, async_false = false) {
                     if (response.message.shipping_address) {
                         frm.set_value('shipping_address', response.message.shipping_address);
                     }
+                    
+                    // For new POs, also get and set the address display content immediately
+                    frappe.call({
+                        method: 'o2o_erpnext.api.purchase_order.get_correct_address_display',
+                        args: {
+                            sub_branch: sub_branch,
+                            branch: branch
+                        },
+                        callback: function(display_response) {
+                            if (display_response.message && display_response.message.status === 'success') {
+                                if (display_response.message.billing_display) {
+                                    frm.set_value('address_display', display_response.message.billing_display);
+                                }
+                                if (display_response.message.shipping_display) {
+                                    frm.set_value('shipping_address_display', display_response.message.shipping_display);
+                                }
+                            }
+                        }
+                    });
                 } else {
                     // For existing documents, the server has already updated the values
                     // We need to refresh both the address links and display fields
@@ -521,13 +549,24 @@ function call_check_and_apply_branch_addresses(frm, async_false = false) {
 function protect_address_display_fields(frm) {
     // CRITICAL: Only protect draft documents (docstatus = 0) and not in workflow
     // Do not modify submitted/cancelled documents or documents in Awaiting Approval to avoid "Not Saved" status
+    // NEW: Allow protection for new documents (__islocal = True) as well
     if (frm.doc.docstatus !== 0 || frm.doc.workflow_state === "Awaiting Approval") {
         return; // Skip protection for submitted/cancelled documents or documents in workflow
     }
     
+    // Allow protection for both new and existing draft documents
     if (!frm.doc.custom_sub_branch && !frm.doc.custom_branch) {
         return;
     }
+    
+    // Debug: Log when protection runs
+    console.log("Address protection running for:", {
+        docname: frm.doc.name,
+        __islocal: frm.doc.__islocal,
+        docstatus: frm.doc.docstatus,
+        custom_branch: frm.doc.custom_branch,
+        custom_sub_branch: frm.doc.custom_sub_branch
+    });
     
     // Get the correct address display content from server
     frappe.call({
